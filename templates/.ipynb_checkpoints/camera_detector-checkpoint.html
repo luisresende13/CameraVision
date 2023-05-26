@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Query Argument Form</title>
+  <style>
+    /* CSS styles */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+      background-color: #f2f2f2;
+    }
+    
+    h1 {
+      margin-top: 0;
+    }
+    
+    form {
+      margin-bottom: 20px;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    
+    input[type="text"],
+    textarea {
+      width: 100%;
+      min-width: 170px;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    
+    .textarea-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .textarea-container textarea {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+    
+    .textarea-container p {
+      font-size: 12px;
+      color: #777777;
+      margin: 0;
+    }
+    
+    label,
+    button {
+      color: #333333;
+    }
+    
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    #videoPlayer {
+      margin-top: 10px;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 5px;
+      display: none;
+    }
+    
+    #videoPlayer h2 {
+      margin-top: 0;
+    }
+    
+    #resultImage {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    
+    #videoPlayer p {
+      font-size: 10px;
+      color: #777777;
+      margin: 0;
+    }
+    
+    @media (min-width: 600px) {
+      form {
+        max-width: 500px;
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Identificando objetos em câmeras</h1>
+  <form id="queryForm">
+    <label for="urlInput">URL:</label>
+    <input type="text" id="urlInput" name="url" value="http://187.111.99.18:9004/?CODE=1644">
+    
+    <label for="objectsInput">Lista de objetos: (exemplo: car,bus,truck)</label>
+    <div class="textarea-container">
+      <textarea id="objectsInput" name="objects" rows="4"></textarea>
+      <p><strong>Objetos disponíveis:</strong> person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, tv, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair drier, toothbrush</p>
+    </div>
+    
+    <label for="secondsInput">Segundos:</label>
+    <input type="text" id="secondsInput" name="seconds" value="20">
+
+    <label for="confidence">Confiança: (entre 0.0 e 1.0)</label>
+    <input type="text" id="confidence" name="seconds" value="0.4">
+    
+    <button type="submit">Iniciar</button>
+  </form>
+    
+  <div id='videoPlayer' style="display: none;">
+      <h2>Transmissão (ao vivo)</h2>
+      <img id="resultImage" src="" alt="Result Image">
+      <p style="font-size: 10;">Obs: Salvando objetos identificados em base de dados BigQuery em tempo real</p>
+  </div>
+      
+  <script>
+    // Function to handle form submission
+    function handleFormSubmit(event) {
+      event.preventDefault();
+
+      // Get the form input values
+      const baseURL = "/track"
+      const url = document.getElementById('urlInput').value;
+      const objects = document.getElementById('objectsInput').value;
+      const seconds = document.getElementById('secondsInput').value;
+      const confidence = document.getElementById('confidence').value;
+
+      // Construct the query URL
+      const queryURL = `${baseURL}?url=${encodeURIComponent(url)}&objects=${objects}&seconds=${encodeURIComponent(seconds)}&confidence=${confidence}`;
+
+      // Update the image source
+      const img = document.getElementById('resultImage');
+      img.src = queryURL + '&dt=' + new Date().getTime();
+
+      // Show the videoPlayer div
+      const videoPlayer = document.getElementById('videoPlayer');
+      videoPlayer.style.display = "block";
+
+    }
+      
+    // Add form submit event listener
+    const form = document.getElementById('queryForm');
+    form.addEventListener('submit', handleFormSubmit);
+  </script>
+</body>
+</html>

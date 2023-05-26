@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Query Argument Form</title>
+  <title>Camera Vision - OctaCity</title>
   <style>
     /* CSS styles */
     body {
@@ -10,8 +10,25 @@
       background-color: #f2f2f2;
     }
     
+    h1, h2, h3 {
+      color: #333333;
+      text-align: center;
+    }
+    
     h1 {
       margin-top: 0;
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    
+    h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    
+    h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
     }
     
     form {
@@ -19,6 +36,9 @@
       background-color: #ffffff;
       padding: 20px;
       border-radius: 5px;
+      width: 100%;
+      box-sizing: border-box;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     }
     
     label {
@@ -40,8 +60,9 @@
     
     .textarea-container {
       display: flex;
-      align-items: center;
+      flex-direction: row;
       margin-bottom: 15px;
+      height: 100%;
     }
     
     .textarea-container textarea {
@@ -67,6 +88,11 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      transition: background-color 0.3s ease; /* Smooth color transition */
+    }
+    
+    button:hover {
+      background-color: #45A049; /* Darker shade on hover */
     }
     
     #videoPlayer {
@@ -75,6 +101,7 @@
       padding: 20px;
       border-radius: 5px;
       display: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Modern shadow */
     }
     
     #videoPlayer h2 {
@@ -102,30 +129,34 @@
   </style>
 </head>
 <body>
-  <h1>Identificando objetos em câmeras</h1>
+  <h1>Camera Vision</h1>
+  <h3>Powered by Octacity</h3>
+  
   <form id="queryForm">
-    <label for="urlInput">URL:</label>
-    <input type="text" id="urlInput" name="url" value="http://187.111.99.18:9004/?CODE=1644">
+    <h2>Object Identification</h2>
     
-    <label for="objectsInput">Lista de objetos: (exemplo: car,bus,truck)</label>
+    <label for="urlInput">URL:</label>
+    <input type="text" id="urlInput" name="url" value="http://187.111.99.18:9004/?CODE=1644" required>
+    
+    <label for="objectsInput">List of objects: (e.g., car, bus, truck)</label>
     <div class="textarea-container">
-      <textarea id="objectsInput" name="objects" rows="4"></textarea>
-      <p><strong>Objetos disponíveis:</strong> person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, tv, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair drier, toothbrush</p>
+      <textarea id="objectsInput" name="objects" rows="4" placeholder="Enter objects (or leave empty for all objects)"></textarea>
+      <p><strong>Available objects:</strong> person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, tv, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair dryer, toothbrush</p>
     </div>
     
-    <label for="secondsInput">Segundos:</label>
-    <input type="text" id="secondsInput" name="seconds" value="20">
-
-    <label for="confidence">Confiança: (entre 0.0 e 1.0)</label>
-    <input type="text" id="confidence" name="seconds" value="0.4">
+    <label for="confidence">Confidence: (between 0.0 and 1.0)</label>
+    <input type="text" id="confidence" name="confidence" value="0.4" required>
     
-    <button type="submit">Iniciar</button>
+    <label for="secondsInput">Seconds:</label>
+    <input type="text" id="secondsInput" name="seconds" value="20" required>
+
+    <button type="submit">Start</button>
   </form>
     
   <div id='videoPlayer' style="display: none;">
-      <h2>Transmissão (ao vivo)</h2>
-      <img id="resultImage" src="" alt="Result Image">
-      <p style="font-size: 10;">Obs: Salvando objetos identificados em base de dados BigQuery em tempo real</p>
+    <h2>Live Stream</h2>
+    <img id="resultImage" src="" alt="Result Image">
+    <p style="font-size: 10px;">Note: Identified objects are being saved in real-time to the BigQuery database.</p>
   </div>
       
   <script>

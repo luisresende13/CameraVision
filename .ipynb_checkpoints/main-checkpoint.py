@@ -171,9 +171,9 @@ def hello_world():
 def home():
     return render_template('video_upload_demo.html')    
 
-@app.get("/camera_detector")
+@app.get("/tracker")
 def camera_detector():
-    return render_template('camera_detector.html')    
+    return render_template('tracker.html')    
 
 @app.route('/upload', methods=['POST'])
 def upload_video():
@@ -241,7 +241,7 @@ class TrackIn(Schema):
 @app.input(TrackIn, 'query')
 def view_track_and_post(query):
 
-    objects_allowed = query['objects'] if query['objects'] != '' and len(query['objects']) > 0 else None
+    objects_allowed = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
     print('objects_allowed:', objects_allowed)
     print('confidence:', query['confidence'])
     return Response(stream_with_context(tracking_reid(

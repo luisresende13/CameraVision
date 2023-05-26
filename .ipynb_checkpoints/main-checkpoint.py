@@ -4,6 +4,8 @@ from tempfile import NamedTemporaryFile
 import pandas as pd, numpy as np
 import cv2
 from urllib.parse import quote
+import warnings
+warnings.filterwarnings("ignore"); # Suppress warnings
 
 # Flask
 
@@ -25,7 +27,7 @@ from modules.video_processing import Video, get_video_metadata
 # ---
 # Base API url
 
-# baseurl = 'https://video-analytics.octacity.dev' # us-central1
+# baseurl = 'https://analytics.octacity.dev' # us-central1
 baseurl = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'
 # baseurl = 'http://127.0.0.1:5000' # development environment
 
@@ -141,7 +143,7 @@ app.config['EXTERNAL_DOCS'] = {
 app.config['INFO'] = {
     'title': 'Video Analytics',
     'version': '1.0',
-    'description': 'API by Octa City Solutions to provide video analytics services.',
+    'description': open('README.MD').read(),
     'contact': {
         'name': 'OCTA CITY SOLUTIONS',
         'url': 'http://octacity.org',

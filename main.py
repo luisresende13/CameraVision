@@ -253,8 +253,8 @@ def view_track_and_post(query):
         max_frames=int(query['seconds'] * query['fps']),
         post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
         post_processing_args={'url': query['url']},
-        proccess_each=3,
-        run_detection_each=3,
+        proccess_each=2,
+        run_detection_each=2,
         frame_annotator=write_demo, # annotates frames using detection output
         to_video_path=None,
         generator=True, # yields annotated frames

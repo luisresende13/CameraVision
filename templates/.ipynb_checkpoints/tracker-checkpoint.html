@@ -36,7 +36,8 @@
       background-color: #ffffff;
       padding: 20px;
       border-radius: 5px;
-      width: 100%;
+      width: 50%;
+      margin: 0 auto;
       box-sizing: border-box;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     }
@@ -49,7 +50,17 @@
     input[type="text"],
     textarea {
       width: 100%;
-      min-width: 170px;
+      min-width: 210px;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    select {
+      width: 100%;
       padding: 10px;
       margin-bottom: 15px;
       font-size: 14px;
@@ -62,7 +73,6 @@
       display: flex;
       flex-direction: row;
       margin-bottom: 15px;
-      height: 100%;
     }
     
     .textarea-container textarea {
@@ -120,12 +130,68 @@
       margin: 0;
     }
     
-    @media (min-width: 600px) {
+/*     @media (min-width: 600px) {
       form {
-        max-width: 500px;
+        max-width: 60%;
         margin: 0 auto;
       }
     }
+     */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #f5f5f5;
+    }
+
+  /* Additional styles for responsiveness */
+  @media (max-width: 1100px) {
+    form {
+      min-width: 100%;
+      max-height: 20%;
+      margin: 0 auto;
+    }    
+    input[type="text"],
+    textarea {
+      width: 100%;
+      min-width: 400px;
+    }
+  }
+  /* Additional styles for responsiveness */
+  @media (max-width: 600px) {
+    table {
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 5px;
+    }
+
+    th {
+      display: none;
+    }
+
+    td:before {
+      content: attr(data-label);
+      display: inline-block;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+  }
+      
   </style>
 </head>
 <body>
@@ -136,20 +202,26 @@
     <h2>Object Identification</h2>
     
     <label for="urlInput">URL:</label>
-    <input type="text" id="urlInput" name="url" value="http://187.111.99.18:9004/?CODE=1644" required>
+    <input type="text" id="urlInput" name="url" value="http://187.111.99.18:9004/?CODE=1643" required>
     
-    <label for="objectsInput">List of objects: (e.g., car, bus, truck)</label>
+    <label for="objectsInput">List of objects:</label>
     <div class="textarea-container">
-      <textarea id="objectsInput" name="objects" rows="4" placeholder="Enter objects (or leave empty for all objects)"></textarea>
-      <p><strong>Available objects:</strong> person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, tv, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair dryer, toothbrush</p>
+      <textarea id="objectsInput" name="objects" rows="4" placeholder="Enter objects (or leave empty for all objects)">person, car, bus</textarea>
+      <p id='availableObjects'><strong>Available objects:</strong> person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, tv, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair dryer, toothbrush</p>
     </div>
-    
+          
     <label for="confidence">Confidence: (between 0.0 and 1.0)</label>
-    <input type="text" id="confidence" name="confidence" value="0.4" required>
+    <input type="text" id="confidence" name="confidence" value="0.3" required>
     
     <label for="secondsInput">Seconds:</label>
-    <input type="text" id="secondsInput" name="seconds" value="20" required>
+    <input type="text" id="secondsInput" name="seconds" value="45" required>
 
+    <label for="detectorSelect">Detector:</label>
+    <select id="detectorSelect" name="detector">
+      <option value="mediapipe">MediaPipe</option>
+      <option value="yolo">YOLO</option>
+    </select>
+      
     <button type="submit">Start</button>
   </form>
     
@@ -158,35 +230,223 @@
     <img id="resultImage" src="" alt="Result Image">
     <p style="font-size: 10px;">Note: Identified objects are being saved in real-time to the BigQuery database.</p>
   </div>
-      
+
+  <h2>Identified Objects</h2>
+  <table id="objectsTable">
+    <thead>
+      <tr>
+        <th>ID</th> <!-- Added ID field -->
+        <th>Object</th>
+        <th>Confidence</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+    
   <script>
+
+    // Get the protocol and host from the current window location
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    let baseURL;
+
+    // Check if the host includes 'localhost'
+    if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev')) {
+      baseURL = `.`;
+    } 
+    // If none of the conditions match, set the base URL to 'api.' followed by the host
+    else {
+      baseURL = `https://analytics.octacity.dev`; // Set base URL to 'api.example.com'
+    }
+    
+    // Log the final base URL and host
+    console.log('Base URL:', baseURL);
+    console.log('Host:', host);
+      
+    // Variables for update interval and user inactivity timeout
+    // const baseURL = "https://analytics.octacity.dev";
+    let intervalId;
+    let inactivityTimeout;
+    let inactiveTime = 75000;
+    let updateTime = 5000;
+    let isActive = false;
+    let url = ''
+    let objects
+    let seconds
+    let confidence
+    let detector
+
+    // Function to populate the objects input field based on the selected model
+    function populateAvailableObjects() {
+      const detectorSelect = document.getElementById('detectorSelect');
+      const availableObjects = document.getElementById('availableObjects');
+
+      // List of objects for YOLO model
+      const yoloObjects = 'person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, tv, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair dryer, toothbrush';
+
+      // List of objects for MediaPipe model
+      const mediapipeObjects = 'person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, tv, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair dryer, toothbrush';
+
+      if (detectorSelect.value === 'yolo') {
+        availableObjects.innerHTML = "<strong>Available objects: </strong>" + yoloObjects;
+      } else if (detectorSelect.value === 'mediapipe') {
+        availableObjects.innerHTML = "<strong>Available objects: </strong>" + mediapipeObjects;
+      }
+    }
+      
+    // Function to fetch and update identified objects
+    function fetchAndPopulateObjects(url) {
+      const objectsURL = `${baseURL}/objects?url=${encodeURIComponent(url)}&dt=${new Date().getTime()}`;
+      console.log("Fetching objects from:", objectsURL);
+      fetch(objectsURL)
+        .then(response => response.json())
+        .then(data => {
+          console.log("Received data:", data);
+
+          const existingRows = Array.from(document.querySelectorAll('#objectsTable tbody tr'));
+          const existingObjects = existingRows.map(row => row.getAttribute('id'));
+
+          // Filter new objects that are not already in the table
+          const newObjects = data.filter(item => !existingObjects.includes(item.id));
+
+          // Create and prepend rows for new objects
+          const fragment = document.createDocumentFragment();
+          newObjects.forEach(item => {
+            const row = document.createElement('tr');
+            const objectIdCell = document.createElement('td');
+            const objectCell = document.createElement('td');
+            const confidenceCell = document.createElement('td');
+            const timestampCell = document.createElement('td');
+
+            objectIdCell.textContent = item.id; // Object identity field
+            objectCell.textContent = item.class_name;
+            confidenceCell.textContent = (item.confidence * 100).toFixed(0) + "%";
+            timestampCell.textContent = new Date(item.timestamp).toLocaleString(); // Convert timestamp to localized date and time string
+
+            row.setAttribute('id', item.id);
+            row.appendChild(objectIdCell);
+            row.appendChild(objectCell);
+            row.appendChild(confidenceCell);
+            row.appendChild(timestampCell);
+
+            fragment.appendChild(row);
+          });
+
+          // Remove rows for objects that are no longer present
+          existingRows.forEach(row => {
+            const objectId = row.getAttribute('id');
+            if (!data.find(item => item.id === objectId)) {
+              row.remove();
+            }
+          });
+
+          // Prepend new rows to the table
+          const tableBody = document.querySelector('#objectsTable tbody');
+          tableBody.prepend(fragment);
+        })
+        .catch(error => {
+          console.error('Error fetching identified objects:', error);
+        });
+    }
+
     // Function to handle form submission
     function handleFormSubmit(event) {
       event.preventDefault();
 
-      // Get the form input values
-      const baseURL = "/track"
-      const url = document.getElementById('urlInput').value;
-      const objects = document.getElementById('objectsInput').value;
-      const seconds = document.getElementById('secondsInput').value;
-      const confidence = document.getElementById('confidence').value;
+      // Function to start updates
+      function startUpdates() {
+        isActive = true;
+        clearInterval(intervalId); // Clear any existing interval
 
-      // Construct the query URL
-      const queryURL = `${baseURL}?url=${encodeURIComponent(url)}&objects=${objects}&seconds=${encodeURIComponent(seconds)}&confidence=${confidence}`;
+        // Fetch and populate identified objects immediately
+        fetchAndPopulateObjects(url);
+
+        // Schedule periodic updates every 8 seconds
+        intervalId = setInterval(() => fetchAndPopulateObjects(url), updateTime);
+          
+        console.log("Updates started.");
+      }
+
+      // Function to stop updates
+      function stopUpdates() {
+        clearInterval(intervalId); // Clear the interval
+        isActive = false;
+        console.log("Updates stopped.");
+      }
+
+      // Check for user inactivity
+      function onUserActive() {
+        if (!isActive) {
+          // Start the updates
+          startUpdates();
+
+          // Sechedule stop of updates
+          setTimeout(stopUpdates, inactiveTime);
+        }
+      }
+      // Get the form input values
+      url = document.getElementById('urlInput').value;
+      objects = document.getElementById('objectsInput').value;
+      seconds = document.getElementById('secondsInput').value;
+      confidence = document.getElementById('confidence').value;
+      detector = document.getElementById('detectorSelect').value;
+
+      // Construct the track view URL
+      const trackViewURL = `${baseURL}/track/view?url=${encodeURIComponent(url)}&objects=${objects}&seconds=${encodeURIComponent(seconds)}&confidence=${confidence}&detector=${detector}&dt=${new Date().getTime()}`;
+
+      // Construct the track post URL
+      const trackPostURL = `${baseURL}/track/post?url=${encodeURIComponent(url)}&objects=${objects}&seconds=${encodeURIComponent(seconds)}&confidence=${confidence}&detector=${detector}&dt=${new Date().getTime()}`;
+
+        
+      async function fetchData(url) {
+        try {
+           console.log('Fetching data...');
+           const response = await fetch(url);
+           console.log('Data fetched successfully.');
+
+           console.log('Parsing response...');
+           const data = await response.json();
+           console.log('Response parsed.');
+
+           // Handle the received data
+           console.log('Response:', data);
+         } catch (error) {
+           // Handle any errors that occurred during the request
+           console.error('Error:', error);
+         }
+       }
+
+      // Request object identificataion posting in parallel
+      console.log('Starting data fetch...');
+      fetchData(trackPostURL);
+
 
       // Update the image source
       const img = document.getElementById('resultImage');
-      img.src = queryURL + '&dt=' + new Date().getTime();
+      img.src = trackViewURL;
 
-      // Show the videoPlayer div
+      // Show the video player
       const videoPlayer = document.getElementById('videoPlayer');
-      videoPlayer.style.display = "block";
+      videoPlayer.style.display = 'block';
 
+      // Add event listeners for user inactivity
+      isActive = false;
+      onUserActive();
+
+      window.addEventListener('scroll', onUserActive);
+      document.addEventListener('mousemove', onUserActive);
+      document.addEventListener('keypress', onUserActive);
     }
-      
-    // Add form submit event listener
+
+    // Add event listener for form submission
     const form = document.getElementById('queryForm');
     form.addEventListener('submit', handleFormSubmit);
+
+    // Add event listener for changing the detector selection
+    const detectorSelect = document.getElementById('detectorSelect');
+    detectorSelect.addEventListener('change', populateAvailableObjects);
+
   </script>
 </body>
 </html>

@@ -185,7 +185,7 @@ def camera_detector():
     Object Identification Web App 
     Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
     """
-    return render_template('tracker-Copy1.html')    
+    return render_template('tracker.html')    
 
 # BigQuery Database
 
@@ -234,14 +234,14 @@ class TrackIn(Schema):
     confidence = Float(load_default=0.4)
     fps = Integer(load_default=3)
     detector = String(load_default='yolo')
-    
+
 @app.get("/track")
 @app.input(TrackIn, 'query')
 @app.doc(tags=['Streaming'])
-def view_track_and_post(query):
+def view_and_post_track(query):
     """
     Object Identification Live Stream
-    Runs object detection, tracking and identification for live camera image streaming. Streams the annotated images and posts identified objects to database in real time.
+    Runs object detection, tracking and identification for live camera image streaming. Streams the annotated images.
     
     """
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
@@ -259,6 +259,58 @@ def view_track_and_post(query):
         to_video_path=None,
         generator=True, # yields annotated frames
     )), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.get("/track/view")
+@app.input(TrackIn, 'query')
+@app.doc(tags=['Streaming'])
+def view_track(query):
+    """
+    Object Identification Live Stream
+    Runs object detection, tracking and identification for live camera image streaming. Streams the annotated images.
+    
+    """
+    allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
+    return Response(stream_with_context(tracking_reid(
+        query['url'],
+        model=query['detector'],
+        confidence_threshold=query['confidence'],
+        allowed_objects=allowed_objects,
+        max_frames=int(query['seconds'] * query['fps']),
+        post_processing_function=None,
+        post_processing_args={},
+        proccess_each=2,
+        run_detection_each=2,
+        frame_annotator=write_demo, # annotates frames using detection output
+        to_video_path=None,
+        generator=True, # yields annotated frames
+    )), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.get("/track/post")
+@app.input(TrackIn, 'query')
+@app.doc(tags=['Streaming'])
+def post_track(query):
+    """
+    Post Object Identification
+    Runs object detection, tracking and identification for live camera image streaming and posts identified objects to database in real time.
+    
+    """
+    allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
+    post_new_objects_records = tracking_reid(
+        query['url'],
+        model=query['detector'],
+        confidence_threshold=query['confidence'],
+        allowed_objects=allowed_objects,
+        max_frames=int(query['seconds'] * query['fps']),
+        post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
+        post_processing_args={'url': query['url']},
+        proccess_each=2,
+        run_detection_each=2,
+        frame_annotator=None, # annotates frames using detection output
+        to_video_path=None,
+        generator=False, # yields annotated frames if true
+    )
+    # print('post_new_objects_records: ', post_new_objects_records)
+    return list(post_new_objects_records)
 
 
 # VIDEO UPLOAD AND PROCESSING

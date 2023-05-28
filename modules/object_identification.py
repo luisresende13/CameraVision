@@ -46,7 +46,7 @@ def tracking_reid(
     # class_names = model.class_names
 
     # initialize DeepSORT real-time tracker
-    deepsort = DeepSort(max_age=50)
+    deepsort = DeepSort(max_age=9)
         
     # initialize the video capture object
     video_cap = cv2.VideoCapture(video_path)

@@ -43,6 +43,13 @@ credentials_path = 'auth/octacity-iduff.json'  # Replace with the path to your J
 dataset_id = 'video_analytics'  # Replace with your dataset ID
 table_id = 'objetos_identificados'      # Replace with your table ID
 
+# BigQuery client
+bqclient = bigquery.Client.from_service_account_json(credentials_path)
+
+# get the BigQuery client and table instances
+table_ref = bqclient.dataset(dataset_id).table(table_id)
+table = bqclient.get_table(table_ref)
+
 # ---
 # Google Cloud Storage
 
@@ -58,7 +65,36 @@ credentials = service_account.Credentials.from_service_account_file(credentials_
 
 def now(fmt="%Y-%m-%d %H:%M:%S"):
     return dt.now().strftime(fmt)
+
+
+# INSERT RECORDS OF NEW OBJECTS INTO BIGQUERY DATABASE
+
+def bigquery_post_new_objects(frame, detections, tracking, new_objects, process_start, process_end, **kwargs):
     
+    # initialize list for errors
+    errors = []
+    
+    # if there's any new object
+    if len(new_objects):
+        
+        # drop unwanted fields
+        for obj in new_objects:
+            del obj['track_id']
+            del obj['bbox']
+            for key, value in kwargs.items():
+                obj[key] = value
+        
+        # insert records of new objects into BigQuery table
+        errors = bqclient.insert_rows(table, new_objects)
+
+        # log errors if any
+        if errors:
+            print('Error inserting record into BigQuery:', errors)
+
+    # return list with errors
+    return {'n_new_objects': len(new_objects), 'n_errors': len(errors), 'errors': errors}
+
+
 # set up color scheme
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
@@ -89,45 +125,10 @@ def write_demo(frame, detections, tracking, new_objects, process_start, process_
     # return annotated frame
     return frame
 
-# INSERT RECORDS OF NEW OBJECTS INTO BIGQUERY DATABASE
-
-def bigquery_post_new_objects(frame, detections, tracking, new_objects, process_start, process_end, **kwargs):
-    
-    # initialize list for errors
-    errors = []
-    
-    # if there's any new object
-    if len(new_objects):
-        
-        # drop unwanted fields
-        for obj in new_objects:
-            del obj['track_id']
-            del obj['bbox']
-            for key, value in kwargs.items():
-                obj[key] = value
-        
-        # BigQuery client
-        client = bigquery.Client.from_service_account_json(credentials_path)
-
-        # get the BigQuery client and table instances
-        table_ref = client.dataset(dataset_id).table(table_id)
-        table = client.get_table(table_ref)
-
-        # insert records of new objects into BigQuery table
-        errors = client.insert_rows(table, new_objects)
-
-        # log errors if any
-        if errors:
-            print('Error inserting record into BigQuery:', errors)
-
-    # return list with errors
-    return {'n_new_objects': len(new_objects), 'n_errors': len(errors), 'errors': errors}
-
-
 # ---
 # FLASK APP CONFIG
 
-app = APIFlask(__name__, docs_ui='elements', title='Camera Vision API', version='0.1'); CORS(app)
+app = APIFlask(__name__); CORS(app)
 
 @app.after_request
 def apply_caching(response):
@@ -153,8 +154,17 @@ app.config['INFO'] = {
 }
 
 app.config['TAGS'] = [{
-#     'name': 'Cameras',
-#     'description': 'Collection of city cameras in Rio de Janeiro'
+    'name': 'Web Apps',
+    'description': ''
+},{
+    'name': 'Big Query',
+    'description': ''
+},{
+    'name': 'Streaming',
+    'description': ''
+},{
+    'name': 'Upload',
+    'description': ''
 }]
 
 # REQUEST AND RESPONSE SCHEMAS

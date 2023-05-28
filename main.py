@@ -19,7 +19,7 @@ from apiflask import APIFlask, Schema, abort
 from apiflask.fields import Integer, String, Float, Boolean, Dict, List, DelimitedList, DateTime
 from apiflask.validators import Length, OneOf
 
-# Custom
+# Custom modules
 
 from modules.object_identification import tracking_reid
 from modules.video_processing import Video, get_video_metadata
@@ -43,11 +43,6 @@ credentials_path = 'auth/octacity-iduff.json'  # Replace with the path to your J
 dataset_id = 'video_analytics'  # Replace with your dataset ID
 table_id = 'objetos_identificados'      # Replace with your table ID
 
-# get the BigQuery client and table instances
-client = bigquery.Client.from_service_account_json(credentials_path)
-table_ref = client.dataset(dataset_id).table(table_id)
-table = client.get_table(table_ref)
-
 # ---
 # Google Cloud Storage
 
@@ -58,7 +53,7 @@ from google.oauth2 import service_account
 credentials_path = 'auth/octacity-iduff.json'  # Replace with the path to your JSON credentials file
 credentials = service_account.Credentials.from_service_account_file(credentials_path)
 
-    
+
 # Util
 
 def now(fmt="%Y-%m-%d %H:%M:%S"):
@@ -75,7 +70,7 @@ def write_demo(frame, detections, tracking, new_objects, process_start, process_
     for track in tracking:
 
         # get track attributes
-        track_id, class_label, class_name, confidence, bbox, timestamp = track
+        track_id, class_name, confidence, bbox, timestamp = track
 
         # get pixel values from track bounding box
         xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
@@ -111,6 +106,13 @@ def bigquery_post_new_objects(frame, detections, tracking, new_objects, process_
             for key, value in kwargs.items():
                 obj[key] = value
         
+        # BigQuery client
+        client = bigquery.Client.from_service_account_json(credentials_path)
+
+        # get the BigQuery client and table instances
+        table_ref = client.dataset(dataset_id).table(table_id)
+        table = client.get_table(table_ref)
+
         # insert records of new objects into BigQuery table
         errors = client.insert_rows(table, new_objects)
 
@@ -231,7 +233,8 @@ class TrackIn(Schema):
     seconds = Integer(load_default=10)
     confidence = Float(load_default=0.4)
     fps = Integer(load_default=3)
-
+    detector = String(load_default='yolo')
+    
 @app.get("/track")
 @app.input(TrackIn, 'query')
 @app.doc(tags=['Streaming'])
@@ -244,6 +247,7 @@ def view_track_and_post(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
     return Response(stream_with_context(tracking_reid(
         query['url'],
+        model=query['detector'],
         confidence_threshold=query['confidence'],
         allowed_objects=allowed_objects,
         max_frames=int(query['seconds'] * query['fps']),
@@ -289,12 +293,13 @@ def upload_video():
     # run tracking and identification
     post_processing_output = tracking_reid(
         uploaded_temp_file_name,
+        model='yolo',
         confidence_threshold=0.4,
         allowed_objects=None,
         max_frames=None,
         post_processing_function=None,
-        proccess_each=1,
-        run_detection_each=1,
+        proccess_each=2,
+        run_detection_each=2,
         frame_annotator=write_demo,
         to_video_path=annotated_temp_file_name,
     )

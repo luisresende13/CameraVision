@@ -12,11 +12,13 @@ import pytz
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
 
-from modules.yolo_util import formatted_yolo_detection
 from modules.video_processing import Video
+from modules.yolo_util import YoloWrap
+from modules.mediapipe_util import MediapipeDetector
 
 def tracking_reid(
     video_path,
+    model='yolo',
     confidence_threshold=0.3,
     allowed_objects=None,
     max_frames=10,
@@ -29,14 +31,22 @@ def tracking_reid(
     generator=False
 ):
     
-    # initialize YOLO object detection model
-    model = YOLO("yolov8n.pt")
-
+    # initialize object detection model
+    if model == 'yolo':
+        model = YoloWrap("yolov8n.pt")
+    elif model == 'mediapipe':
+        model = MediapipeDetector(
+            model_asset_path='models/mediapipe/efficientdet_lite0.tflite',
+            score_threshold=confidence_threshold,
+            category_allowlist=allowed_objects,
+            max_results=None,
+        )
+        
     # Get class names from model
-    class_names = model.names
+    # class_names = model.class_names
 
     # initialize DeepSORT real-time tracker
-    deepsort = DeepSort(max_age=6)
+    deepsort = DeepSort(max_age=50)
         
     # initialize the video capture object
     video_cap = cv2.VideoCapture(video_path)
@@ -78,9 +88,6 @@ def tracking_reid(
         # Get the current date and time in the Brazil time zone
         start = datetime.datetime.now(brazil_tz)
 
-        # Convert the datetime to a string rounded to seconds
-        timestamp = start.strftime('%Y-%m-%d %H:%M:%S')
-
         # read video frame
         ret, frame = video_cap.read()
         if not ret:
@@ -96,11 +103,8 @@ def tracking_reid(
             ######################################
             # RUN DETECTION · Obs. Choose standard model method for prediction and wrap models that use other methods before passing then to the function.
 
-            # run the YOLO model on the frame
-            yolo_detection = model(frame)[0]
-
             # formatted yolo detections
-            detections = formatted_yolo_detection(yolo_detection, class_names=class_names)
+            detections = model.detect(frame)
 
             # initialize list for tracker input
             tracker_input = []
@@ -109,7 +113,7 @@ def tracking_reid(
             for det in detections:
 
                 # get detected object attributes
-                class_id, class_name, confidence, bbox = det
+                class_name, confidence, bbox = det
 
                 # filter out weak detections by ensuring the 
                 # confidence is greater than the minimum confidence
@@ -125,7 +129,7 @@ def tracking_reid(
                 xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
 
                 # add the bounding box (x, y, w, h), confidence and class id to the results list
-                tracker_input.append([[xmin, ymin, xmax - xmin, ymax - ymin], confidence, class_id])
+                tracker_input.append([[xmin, ymin, xmax - xmin, ymax - ymin], confidence, class_name])
 
             ######################################
             # RUN TRACKING
@@ -145,13 +149,12 @@ def tracking_reid(
 
                 # get attributes of tracked object
                 track_id = track.track_id
-                class_id = track.det_class
-                class_name = class_names[class_id]
+                class_name = track.det_class
                 confidence = track.det_conf
                 bbox = track.to_ltrb()
 
                 # append attributes of tracked objects
-                tracking.append([track_id, class_id, class_name, confidence, bbox, start])
+                tracking.append([track_id, class_name, confidence, bbox, start])
 
             ######################################
             # GET NEW IDENTIFIED OBJECTS
@@ -163,17 +166,17 @@ def tracking_reid(
             for track in tracking:
 
                 # get track attributes
-                track_id, class_label, class_name, confidence, bbox, timestamp = track
+                track_id, class_name, confidence, bbox, start = track
 
                 # check if track ID is unique
                 if track_id not in unique_track_ids:
 
                     # prepare record of newly identified object
                     record = {
-                        'class_label': class_label,
+                        # 'class_label': class_label,
                         'class_name': class_name,
                         'confidence': confidence,
-                        'timestamp': timestamp,
+                        'timestamp': start,
                         'track_id': track_id,
                         'bbox': list(bbox),
                     }
@@ -204,11 +207,7 @@ def tracking_reid(
         if post_processing_function is not None:
             post_processing_output.append(post_processing_function(frame, detections, tracking, new_objects, start, end, **post_processing_args))
 
-        # report progress and time to process the current frame
-        # if total_frames is not None:
-            # co(True); print(f"Time to process frame {i}/{total_frames}: {(end - start).total_seconds() * 1000:.0f} milliseconds")
-
-        # YIELD FRAME IN GENERATOR MODE
+        # YIELD FRAME IF IN GENERATOR MODE
         if generator:
             selected_frame = frame if frame_annotator is None else annotated_frame
             ret, buffer = cv2.imencode('.jpg', selected_frame)

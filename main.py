@@ -179,14 +179,6 @@ def hello_world():
     name = os.environ.get("NAME", "World")
     return "Hello {}!".format(name)
 
-@app.get("/upload_video")
-@app.doc(tags=['Web Apps'])
-def home():
-    """
-    Video File Web App
-    Uploads a video file, runs object detection, tracking and identification and download processed video file. 
-    """
-    return render_template('video_upload_demo.html')    
 
 @app.get("/tracker")
 @app.doc(tags=['Web Apps'])
@@ -196,6 +188,17 @@ def camera_detector():
     Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
     """
     return render_template('tracker.html')    
+
+
+@app.get("/upload_video")
+@app.doc(tags=['Web Apps'])
+def home():
+    """
+    Video File Web App
+    Uploads a video file, runs object detection, tracking and identification and download processed video file. 
+    """
+    return render_template('video_upload_demo.html')    
+
 
 # BigQuery Database
 
@@ -263,8 +266,8 @@ def view_and_post_track(query):
         max_frames=int(query['seconds'] * query['fps']),
         post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
         post_processing_args={'url': query['url']},
-        proccess_each=2,
-        run_detection_each=2,
+        proccess_each=1,
+        run_detection_each=1,
         frame_annotator=write_demo, # annotates frames using detection output
         to_video_path=None,
         generator=True, # yields annotated frames
@@ -288,8 +291,8 @@ def view_track(query):
         max_frames=int(query['seconds'] * query['fps']),
         post_processing_function=None,
         post_processing_args={},
-        proccess_each=2,
-        run_detection_each=2,
+        proccess_each=1,
+        run_detection_each=1,
         frame_annotator=write_demo, # annotates frames using detection output
         to_video_path=None,
         generator=True, # yields annotated frames
@@ -313,8 +316,8 @@ def post_track(query):
         max_frames=int(query['seconds'] * query['fps']),
         post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
         post_processing_args={'url': query['url']},
-        proccess_each=2,
-        run_detection_each=2,
+        proccess_each=1,
+        run_detection_each=1,
         frame_annotator=None, # annotates frames using detection output
         to_video_path=None,
         generator=False, # yields annotated frames if true

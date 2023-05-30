@@ -279,9 +279,13 @@
     const host = window.location.host;
     let baseURL;
 
-    // Check if the host includes 'localhost'
+    // Check if the host a server 
     if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev')) {
       baseURL = `.`;
+    } 
+    // Check if the host the file system 
+    else if (host.includes('')) {
+      baseURL = `http://127.0.0.1:5000`;
     } 
     // If none of the conditions match, set the base URL to 'api.' followed by the host
     else {
@@ -457,9 +461,8 @@
            const response = await fetch(url);
            console.log('Data fetched successfully.');
 
-           console.log('Parsing response...');
            const data = await response.json();
-           console.log('Response parsed.');
+           console.log('Data successfully.');
 
            // Handle the received data
            console.log('Response:', data);
@@ -469,7 +472,7 @@
          }
        }
 
-      // Request object identificataion posting in parallel
+      // Request object identificataion posting asyncronously
       console.log('Starting data fetch...');
       fetchData(trackPostURL);
 

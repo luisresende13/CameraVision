@@ -106,7 +106,7 @@ def write_demo(frame, detections, tracking, new_objects, process_start, process_
     for track in tracking:
 
         # get track attributes
-        track_id, class_name, confidence, bbox, timestamp = track
+        track_id, class_name, confidence, bbox = track
 
         # get pixel values from track bounding box
         xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
@@ -263,14 +263,15 @@ def view_and_post_track(query):
         model=query['detector'],
         confidence_threshold=query['confidence'],
         allowed_objects=allowed_objects,
-        max_frames=int(query['seconds'] * query['fps']),
         post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
         post_processing_args={'url': query['url']},
         proccess_each=1,
         run_detection_each=1,
         frame_annotator=write_demo, # annotates frames using detection output
-        to_video_path=None,
+        to_url=None,
         generator=True, # yields annotated frames
+        secs=float(query['seconds']),
+        fps=3
     )), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.get("/track/view")
@@ -288,14 +289,15 @@ def view_track(query):
         model=query['detector'],
         confidence_threshold=query['confidence'],
         allowed_objects=allowed_objects,
-        max_frames=int(query['seconds'] * query['fps']),
         post_processing_function=None,
         post_processing_args={},
         proccess_each=1,
         run_detection_each=1,
         frame_annotator=write_demo, # annotates frames using detection output
-        to_video_path=None,
+        to_url=None,
         generator=True, # yields annotated frames
+        secs=float(query['seconds']),
+        fps=3
     )), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.get("/track/post")
@@ -319,8 +321,10 @@ def post_track(query):
         proccess_each=1,
         run_detection_each=1,
         frame_annotator=None, # annotates frames using detection output
-        to_video_path=None,
+        to_url=None,
         generator=False, # yields annotated frames if true
+        secs=float(query['seconds']),
+        fps=3
     )
     # print('post_new_objects_records: ', post_new_objects_records)
     return list(post_new_objects_records)

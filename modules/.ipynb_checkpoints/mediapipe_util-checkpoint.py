@@ -26,9 +26,10 @@ class MediapipeDetector:
         self.detector = vision.ObjectDetector.create_from_options(options)
         self.class_names = class_names
         
-    def detect(self, frame):
+    def detect(self, image):
+        
         # Load the input image.
-        image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
+        image = mp.Image(data=image, image_format=mp.ImageFormat.SRGB)
 
         # Detect objects in the input image.
         detection_result = self.detector.detect(image)

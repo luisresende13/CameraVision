@@ -69,7 +69,10 @@ def now(fmt="%Y-%m-%d %H:%M:%S"):
 
 # INSERT RECORDS OF NEW OBJECTS INTO BIGQUERY DATABASE
 
-def bigquery_post_new_objects(frame, detections, tracking, new_objects, process_start, process_end, **kwargs):
+def bigquery_post_new_objects(frame, inference, time_info, **kwargs):
+    
+    # get list of objects identified on the frame
+    new_objects = inference[2]
     
     # initialize list for errors
     errors = []
@@ -100,7 +103,10 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
-def write_demo(frame, detections, tracking, new_objects, process_start, process_end):
+def write_demo(frame, inference, time_info, resize_shape=None):
+
+    tracking = inference[1]
+    n_frames, process_start, process_end, start_time, end_time = time_info
 
     # loop over the formatted tracks and get newly identified objects
     for track in tracking:
@@ -111,19 +117,36 @@ def write_demo(frame, detections, tracking, new_objects, process_start, process_
         # get pixel values from track bounding box
         xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
 
+        # resize bounding boxes if image has been resized for preprocessing
+        if resize_shape is not None:
+            height, width = frame.shape[:2]
+            new_width, new_height = resize_shape
+            resize_factor_x = new_width / width
+            resize_factor_y = new_height / height
+            xmin = int(xmin / resize_factor_x)
+            xmax = int(xmax / resize_factor_x)
+            ymin = int(ymin / resize_factor_y)
+            ymax = int(ymax / resize_factor_y)
+            
         # draw the bounding box and the track id
         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), GREEN, 2)
         cv2.rectangle(frame, (xmin, ymin - 30), (xmin + 10 + 11 * (len(str(track_id)) + len(class_name)), ymin), GREEN, -1)
         cv2.putText(frame, str(track_id), (xmin + 5, ymin - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2)
         cv2.putText(frame, class_name, (xmin + 12 + 10 * len(str(track_id)), ymin - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2)
 
-    # calculate the frame per second and draw it on the frame
-    fps = f"FPS: {1 / (process_end - process_start).total_seconds():.2f}"
-    w = frame.shape[1]
-    cv2.putText(frame, fps, (w - 125, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, BLUE, 4)
+    # calculate the average frames per second
+    total_time = end_time - start_time
+    avg_fps = n_frames / total_time
+
+    # draw the average fps on the frame
+    width = frame.shape[1]
+    fps = f"FPS: {avg_fps:.2f}"
+    cv2.putText(frame, fps, (width - 125, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, BLUE, 4)
 
     # return annotated frame
     return frame
+
+
 
 # ---
 # FLASK APP CONFIG
@@ -182,12 +205,21 @@ def hello_world():
 
 @app.get("/tracker")
 @app.doc(tags=['Web Apps'])
-def camera_detector():
+def camera_tracker():
     """
     Object Identification Web App 
     Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
     """
     return render_template('tracker.html')    
+
+@app.get("/tracker/phone")
+@app.doc(tags=['Web Apps'])
+def camera_tracker_mobile():
+    """
+    Object Identification Web App 
+    Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
+    """
+    return render_template('tracker-mobile.html')    
 
 
 @app.get("/upload_video")

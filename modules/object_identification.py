@@ -10,6 +10,7 @@ import datetime
 from time import time
 from flask import request
 import pytz
+import traceback
 
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
@@ -20,12 +21,12 @@ from modules.mediapipe_util import MediapipeDetector
 
 object_detection_models = {
     'yolo': YoloWrap("yolov8n.pt"),
-    # 'mediapipe': MediapipeDetector(
-    #     model_asset_path='models/mediapipe/efficientdet_lite0.tflite',
-    #     score_threshold=0.9,
-    #     category_allowlist=['person'],
-    #     max_results=None,
-    # ),
+    'mediapipe': MediapipeDetector(
+        model_asset_path='models/mediapipe/efficientdet_lite0.tflite',
+        score_threshold=0.99,
+        category_allowlist=['apple'],
+        max_results=None,
+    ),
 }
 
 # initialize DeepSORT real-time tracker
@@ -36,31 +37,34 @@ def tracking_reid(
     model='yolo',
     confidence_threshold=0.3,
     allowed_objects=None,
-    max_frames=None,
-    post_processing_function=None,
-    post_processing_args={},
     proccess_each=1,
     run_detection_each=1,
+    post_processing_function=None,
+    post_processing_args={},
     frame_annotator=None,
-    to_url=None, # save video or annotaded video to file path `to_url`
     generator=False,
+    to_url=None, # save video or annotaded video to file path `to_url`
+    max_frames=None,
     secs=10,
     exec_secs=None,
     log_secs=30,
     fps=3,
     max_retries=5,
+    resize_shape=(300, 300),
 ):
     
-    # initialize object detection model
+    # initialize detection model instance
     if model == 'yolo':
         model = object_detection_models[model]
     elif model == 'mediapipe':
+        print('INITIALIZING MEDIAPIPE DETECTOR...')
         model = MediapipeDetector(
             model_asset_path='models/mediapipe/efficientdet_lite0.tflite',
             score_threshold=confidence_threshold,
             category_allowlist=allowed_objects,
             max_results=None,
         )
+        print('MEDIAPIPE DETECTOR LOADED')
         
     # Get class names from model
     # class_names = model.class_names
@@ -68,42 +72,49 @@ def tracking_reid(
     # check if video capture is a live http image stream
     is_video_stream = url.startswith('http')
 
+    if max_frames is None and secs is None and exec_secs is None:
+        raise "At least one of `max_frames`, `secs` or `exec_secs` should be specified."
+    
     # initialize the video capture object
     cap = cv2.VideoCapture(url)
     
     # total frames of video file
     total_frames = None if is_video_stream else int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # if capture is from video file
 
+    # Get the frames per second (fps)
+    fps = fps if fps is not None else cap.get(cv2.CAP_PROP_FPS)
+
+    # Get the frame dimensions (shape)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
     if to_url is not None:
-        # Get the frames per second (fps)
-        fps = cap.get(cv2.CAP_PROP_FPS)
-
-        # Get the frame dimensions (shape)
-        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
         # Video writer instance
-        video = Video(codec='MP4V', fps=fps, shape=(w, h), overwrite=True)
+        video = Video(codec='MP4V', fps=fps, shape=(width, height), overwrite=True)
         WRITER = video.writer(to_url)
-
-    # initialize set for track ids 
-    unique_track_ids = set()
-
-    # initialize post processing output list
-    post_processing_output = []
-    
-    # get start time reference to measure execution time
-    start_time = time()
     
     # error handler for stream loop
     try:
         
+        # initialize set for track ids 
+        unique_track_ids = set()
+
+        # initialize post processing output list
+        post_processing_output = []
+
+        # get start time reference to measure execution time
+        start_time = time()
+
+        # initialize number of frames processed
+        n_frames = 0
+
         # start stream loop
-        n_frames = -1
         while True:
 
-            # update number of frames and seconds
-            n_frames += 1
+            # get the current time and date for Brazil time zone
+            start = datetime.datetime.now(brazil_tz)
+
+            # update video time in seconds
             video_seconds = n_frames / fps
 
             # break loop if `max_frames` is reached
@@ -121,9 +132,6 @@ def tracking_reid(
             # log streaming progress
             if log_secs is not None and video_seconds % log_secs == 0:
                 print(f'STREAMING · TIME: {round(n_frames / fps, 1)} s · URL: {url}')
-
-            # get the current time and date for Brazil time zone
-            start = datetime.datetime.now(brazil_tz)
 
             # read video frame
             success, frame = cap.read()
@@ -151,6 +159,11 @@ def tracking_reid(
                 ######################################
                 # RUN DETECTION · Obs. Choose standard model method for prediction and wrap models that use other methods before passing then to the function.
 
+                if resize_shape is not None:
+                    # Resize the image using the specified width and height
+                    original_frame = frame.copy()
+                    frame = cv2.resize(frame, resize_shape, interpolation=cv2.INTER_AREA)
+                
                 # formatted yolo detections
                 detections = model.detect(frame)
 
@@ -238,38 +251,52 @@ def tracking_reid(
             ######################################
             # PROCESS RESULT
 
-            # end time to compute the fps
+            # inference end time 
             end = datetime.datetime.now(brazil_tz)
+            end_time = time()
 
-            # ANNOTATE FRAME WITH DETECTION OUTPUTS
-            if frame_annotator is not None:
-                annotated_frame = frame_annotator(frame, detections, tracking, new_objects, start, end)
+            # update number of frames processed
+            n_frames += 1
 
-            # WRITE FRAME TO VIDEO FILE
-            if to_url is not None:
-                selected_frame = frame if frame_annotator is None else annotated_frame
-                WRITER.write(selected_frame)
-
+            # JOIN INFERENCE OUTPUTS AND TIME METADATA
+            inference = (detections, tracking, new_objects)
+            time_info = (n_frames, start, end, start_time, end_time)
+            
             # POST PROCESSING
             # call arbitrary post processing function on frame and on detection and tracking outputs
             if post_processing_function is not None:
-                post_processing_output.append(post_processing_function(frame, detections, tracking, new_objects, start, end, **post_processing_args))
+                post_processing_output.append(post_processing_function(frame, inference, time_info, **post_processing_args))
+
+            # ANNOTATE FRAME WITH DETECTION OUTPUTS
+            if frame_annotator is not None:
+                annotator_input_frame = frame if resize_shape is None else original_frame
+                frame = frame_annotator(annotator_input_frame, inference, time_info, resize_shape)
+
+            # # Resize the image using the specified width and height
+            # if resize_shape is not None:
+            #     frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
+
+            # WRITE FRAME TO VIDEO FILE
+            if to_url is not None:
+                WRITER.write(frame)
 
             # YIELD FRAME IF IN GENERATOR MODE
             if generator:
-                selected_frame = frame if frame_annotator is None else annotated_frame
-                ret, buffer = cv2.imencode('.jpg', selected_frame)
+                ret, buffer = cv2.imencode('.jpg', frame)
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
 
+    # handle exception inside video capture loop
     except Exception as e:
-        print(f'STREAMING (EXCEPTION CAUGHT) · ERROR: {e}')
-
+        print(f'STREAMING (EXCEPTION) · ERROR: {str(e)}')
+        traceback.print_exc()
+        
+    # finish video capture
     finally:
         
         if to_url is not None:
-            # Optional · release video writer
-            WRITER.release() # run after writing is finished
+            # release video writer after file is finished
+            WRITER.release()
 
         # release video capture
         cap.release()
@@ -277,6 +304,6 @@ def tracking_reid(
 
         # Report end of stream 
         print(f'STREAMING FINISHED · STREAM-TIME: {round(n_frames / fps, 1)} s · EXEC-TIME: {round(time() - start_time, 1)} s · URL {url}')
-                
-        # return post processing results
-        return post_processing_output
+    
+    # return post processing results
+    return post_processing_output

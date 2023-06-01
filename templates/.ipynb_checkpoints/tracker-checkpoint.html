@@ -196,15 +196,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 15px;
-/*       margin-top: 10px; */
+      height: 16px;
     }
 
     .spinner::after {
       content: "";
       display: inline-block;
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       border: 2px solid #ccc;
       border-top-color: #333;
@@ -227,7 +226,7 @@
     <h2>Object Identification</h2>
     
     <label for="urlInput">URL:</label>
-    <input type="text" id="urlInput" name="url" value="http://187.111.99.18:9004/?CODE=1643" required>
+    <input type="text" id="urlInput" name="url" required>
     
     <label for="objectsInput">List of objects:</label>
     <div class="textarea-container">
@@ -308,7 +307,7 @@
     let seconds
     let confidence
     let detector
-
+    
     // Function to populate the objects input field based on the selected model
     function populateAvailableObjects() {
       const detectorSelect = document.getElementById('detectorSelect');

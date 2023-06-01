@@ -6,7 +6,8 @@
     /* CSS styles */
     body {
       font-family: Arial, sans-serif;
-      padding: 15px;
+      padding: 0;
+      margin: 0;
       background-color: #f2f2f2;
     }
     
@@ -36,8 +37,7 @@
       background-color: #ffffff;
       padding: 20px;
       border-radius: 5px;
-      width: 50%;
-      margin: 0 auto;
+      width: 100%;
       box-sizing: border-box;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     }
@@ -112,6 +112,8 @@
       border-radius: 5px;
       display: none;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Modern shadow */
+      width: 100%;
+      box-sizing: border-box;
     }
     
     #videoPlayer h2 {
@@ -124,111 +126,119 @@
       margin-bottom: 10px;
     }
     
+    #videoPlayer video {
+      width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    
     #videoPlayer p {
-      font-size: 10px;
-      color: #777777;
-      margin: 0;
+      font-size: 14px;
+      margin-bottom: 10px;
     }
-      
-    #loadingIcon {
+    
+    #objectsTableContainer {
+      margin-top: 10px;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 5px;
       display: none;
-      margin-top: 20px;
-      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Modern shadow */
+      width: 100%;
+      box-sizing: border-box;
     }
-
-    .lds-spinner {
-      display: inline-block;
-      position: relative;
-      width: 64px;
-      height: 64px;
+    
+    #objectsTableContainer table {
+      width: 100%;
+      border-collapse: collapse;
     }
-
-    .lds-spinner div {
-      transform-origin: 32px 32px;
-      animation: lds-spinner 1.2s linear infinite;
+    
+    table th,
+    table td {
+      padding: 8px;
+      border: 1px solid #cccccc;
+      text-align: left;
     }
-
-    .lds-spinner div:after {
-      content: " ";
-      display: block;
-      position: absolute;
-      top: 3px;
-      left: 29px;
-      width: 5px;
-      height: 14px;
-      border-radius: 20%;
-      background: #fff;
+    
+    table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
     }
-
-    .lds-spinner div:nth-child(1) {
-      transform: rotate(0deg);
-      animation-delay: -1.1s;
-    }
-
-    .lds-spinner div:nth-child(2) {
-      transform: rotate(30deg);
-      animation-delay: -1s;
-    }
-
-    .lds-spinner div:nth-child(3) {
-      transform: rotate(60deg);
-      animation-delay: -0.9s;
-    }
-
-    .lds-spinner div:nth-child(4) {
-      transform: rotate(90deg);
-      animation-delay: -0.8s;
-    }
-
-    .lds-spinner div:nth-child(5) {
-      transform: rotate(120deg);
-      animation-delay: -0.7s;
-    }
-
-    .lds-spinner div:nth-child(6) {
-      transform: rotate(150deg);
-      animation-delay: -0.6s;
-    }
-
-    .lds-spinner div:nth-child(7) {
-      transform: rotate(180deg);
-      animation-delay: -0.5s;
-    }
-
-    .lds-spinner div:nth-child(8) {
-      transform: rotate(210deg);
-      animation-delay: -0.4s;
-    }
-
-    .lds-spinner div:nth-child(9) {
-      transform: rotate(240deg);
-      animation-delay: -0.3s;
-    }
-
-    .lds-spinner div:nth-child(10) {
-      transform: rotate(270deg);
-      animation-delay: -0.2s;
-    }
-
-    .lds-spinner div:nth-child(11) {
-      transform: rotate(300deg);
-      animation-delay: -0.1s;
-    }
-
-    .lds-spinner div:nth-child(12) {
-      transform: rotate(330deg);
-      animation-delay: 0s;
-    }
-
-    @keyframes lds-spinner {
-      0% {
-        opacity: 1;
+    
+    @media (max-width: 600px) {
+      /* Styles for smaller screens */
+      h1 {
+        font-size: 28px;
       }
-      100% {
-        opacity: 0;
+      
+      h2 {
+        font-size: 20px;
+      }
+      
+      h3 {
+        font-size: 16px;
+      }
+      
+      form {
+        padding: 10px;
+      }
+      
+      input[type="text"],
+      textarea {
+        font-size: 12px;
+      }
+      
+      .textarea-container textarea {
+        margin-right: 5px;
+      }
+      
+      button {
+        font-size: 12px;
+      }
+      
+      #videoPlayer {
+        padding: 10px;
+      }
+      
+      #videoPlayer p {
+        font-size: 12px;
+      }
+      
+      #objectsTableContainer {
+        padding: 10px;
+      }
+      
+      #objectsTableContainer th,
+      #objectsTableContainer td {
+        padding: 5px;
       }
     }
       
+    .spinner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 16px;
+      padding-bottom: 15px;
+    }
+
+    .spinner::after {
+      content: "";
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      border-top-color: #333;
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -239,7 +249,7 @@
     <h2>Object Identification</h2>
     
     <label for="urlInput">URL:</label>
-    <input type="text" id="urlInput" name="url" value="http://187.111.99.18:9004/?CODE=1643" required>
+    <input type="text" id="urlInput" name="url" required>
     
     <label for="objectsInput">List of objects:</label>
     <div class="textarea-container">
@@ -248,10 +258,10 @@
     </div>
           
     <label for="confidence">Confidence: (between 0.0 and 1.0)</label>
-    <input type="text" id="confidence" name="confidence" value="0.3" required>
+    <input type="text" id="confidence" name="confidence" value="0.35" required>
     
     <label for="secondsInput">Seconds:</label>
-    <input type="text" id="secondsInput" name="seconds" value="45" required>
+    <input type="text" id="secondsInput" name="seconds" value="60" required>
 
     <label for="detectorSelect">Detector:</label>
     <select id="detectorSelect" name="detector">
@@ -268,18 +278,22 @@
     <p style="font-size: 10px;">Note: Identified objects are being saved in real-time to the BigQuery database.</p>
   </div>
 
-  <h2>Identified Objects</h2>
-  <table id="objectsTable" clasas="loading">
-    <thead>
-      <tr>
-        <th>ID</th> <!-- Added ID field -->
-        <th>Object</th>
-        <th>Confidence</th>
-        <th>Timestamp</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div id="objectsTableContainer" style="display: none;">
+    <h2>Identified Objects</h2>
+    <table id="objectsTable">
+      <thead>
+        <tr>
+          <th>ID</th> <!-- Added ID field -->
+          <th>Object</th>
+          <th>Confidence</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <div id="spinner"></div>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
     
   <script>
 
@@ -288,9 +302,13 @@
     const host = window.location.host;
     let baseURL;
 
-    // Check if the host includes 'localhost'
+    // Check if the host a server 
     if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev')) {
       baseURL = `.`;
+    } 
+    // Check if the host the file system 
+    else if (host.includes('')) {
+      baseURL = `http://127.0.0.1:5000`;
     } 
     // If none of the conditions match, set the base URL to 'api.' followed by the host
     else {
@@ -306,14 +324,14 @@
     let intervalId;
     let inactivityTimeout;
     let inactiveTime = 75000;
-    let updateTime = 5000;
+    let updateTime = 10000;
     let isActive = false;
     let url = ''
     let objects
     let seconds
     let confidence
     let detector
-
+    
     // Function to populate the objects input field based on the selected model
     function populateAvailableObjects() {
       const detectorSelect = document.getElementById('detectorSelect');
@@ -332,69 +350,82 @@
       }
     }
       
-    // Function to fetch and update identified objects
     function fetchAndPopulateObjects(url) {
-  
-  // Add the loading class
-  const objectsTable = document.getElementById('objectsTable');
-  objectsTable.classList.add('loading');
-  
-  const objectsURL = `${baseURL}/objects?url=${encodeURIComponent(url)}&dt=${new Date().getTime()}`;
+      const spinner = document.getElementById("spinner");
+      spinner.classList.add("spinner");
+      const objectsURL = `${baseURL}/objects?url=${encodeURIComponent(
+        url
+      )}&dt=${new Date().getTime()}`;
       console.log("Fetching objects from:", objectsURL);
       fetch(objectsURL)
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => response.json())
+        .then((data) => {
           console.log("Received data:", data);
 
-          const existingRows = Array.from(document.querySelectorAll('#objectsTable tbody tr'));
-          const existingObjects = existingRows.map(row => row.getAttribute('id'));
+          const existingRows = Array.from(
+            document.querySelectorAll("#objectsTable tbody tr")
+          );
+          const existingObjects = existingRows.map((row) =>
+            row.getAttribute("id")
+          );
 
           // Filter new objects that are not already in the table
-          const newObjects = data.filter(item => !existingObjects.includes(item.id));
+          const newObjects = data.filter(
+            (item) => !existingObjects.includes(item.id)
+          );
 
           // Create and prepend rows for new objects
           const fragment = document.createDocumentFragment();
-          newObjects.forEach(item => {
-            const row = document.createElement('tr');
-            const objectIdCell = document.createElement('td');
-            const objectCell = document.createElement('td');
-            const confidenceCell = document.createElement('td');
-            const timestampCell = document.createElement('td');
+          newObjects.forEach((item) => {
+            const row = document.createElement("tr");
+            const objectIdCell = document.createElement("td");
+            const objectCell = document.createElement("td");
+            const confidenceCell = document.createElement("td");
+            const timestampCell = document.createElement("td");
 
             objectIdCell.textContent = item.id; // Object identity field
             objectCell.textContent = item.class_name;
-            confidenceCell.textContent = (item.confidence * 100).toFixed(0) + "%";
-            timestampCell.textContent = new Date(item.timestamp).toLocaleString(); // Convert timestamp to localized date and time string
+            confidenceCell.textContent =
+              (item.confidence * 100).toFixed(0) + "%";
+            timestampCell.textContent = new Date(
+              item.timestamp
+            ).toLocaleString(); // Convert timestamp to localized date and time string
 
-            row.setAttribute('id', item.id);
+            row.setAttribute("id", item.id);
             row.appendChild(objectIdCell);
             row.appendChild(objectCell);
             row.appendChild(confidenceCell);
             row.appendChild(timestampCell);
 
             fragment.appendChild(row);
+
+            // Highlight the new row
+            // row.style.backgroundColor = "#ffff99";
           });
 
           // Remove rows for objects that are no longer present
-          existingRows.forEach(row => {
-            const objectId = row.getAttribute('id');
-            if (!data.find(item => item.id === objectId)) {
+          existingRows.forEach((row) => {
+            const objectId = row.getAttribute("id");
+            if (!data.find((item) => item.id === objectId)) {
               row.remove();
+            // } else {
+              // // remove highlight for existing row
+              // row.style.backgroundColor = null;                
             }
           });
 
           // Prepend new rows to the table
-          const tableBody = document.querySelector('#objectsTable tbody');
+          const tableBody = document.querySelector("#objectsTable tbody");
           tableBody.prepend(fragment);
-          
-          // Remove the loading class
-          objectsTable.classList.remove('loading');
+
+          // Remove spinner class
+          spinner.classList.remove("spinner");
         })
-        .catch(error => {
-          console.error('Error fetching identified objects:', error);
-          
-          // Remove the loading class in case of error
-          objectsTable.classList.remove('loading');
+        .catch((error) => {
+          console.error("Error fetching identified objects:", error);
+
+          // Remove spinner class
+          spinner.classList.remove("spinner");
         });
     }
 
@@ -453,9 +484,8 @@
            const response = await fetch(url);
            console.log('Data fetched successfully.');
 
-           console.log('Parsing response...');
            const data = await response.json();
-           console.log('Response parsed.');
+           console.log('Data successfully.');
 
            // Handle the received data
            console.log('Response:', data);
@@ -465,7 +495,7 @@
          }
        }
 
-      // Request object identificataion posting in parallel
+      // Request object identificataion posting asyncronously
       console.log('Starting data fetch...');
       fetchData(trackPostURL);
 
@@ -478,6 +508,10 @@
       const videoPlayer = document.getElementById('videoPlayer');
       videoPlayer.style.display = 'block';
 
+      // Toggle the display of the objectsTableContainer based on the isActive state
+      const objectsTableContainer = document.getElementById('objectsTableContainer');
+      objectsTableContainer.style.display =  'block';
+
       // Add event listeners for user inactivity
       isActive = false;
       onUserActive();
@@ -485,6 +519,7 @@
       window.addEventListener('scroll', onUserActive);
       document.addEventListener('mousemove', onUserActive);
       document.addEventListener('keypress', onUserActive);
+        
     }
 
     // Add event listener for form submission

@@ -29,9 +29,6 @@ object_detection_models = {
     ),
 }
 
-# initialize DeepSORT real-time tracker
-deepsort = DeepSort(max_age=3)
-
 def tracking_reid(
     url,
     model='yolo',
@@ -51,21 +48,24 @@ def tracking_reid(
     fps=3,
     max_retries=5,
     resize_shape=(300, 300),
+    stream_shape=(),
 ):
     
     # initialize detection model instance
     if model == 'yolo':
         model = object_detection_models[model]
     elif model == 'mediapipe':
-        print('INITIALIZING MEDIAPIPE DETECTOR...')
+        t = time()
         model = MediapipeDetector(
             model_asset_path='models/mediapipe/efficientdet_lite0.tflite',
             score_threshold=confidence_threshold,
             category_allowlist=allowed_objects,
             max_results=None,
-        )
-        print('MEDIAPIPE DETECTOR LOADED')
-        
+        ); print(f'MEDIAPIPE DETECTOR LOADED · {time() - t} s')
+
+    # initialize DeepSORT real-time tracker
+    deepsort = DeepSort(max_age=3)
+
     # Get class names from model
     # class_names = model.class_names
     
@@ -161,6 +161,7 @@ def tracking_reid(
 
                 if resize_shape is not None:
                     # Resize the image using the specified width and height
+                    original_frame = frame.copy()
                     frame = cv2.resize(frame, resize_shape, interpolation=cv2.INTER_AREA)
                 
                 # formatted yolo detections
@@ -268,11 +269,12 @@ def tracking_reid(
 
             # ANNOTATE FRAME WITH DETECTION OUTPUTS
             if frame_annotator is not None:
-                frame = frame_annotator(frame, inference, time_info)
+                annotator_input_frame = frame if resize_shape is None else original_frame
+                frame = frame_annotator(annotator_input_frame, inference, time_info, resize_shape)
 
-            # Resize the image using the specified width and height
-            if resize_shape is not None:
-                frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
+            # # Resize the image using the specified width and height
+            # if resize_shape is not None:
+            #     frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
 
             # WRITE FRAME TO VIDEO FILE
             if to_url is not None:

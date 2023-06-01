@@ -29,9 +29,6 @@ object_detection_models = {
     ),
 }
 
-# initialize DeepSORT real-time tracker
-deepsort = DeepSort(max_age=3)
-
 def tracking_reid(
     url,
     model='yolo',
@@ -51,21 +48,24 @@ def tracking_reid(
     fps=3,
     max_retries=5,
     resize_shape=(300, 300),
+    stream_shape=(),
 ):
     
     # initialize detection model instance
     if model == 'yolo':
         model = object_detection_models[model]
     elif model == 'mediapipe':
-        print('INITIALIZING MEDIAPIPE DETECTOR...')
+        t = time()
         model = MediapipeDetector(
             model_asset_path='models/mediapipe/efficientdet_lite0.tflite',
             score_threshold=confidence_threshold,
             category_allowlist=allowed_objects,
             max_results=None,
-        )
-        print('MEDIAPIPE DETECTOR LOADED')
-        
+        ); print(f'MEDIAPIPE DETECTOR LOADED · {time() - t} s')
+
+    # initialize DeepSORT real-time tracker
+    deepsort = DeepSort(max_age=3)
+
     # Get class names from model
     # class_names = model.class_names
     

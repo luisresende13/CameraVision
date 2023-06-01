@@ -2,45 +2,52 @@
 <html>
 <head>
   <title>Camera Vision - OctaCity</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     /* CSS styles */
-    body {
-      font-family: Arial, sans-serif;
-      padding: 15px;
-      background-color: #f2f2f2;
-    }
-    
-    h1, h2, h3 {
-      color: #333333;
-      text-align: center;
-    }
-    
-    h1 {
-      margin-top: 0;
-      font-size: 36px;
-      margin-bottom: 20px;
-    }
-    
-    h2 {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    
-    h3 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    
-    form {
-      margin-bottom: 20px;
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 5px;
-      width: 50%;
-      margin: 0 auto;
-      box-sizing: border-box;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    }
+  body {
+    font-family: Arial, sans-serif;
+    padding: 0;
+    padding-top: 15px;
+    margin: 0;
+    background-color: #f2f2f2;
+  }
+
+  h1, h2, h3 {
+    color: #333333;
+    text-align: center;
+  }
+
+  h1 {
+    margin-top: 0;
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  form {
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    width: 50%;
+    height: 100vh; /* Set the height to 100% of the viewport height */
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0 auto; /* Center align the form */
+  }
     
     label {
       display: block;
@@ -50,7 +57,8 @@
     input[type="text"],
     textarea {
       width: 100%;
-      min-width: 210px;
+      min-width: 200px;
+/*       max-height: 130px; */
       padding: 10px;
       margin-bottom: 15px;
       font-size: 14px;
@@ -72,18 +80,25 @@
     .textarea-container {
       display: flex;
       flex-direction: row;
+      max-height: 150px;
       margin-bottom: 15px;
     }
-    
+
     .textarea-container textarea {
       flex-grow: 1;
       margin-right: 10px;
     }
-    
+
     .textarea-container p {
       font-size: 12px;
       color: #777777;
       margin: 0;
+    }
+
+    #availableObjects {
+      float: right;
+/*       max-height: 120px; */
+      overflow-y: auto;
     }
     
     label,
@@ -105,6 +120,12 @@
       background-color: #45A049; /* Darker shade on hover */
     }
     
+/*     #videoContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+ */
     #videoPlayer {
       margin-top: 10px;
       background-color: #ffffff;
@@ -112,8 +133,9 @@
       border-radius: 5px;
       display: none;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Modern shadow */
+      box-sizing: border-box;
     }
-    
+      
     #videoPlayer h2 {
       margin-top: 0;
     }
@@ -124,79 +146,126 @@
       margin-bottom: 10px;
     }
     
-    #videoPlayer p {
-      font-size: 10px;
-      color: #777777;
-      margin: 0;
+    #videoPlayer video {
+      width: 100%;
+      height: auto;
+      margin-bottom: 10px;
     }
     
-/*     @media (min-width: 600px) {
-      form {
-        max-width: 60%;
-        margin: 0 auto;
-      }
+    #videoPlayer p {
+      font-size: 14px;
+      margin-bottom: 10px;
     }
-     */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    th, td {
-        padding: 8px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
-
-    th {
-        background-color: #f2f2f2;
-    }
-
-    tr:hover {
-        background-color: #f5f5f5;
-    }
-
-  /* Additional styles for responsiveness */
-  @media (max-width: 1100px) {
-    form {
-      min-width: 100%;
-      max-height: 20%;
-      margin: 0 auto;
-    }    
-    input[type="text"],
-    textarea {
-      width: 100%;
-      min-width: 400px;
-    }
-  }
-  /* Additional styles for responsiveness */
-  @media (max-width: 600px) {
-    table {
-      font-size: 12px;
-    }
-
-    th, td {
-      padding: 5px;
-    }
-
-    th {
+    
+    #objectsTableContainer {
+      margin-top: 10px;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 5px;
       display: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Modern shadow */
+      width: 100%;
+      box-sizing: border-box;
     }
-
-    td:before {
-      content: attr(data-label);
-      display: inline-block;
+    
+    #objectsTableContainer table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    table th,
+    table td {
+      padding: 8px;
+      border: 1px solid #cccccc;
+      text-align: left;
+    }
+    
+    table th {
+      background-color: #f2f2f2;
       font-weight: bold;
-      margin-right: 5px;
     }
-  }
 
+
+    @media (max-width: 1100px) {
+      /* Styles for smaller screens */
+      body {
+        padding-top: 10px;
+      }
+        
+      h1 {
+        font-size: 32px;
+        margin-bottom: 12px;
+      }
+
+      h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+
+      form {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 30px;
+      }
+
+      input[type="text"],
+      textarea {
+        font-size: 16px;
+        padding: 10px;
+        margin-bottom: 15px;
+      }
+
+      select {
+        font-size: 16px;
+        padding: 10px;
+        margin-bottom: 15px;
+      }
+
+      .textarea-container textarea {
+        margin-right: 8px;
+      }
+
+      .textarea-container p {
+        font-size: 14px;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 8px 16px;
+      }
+
+      #videoPlayer {
+        padding: 15px;
+        margin-top: 10px;
+      }
+
+      #videoPlayer p {
+        font-size: 14px;
+      }
+
+      #objectsTableContainer {
+        padding: 15px;
+        margin-top: 10px;
+      }
+
+      #objectsTableContainer th,
+      #objectsTableContainer td {
+        padding: 8px;
+      }
+
+    }
+   
     .spinner {
       display: flex;
       align-items: center;
       justify-content: center;
       height: 16px;
+      padding-bottom: 15px;
     }
 
     .spinner::after {
@@ -249,18 +318,20 @@
     <button type="submit">Start</button>
   </form>
     
+<!-- <div id="videoContainer"> -->
   <div id='videoPlayer' style="display: none;">
     <h2>Live Stream</h2>
     <img id="resultImage" src="" alt="Result Image">
     <p style="font-size: 10px;">Note: Identified objects are being saved in real-time to the BigQuery database.</p>
   </div>
+<!-- </div> -->
 
   <div id="objectsTableContainer" style="display: none;">
     <h2>Identified Objects</h2>
     <table id="objectsTable">
       <thead>
         <tr>
-          <th>ID</th> <!-- Added ID field -->
+          <th>ID</th>
           <th>Object</th>
           <th>Confidence</th>
           <th>Timestamp</th>

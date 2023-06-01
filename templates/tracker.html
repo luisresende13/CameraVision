@@ -283,7 +283,7 @@
       baseURL = `.`;
     } 
     // Check if the host the file system 
-    else if (host.includes('')) {
+    else if (host == '') {
       baseURL = `http://127.0.0.1:5000`;
     } 
     // If none of the conditions match, set the base URL to 'api.' followed by the host

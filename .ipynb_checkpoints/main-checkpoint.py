@@ -204,22 +204,23 @@ def hello_world():
 
 
 @app.get("/tracker")
+@app.get("/tracker/v2")
 @app.doc(tags=['Web Apps'])
-def camera_detector():
-    """
-    Object Identification Web App 
-    Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
-    """
-    return render_template('tracker.html')    
-
-@app.get("/tracker/phone")
-@app.doc(tags=['Web Apps'])
-def camera_detector():
+def camera_tracker():
     """
     Object Identification Web App 
     Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
     """
     return render_template('tracker-mobile.html')    
+
+@app.get("/tracker/v1")
+@app.doc(tags=['Web Apps'])
+def camera_tracker_mobile():
+    """
+    Object Identification Web App 
+    Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
+    """
+    return render_template('tracker.html')    
 
 
 @app.get("/upload_video")

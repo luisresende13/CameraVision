@@ -2,45 +2,51 @@
 <html>
 <head>
   <title>Camera Vision - OctaCity</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     /* CSS styles */
-    body {
-      font-family: Arial, sans-serif;
-      padding: 0;
-      margin: 0;
-      background-color: #f2f2f2;
-    }
-    
-    h1, h2, h3 {
-      color: #333333;
-      text-align: center;
-    }
-    
-    h1 {
-      margin-top: 0;
-      font-size: 36px;
-      margin-bottom: 20px;
-    }
-    
-    h2 {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    
-    h3 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    
-    form {
-      margin-bottom: 20px;
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 5px;
-      width: 100%;
-      box-sizing: border-box;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    }
+  body {
+    font-family: Arial, sans-serif;
+    padding: 0;
+    margin: 0;
+    background-color: #f2f2f2;
+  }
+
+  h1, h2, h3 {
+    color: #333333;
+    text-align: center;
+  }
+
+  h1 {
+    margin-top: 0;
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  form {
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    width: 50%;
+    height: 100vh; /* Set the height to 100% of the viewport height */
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0 auto; /* Center align the form */
+  }
     
     label {
       display: block;
@@ -50,7 +56,8 @@
     input[type="text"],
     textarea {
       width: 100%;
-      min-width: 210px;
+      min-width: 200px;
+/*       max-height: 130px; */
       padding: 10px;
       margin-bottom: 15px;
       font-size: 14px;
@@ -72,18 +79,25 @@
     .textarea-container {
       display: flex;
       flex-direction: row;
+      max-height: 150px;
       margin-bottom: 15px;
     }
-    
+
     .textarea-container textarea {
       flex-grow: 1;
       margin-right: 10px;
     }
-    
+
     .textarea-container p {
       font-size: 12px;
       color: #777777;
       margin: 0;
+    }
+
+    #availableObjects {
+      float: right;
+/*       max-height: 120px; */
+      overflow-y: auto;
     }
     
     label,
@@ -105,6 +119,12 @@
       background-color: #45A049; /* Darker shade on hover */
     }
     
+/*     #videoContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+ */
     #videoPlayer {
       margin-top: 10px;
       background-color: #ffffff;
@@ -112,10 +132,9 @@
       border-radius: 5px;
       display: none;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Modern shadow */
-      width: 100%;
       box-sizing: border-box;
     }
-    
+      
     #videoPlayer h2 {
       margin-top: 0;
     }
@@ -164,56 +183,78 @@
       background-color: #f2f2f2;
       font-weight: bold;
     }
-    
-    @media (max-width: 600px) {
+
+
+    @media (max-width: 1100px) {
       /* Styles for smaller screens */
       h1 {
-        font-size: 28px;
+        font-size: 32px;
+        margin-bottom: 12px;
       }
-      
+
       h2 {
-        font-size: 20px;
+        font-size: 24px;
+        margin-bottom: 10px;
       }
-      
+
       h3 {
-        font-size: 16px;
+        font-size: 20px;
+        margin-bottom: 10px;
       }
-      
+
       form {
-        padding: 10px;
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 30px;
       }
-      
+
       input[type="text"],
       textarea {
-        font-size: 12px;
+        font-size: 16px;
+        padding: 10px;
+        margin-bottom: 15px;
       }
-      
+
+      select {
+        font-size: 16px;
+        padding: 10px;
+        margin-bottom: 15px;
+      }
+
       .textarea-container textarea {
-        margin-right: 5px;
+        margin-right: 8px;
       }
-      
+
+      .textarea-container p {
+        font-size: 14px;
+      }
+
       button {
-        font-size: 12px;
+        font-size: 16px;
+        padding: 8px 16px;
       }
-      
+
       #videoPlayer {
-        padding: 10px;
+        padding: 15px;
+        margin-top: 10px;
       }
-      
+
       #videoPlayer p {
-        font-size: 12px;
+        font-size: 14px;
       }
-      
+
       #objectsTableContainer {
-        padding: 10px;
+        padding: 15px;
+        margin-top: 10px;
       }
-      
+
       #objectsTableContainer th,
       #objectsTableContainer td {
-        padding: 5px;
+        padding: 8px;
       }
+
     }
-      
+   
     .spinner {
       display: flex;
       align-items: center;
@@ -272,26 +313,27 @@
     <button type="submit">Start</button>
   </form>
     
+<!-- <div id="videoContainer"> -->
   <div id='videoPlayer' style="display: none;">
     <h2>Live Stream</h2>
     <img id="resultImage" src="" alt="Result Image">
     <p style="font-size: 10px;">Note: Identified objects are being saved in real-time to the BigQuery database.</p>
   </div>
+<!-- </div> -->
 
   <div id="objectsTableContainer" style="display: none;">
     <h2>Identified Objects</h2>
     <table id="objectsTable">
       <thead>
         <tr>
-          <th>ID</th> <!-- Added ID field -->
+          <th>ID</th>
           <th>Object</th>
           <th>Confidence</th>
           <th>Timestamp</th>
         </tr>
       </thead>
       <div id="spinner"></div>
-      <tbody>
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
     
@@ -307,7 +349,7 @@
       baseURL = `.`;
     } 
     // Check if the host the file system 
-    else if (host.includes('')) {
+    else if (host == '') {
       baseURL = `http://127.0.0.1:5000`;
     } 
     // If none of the conditions match, set the base URL to 'api.' followed by the host

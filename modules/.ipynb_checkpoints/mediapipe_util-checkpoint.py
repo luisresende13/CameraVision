@@ -45,6 +45,7 @@ class MediapipeDetector:
         for detection in detection_result.detections:
             ctgr = detection.categories[0]
             class_name = ctgr.category_name
+            class_id = class_ids[class_name]
             confidence = ctgr.score
             bbox = detection.bounding_box
 
@@ -52,7 +53,7 @@ class MediapipeDetector:
             width, height = bbox.width, bbox.height
             x_max, y_max = x_min + width, y_min + height
             bbox = [x_min, y_min, x_max, y_max]
-            detections.append([class_name, confidence, bbox])
+            detections.append([class_id, class_name, confidence, bbox])
 
         return detections
         

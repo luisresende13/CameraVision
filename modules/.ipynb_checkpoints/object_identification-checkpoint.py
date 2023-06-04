@@ -4,7 +4,7 @@ import pandas as pd
 from IPython.display import clear_output as co
 from ultralytics import YOLO
 import cv2
-from deep_sort_realtime.deepsort_tracker import DeepSort
+# from deep_sort_realtime.deepsort_tracker import DeepSort
 import asyncio
 import datetime
 from time import time
@@ -17,7 +17,9 @@ brazil_tz = pytz.timezone('America/Sao_Paulo')
 
 from modules.video_processing import Video
 from modules.yolo_util import YoloWrap
-from modules.mediapipe_util import MediapipeDetector
+from modules.mediapipe_util import MediapipeDetector, class_names as mediapipe_class_names
+from modules.deepsort_util import DeepSortWrap
+from modules.motracker_util import CentroidTrackerWrap
 
 object_detection_models = {
     'yolo': YoloWrap("yolov8n.pt"),
@@ -54,6 +56,7 @@ def tracking_reid(
     # initialize detection model instance
     if model == 'yolo':
         model = object_detection_models[model]
+        class_names = model.class_names
     elif model == 'mediapipe':
         t = time()
         model = MediapipeDetector(
@@ -62,10 +65,12 @@ def tracking_reid(
             category_allowlist=allowed_objects,
             max_results=None,
         ); print(f'MEDIAPIPE DETECTOR LOADED · {time() - t} s')
+        class_names = mediapipe_class_names
 
     # initialize DeepSORT real-time tracker
-    deepsort = DeepSort(max_age=3)
-
+    max_age = 3
+    tracker = DeepSortWrap(max_age, confidence_threshold, allowed_objects)
+    # tracker = CentroidTrackerWrap(class_names=class_names)
     # Get class names from model
     # class_names = model.class_names
     
@@ -96,9 +101,6 @@ def tracking_reid(
     # error handler for stream loop
     try:
         
-        # initialize set for track ids 
-        unique_track_ids = set()
-
         # initialize post processing output list
         post_processing_output = []
 
@@ -167,86 +169,15 @@ def tracking_reid(
                 # formatted yolo detections
                 detections = model.detect(frame)
 
-                # initialize list for tracker input
-                tracker_input = []
-
-                # set up tracker input from detections
-                for det in detections:
-
-                    # get detected object attributes
-                    class_name, confidence, bbox = det
-
-                    # filter out weak detections by ensuring the 
-                    # confidence is greater than the minimum confidence
-                    if float(confidence) < confidence_threshold:
-                        continue
-
-                    # filter out unwanted objects  
-                    if allowed_objects is not None and class_name not in allowed_objects:
-                        continue
-
-                    # if the confidence is greater than the minimum confidence,
-                    # get the bounding box and the class id
-                    xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
-
-                    # add the bounding box (x, y, w, h), confidence and class id to the results list
-                    tracker_input.append([[xmin, ymin, xmax - xmin, ymax - ymin], confidence, class_name])
-
                 ######################################
                 # RUN TRACKING
 
                 # update the tracker with the new detections
-                tracks = deepsort.update_tracks(tracker_input, frame=frame)
+                tracking, new_objects = tracker.update_tracks(frame, detections, start)
 
-                # initialize list for formatted tracker output
-                tracking = []
 
-                # list tracking result
-                for track in tracks:
-
-                    # if the track is not confirmed, ignore it
-                    if not track.is_confirmed():
-                        continue
-
-                    # get attributes of tracked object
-                    track_id = track.track_id
-                    class_name = track.det_class
-                    confidence = track.det_conf
-                    bbox = track.to_ltrb()
-
-                    # append attributes of tracked objects
-                    tracking.append([track_id, class_name, confidence, bbox])
-
-                ######################################
-                # GET NEW IDENTIFIED OBJECTS
-
-                # initialize list for newly detected objects
-                new_objects = []
-
-                # loop over the formatted tracks and get newly identified objects
-                for track in tracking:
-
-                    # get track attributes
-                    track_id, class_name, confidence, bbox = track
-
-                    # check if track ID is unique
-                    if track_id not in unique_track_ids:
-
-                        # prepare record of newly identified object
-                        record = {
-                            # 'class_label': class_label,
-                            'class_name': class_name,
-                            'confidence': confidence,
-                            'timestamp': start,
-                            'track_id': track_id,
-                            'bbox': list(bbox),
-                        }
-
-                        # append record to list of new objects
-                        new_objects.append(record)
-
-                        # add the tracked object ID to the set of unique track IDs
-                        unique_track_ids.add(track_id)
+                # add the tracked object ID to the set of unique track IDs
+                unique_track_ids = tracker.unique_track_ids
 
             ######################################
             # PROCESS RESULT

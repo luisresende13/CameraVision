@@ -192,16 +192,12 @@ app.config['TAGS'] = [{
 
 # REQUEST AND RESPONSE SCHEMAS
 
-class inputIn(Schema):
-    test = String()
+@app.get("/init")
+def initialize():
+    name = os.environ.get("NAME", "unamed")
+    return f'Server `{name}` is running!'
 
 # WEB APPS
-
-@app.get("/")
-def hello_world():
-    name = os.environ.get("NAME", "World")
-    return "Hello {}!".format(name)
-
 
 @app.get("/tracker")
 @app.get("/tracker/v2")

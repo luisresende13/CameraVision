@@ -46,6 +46,6 @@ class YoloWrap:
             bbox = [xmin, ymin, xmax, ymax]
 
             # Add standard format detections
-            formatted_detection.append([class_name, confidence, bbox])
+            formatted_detection.append([class_id, class_name, confidence, bbox])
 
         return formatted_detection

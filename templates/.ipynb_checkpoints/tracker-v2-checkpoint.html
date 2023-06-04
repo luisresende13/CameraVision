@@ -379,6 +379,7 @@
     let confidence
     let detector
     
+
     // Function to populate the objects input field based on the selected model
     function populateAvailableObjects() {
       const detectorSelect = document.getElementById('detectorSelect');
@@ -399,10 +400,12 @@
       
     function fetchAndPopulateObjects(url) {
       const spinner = document.getElementById("spinner");
+      if (spinner.classList.contains("spinner")) {
+          console.log("Fetching objects is still running. Skipped.")
+          return
+      }
       spinner.classList.add("spinner");
-      const objectsURL = `${baseURL}/objects?url=${encodeURIComponent(
-        url
-      )}&dt=${new Date().getTime()}`;
+      const objectsURL = `${baseURL}/objects?url=${encodeURIComponent(url)}&dt=${new Date().getTime()}`;
       console.log("Fetching objects from:", objectsURL);
       fetch(objectsURL)
         .then((response) => response.json())
@@ -545,7 +548,7 @@
       // Request object identificataion posting asyncronously
       console.log('Starting data fetch...');
       fetchData(trackPostURL);
-
+        
 
       // Update the image source
       const img = document.getElementById('resultImage');
@@ -569,6 +572,21 @@
         
     }
 
+  // Function to send a request to initialize the server
+  function initializeServer() {
+    fetch(`${baseURL}/init`)
+      .then((response) => {
+        if (response.ok) {
+          console.log("Server initialized successfully");
+        } else {
+          console.error("Failed to initialize server");
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to initialize server:", error);
+      });
+  }
+
     // Add event listener for form submission
     const form = document.getElementById('queryForm');
     form.addEventListener('submit', handleFormSubmit);
@@ -577,6 +595,9 @@
     const detectorSelect = document.getElementById('detectorSelect');
     detectorSelect.addEventListener('change', populateAvailableObjects);
 
+    // Call the initializeServer function when the page loads
+    window.addEventListener("load", initializeServer);
+      
   </script>
 </body>
 </html>

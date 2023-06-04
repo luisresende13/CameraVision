@@ -156,6 +156,7 @@ app = APIFlask(__name__); CORS(app)
 @app.after_request
 def apply_caching(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
 app.config['SERVERS'] = [{'name': 'Google Cloud Run Server', 'url': f'{baseurl}/'}]
@@ -196,6 +197,116 @@ app.config['TAGS'] = [{
 def initialize():
     name = os.environ.get("NAME", "unamed")
     return f'Server `{name}` is running!'
+
+
+# User login and signup
+
+class LoginIn(Schema):
+    email = String(requird=True)
+    password = String(requird=True)
+    
+@app.post('/login')
+@app.input(LoginIn)
+@app.doc(tags=['Web Apps'])
+def login(data):
+    email = data['email']
+    password = data['password']
+
+    if not email or not password:
+        return jsonify({'error': 'Invalid email or password'}), 400
+
+    # Check if the user exists in the BigQuery database
+    query = f"SELECT * FROM `octacity.video_analytics.users` WHERE email='{email}'"
+    query_job = bqclient.query(query)
+    rows = query_job.result()
+    
+    # Validate the password
+    is_empty = True
+    for row in rows:
+        is_empty = False
+        if row['password'] != password:
+            return jsonify({'error': 'Invalid password'}), 401
+        
+    # Validate the username
+    if is_empty:
+        return jsonify({'error': 'User not found'}), 404
+
+    # Login successful
+    return jsonify({'message': 'Login successful'})
+
+class SignUpIn(Schema):
+    email = String(required=True)
+    password = String(required=True)
+
+@app.post('/signup')
+@app.input(SignUpIn)
+@app.doc(tags=['Web Apps'])
+def signup(data):
+    email = data['email']
+    password = data['password']
+
+    if not email or not password:
+        return jsonify({'error': 'Invalid email or password'}), 400
+
+    # Check if the user exists in the BigQuery database
+    query = f"SELECT * FROM `octacity.video_analytics.users` WHERE email='{email}'"
+    query_job = bqclient.query(query)
+    rows = query_job.result()
+
+    for row in rows:
+        return jsonify({'error': 'User already exists'}), 409
+
+    # Create a new user in the BigQuery database
+    query = f"INSERT INTO `octacity.video_analytics.users` (email, password) VALUES ('{email}', '{password}')"
+    query_job = bqclient.query(query)
+    query_job.result()
+
+    # Sign-up successful
+    return jsonify({'message': 'Sign up successful'})
+
+
+# Define the forgot-password endpoint
+@app.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    email = request.json.get('email')
+
+    # Perform additional validation if needed
+
+    # Query the BigQuery database to check if the email exists
+    query = f"SELECT COUNT(*) as count FROM `octacity.video_analytics.users` WHERE email = '{email}'"
+    query_job = bqclient.query(query)
+    result = query_job.result()
+
+    # Get the count value from the result
+    count = next(result).get('count')
+
+    if count == 0:
+        return jsonify(message='Email does not exist'), 404
+
+    # If the email exists, send a password reset link to the user's email
+    send_password_reset_email(email)
+
+    # Return a success message
+    return jsonify(message='Password reset link sent to your email'), 200
+
+from flask_mail import Mail, Message
+
+app.config['MAIL_SERVER'] = 'your_mail_server'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'your_username'
+app.config['MAIL_PASSWORD'] = 'your_password'
+
+mail = Mail(app)
+
+# Helper function to send the password reset email
+def send_password_reset_email(email):
+    # Replace this with your email sending code
+    # Example: send an email with a password reset link to the provided email address
+    # You can use libraries like Flask-Mail or third-party email services
+    msg = Message('Password Reset', sender='luisresende@id.uff.br', recipients=[email])
+    msg.body = "Please click on the following link to reset your password: <reset_link>"
+    mail.send(msg)
 
 # WEB APPS
 

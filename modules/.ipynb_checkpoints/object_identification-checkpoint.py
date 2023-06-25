@@ -2,7 +2,7 @@
 
 import pandas as pd
 from IPython.display import clear_output as co
-from ultralytics import YOLO
+# from ultralytics import YOLO
 import cv2
 # from deep_sort_realtime.deepsort_tracker import DeepSort
 import asyncio
@@ -22,18 +22,19 @@ from modules.deepsort_util import DeepSortWrap
 from modules.motracker_util import CentroidTrackerWrap
 
 object_detection_models = {
-    'yolo': YoloWrap("yolov8n.pt"),
-    'mediapipe': MediapipeDetector(
-        model_asset_path='models/mediapipe/efficientdet_lite0.tflite',
-        score_threshold=0.99,
-        category_allowlist=['apple'],
-        max_results=None,
-    ),
+    'yolo': YoloWrap("models/yolo/yolov8n.pt"),
+    # 'mediapipe': MediapipeDetector(
+    #     model_asset_path='models/mediapipe/efficientdet_lite0.tflite',
+    #     score_threshold=0.99,
+    #     category_allowlist=['apple'],
+    #     max_results=None,
+    # ),
 }
 
 def tracking_reid(
     url,
     model='yolo',
+    tracker='deepsort',
     confidence_threshold=0.3,
     allowed_objects=None,
     proccess_each=1,
@@ -42,7 +43,7 @@ def tracking_reid(
     post_processing_args={},
     frame_annotator=None,
     generator=False,
-    to_url=None, # save video or annotaded video to file path `to_url`
+    to_url=None, #  file path to save optionally annotaded video
     max_frames=None,
     secs=10,
     exec_secs=None,
@@ -66,11 +67,16 @@ def tracking_reid(
             max_results=None,
         ); print(f'MEDIAPIPE DETECTOR LOADED · {time() - t} s')
         class_names = mediapipe_class_names
+    else:
+        model = YoloWrap(model)
 
     # initialize DeepSORT real-time tracker
     max_age = 3
-    tracker = DeepSortWrap(max_age, confidence_threshold, allowed_objects)
-    # tracker = CentroidTrackerWrap(class_names=class_names)
+    if tracker == 'deepsort':
+        tracker = DeepSortWrap(max_age, confidence_threshold, allowed_objects)
+    elif tracker == 'centroid':
+        tracker = CentroidTrackerWrap(class_names=class_names)
+    
     # Get class names from model
     # class_names = model.class_names
     

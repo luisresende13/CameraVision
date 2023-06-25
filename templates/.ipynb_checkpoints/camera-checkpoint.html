@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+/*       height: 100vh; */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: #f3f3f3;
+    }
+    
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    #user-button {
+      background-color: #fff;
+      color: #333;
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color 0.3s ease;
+    }
+
+    #user-button:hover {
+      background-color: #ddd;
+    }
+    
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      flex: 1;
+      margin: 0 auto;
+      min-width: 100%;
+      overflow-y: auto;
+/*       min-height: 100%; */
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .container > div {
+      flex: 1;
+      min-width: 300px;
+      padding: 20px;
+      text-align: center;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      transition: background-color 0.3s ease;
+    }
+    
+    .container > div:not(:last-child) {
+      border-right: none;
+    }
+
+    .container > div:hover {
+      background-color: #f6f6f6;
+    }
+    
+    .scrollable-list-cams {
+      max-height: 40vh;
+      overflow-y: auto;
+      padding: 0;
+      margin: 0;
+    }
+
+    .scrollable-list-objects {
+      max-height: 15vh;
+      overflow-y: auto;
+      padding: 0;
+      margin: 0;
+    }
+
+    .scrollable-list-events {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding: 0;
+      margin: 0;
+    }
+
+    .checkbox-list li {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+          
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #333;
+      border-radius: 3px;
+      margin-right: 5px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"]:checked {
+      background-color: #333;
+    }
+    
+    .checkbox-list label {
+      display: flex;
+      align-items: center;
+      margin-left: 5px;
+      color: #333;
+    }
+     
+    .checkbox-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+      
+    .mark-all {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .mark-all input[type="checkbox"] {
+      margin-right: 5px;
+    }
+
+    .mark-all label {
+      color: #333;
+    }
+      
+    video {
+      max-width: 100%;
+      max-height: 400px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    @media (max-width: 1100px) {
+      .container > div {
+        flex: 1 1 100%;
+        min-width: 100%;
+        border-right: none;
+        margin-bottom: 10px;
+        padding: 20px;
+      }
+      
+      video {
+        max-height: 300px;
+      }
+    }
+    
+    @media (min-width: 1100px) {
+      .container > div:nth-child(2) {
+        flex: 2; /* Adjust the flex value for the middle section */
+      }
+      
+      video {
+        max-height: 600px;
+      }
+    }
+    
+    #camera-form {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      max-height: 100px;
+      margin: 20px 0;
+    }
+    
+    #camera-url {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+    }
+    
+    #camera-form button[type="submit"] {
+      margin-top: 10px;
+    }
+
+    /* Changes for Cameras Cadastradas section */
+    .camera-section {
+      background-color: #fff;
+      padding: 20px;
+/*       border-radius: 8px; */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .camera-section h2 {
+      color: #333;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .camera-list {
+      margin-top: 20px;
+      padding: 0 20px;
+    }
+
+    /* Additional styles for selectable camera list */
+    .camera-list li {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .camera-list li.selected {
+      background-color: #ddd;
+    }
+
+    /* Changes for Event List */
+    .event-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .event-list li {
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #f6f6f6;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .event-list li:hover {
+      background-color: #e9e9e9;
+    }
+
+    /* Additional styles for event information */
+    .event-list li .event-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .event-list li .event-info .event-title {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .event-list li .event-info .event-date {
+      color: #777;
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Camera App</h1>
+    <button id="user-button">&#x1F464;</button>
+  </header>
+  
+  <div class="container">
+    <div class="camera-section">
+      <h2>Cadastro de Câmera</h2>
+      <form id="camera-form">
+        <label for="camera-url">Camera URL:</label>
+        <input type="text" id="camera-url" name="camera-url" required>
+        <button type="submit" style="background-color: #333; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Cadastrar</button>
+      </form>
+      <div class="camera-section">
+        <h2>Câmeras cadastradas</h2>
+        <ul id="camera-list" class="scrollable-list-cams camera-list">
+          <li class="camera-item">Camera URL 1 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 2 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 3 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 1 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 2 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 3 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 1 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 2 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 3 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 1 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 2 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 3 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 1 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 2 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 3 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 1 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 2 - Registration Date and Time</li>
+          <li class="camera-item">Camera URL 3 - Registration Date and Time</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <h2 style="color: #333;">Transmissão · Camera #1</h2>
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+        <video controls></video>
+      </div>
+      <div>
+        <h2 style="color: #333;">Configuração · Camera #1</h2>
+        <div class="mark-all">
+          <input type="checkbox" id="mark-all-checkbox">
+          <label for="mark-all-checkbox">Selecionar todos</label>
+        </div>
+        <ul class="checkbox-list scrollable-list-objects" id="checkbox-list">
+        </ul>
+      </div>
+    </div>
+    <div>
+      <h2 style="color: #333;">Feed</h2>
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; margin: 20px 0;">
+        <ul id="event-list" class="scrollable-list-events event-list">
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 1</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 2</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 3</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 1</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 2</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 3</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 1</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 2</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 3</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 1</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 2</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 3</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 1</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 2</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 3</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 1</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 2</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+          <li>
+            <div class="event-info">
+              <div class="event-title">Event 3</div>
+              <div class="event-title">Type</div>
+              <div class="event-date">Date and Time</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script>
+      
+    // JavaScript code to fill checkbox list
+      
+    const checkboxes = [
+      'Pessoa',
+      'Mochila',
+      'Bolsa',
+      'Carro',
+      'Moto',
+      'Ônibus',
+      'Caminhão',
+      'Bicicleta',
+      'Cachorro',
+      'Gato',
+      'TV',
+      'Laptop',
+      'Notebook',
+      'Celular',
+      'Pose-deitado',
+      'Pose-mãos-pro-alto'
+    ];
+
+    const checkboxList = document.getElementById('checkbox-list');
+
+    checkboxes.forEach((value, index) => {
+      const listItem = document.createElement('li');
+      listItem.classList.add("checkbox-item");
+      listItem.innerHTML = `
+        <input type="checkbox" id="checkbox${index + 1}" name="checkbox${index + 1}" value="${value}">
+        <label for="checkbox${index + 1}" style="color: #333;">${value}</label>
+      `;
+      checkboxList.appendChild(listItem);
+    });
+      
+      
+    // JavaScript code for handling selection of camera items
+      
+    const cameraList = document.getElementById('camera-list');
+    const cameraItems = cameraList.getElementsByClassName('camera-item');
+
+    function selectCameraItem(event) {
+      const selectedItem = event.currentTarget;
+      const selectedItems = cameraList.getElementsByClassName('selected');
+
+      // Deselect previously selected items
+      Array.from(selectedItems).forEach(item => {
+        item.classList.remove('selected');
+      });
+
+      // Select the clicked item
+      selectedItem.classList.add('selected');
+    }
+
+    // Add event listeners to camera items
+    Array.from(cameraItems).forEach(item => {
+      item.addEventListener('click', selectCameraItem);
+    });
+
+    // "Mark all" checkbox functionality
+    window.addEventListener('DOMContentLoaded', () => {
+      const markAllCheckbox = document.getElementById('mark-all-checkbox');
+      const checkboxes = document.querySelectorAll('#checkbox-list input[type="checkbox"]');
+
+      markAllCheckbox.addEventListener('change', () => {
+        checkboxes.forEach(checkbox => {
+          checkbox.checked = markAllCheckbox.checked;
+        });
+      });
+
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          if (!checkbox.checked) {
+            markAllCheckbox.checked = false;
+          } else {
+            // Check if all checkboxes are checked
+            const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+            markAllCheckbox.checked = allChecked;
+          }
+        });
+      });
+    });
+
+  </script>
+</body>
+</html>

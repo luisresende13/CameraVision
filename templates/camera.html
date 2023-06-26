@@ -3,7 +3,8 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
   <style>
     * {
       box-sizing: border-box;
@@ -160,7 +161,18 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    
+
+    #video-player {
+/*       max-width: 100%; */
+/*       max-height: 400px; */
+      width: 100%;
+      height: 400px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
+    }
+
     @media (max-width: 1100px) {
       .container > div {
         flex: 1 1 100%;
@@ -173,6 +185,10 @@
       video {
         max-height: 300px;
       }
+
+      #video-player {
+        max-height: 300px;
+      }
     }
     
     @media (min-width: 1100px) {
@@ -181,6 +197,10 @@
       }
       
       video {
+        max-height: 600px;
+      }
+        
+      #video-player {
         max-height: 600px;
       }
     }
@@ -219,23 +239,66 @@
     }
 
     .camera-list {
+      font-size: 16px;
       margin-top: 20px;
-      padding: 0 20px;
+/*       padding: 0 20px; */
     }
 
     /* Additional styles for selectable camera list */
     .camera-list li {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-      cursor: pointer;
+      margin-bottom: 8px;
       padding: 8px;
+/*       padding-left: 8px; */
+      cursor: pointer;
       border-radius: 4px;
       transition: background-color 0.3s ease;
     }
 
+    .camera-list li > div:not(:last-child) {
+      margin-right: 10px;
+    }
+
+    .camera-list li:hover {
+      background-color: #f6f6f6;
+    }
+
     .camera-list li.selected {
       background-color: #ddd;
+    }
+
+    .camera-item-id {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .camera-timestamp {
+      color: #777;
+    }
+     
+/*     .camera-delete {
+      margin: 5px;
+    }
+ */
+    .camera-delete-div {
+/*       width: 30px; */
+/*       height: 30px; */
+      padding: 10px;
+      border-radius: 2px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .camera-delete-div:hover {
+      background-color: #ddd;
+/*       background-color: #e9e9e9;           */
+    }
+
+    .camera-list li.selected .camera-delete-div:hover {
+      background-color: #eee;
     }
 
     /* Changes for Event List */
@@ -274,6 +337,7 @@
     }
 
     .spinner {
+      background-color: #fff;
       display: none;
       width: 20px;
       height: 20px;
@@ -299,14 +363,13 @@
         <label for="camera-url">Camera URL:</label>
         <input type="text" id="camera-url" name="camera-url" required>
         <button id="btn-post-camera" type="submit" style="background-color: #333; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Cadastrar</button>
-        <div class="spinner" id="spinner"></div>
+        <div id="spinner-post-camera"></div>
       </form>
       <div class="camera-section">
         <h2>Câmeras cadastradas</h2>
+        <div id="spinner-get-cameras"></div>
         <ul id="camera-list" class="scrollable-list-cams camera-list">
-          <li class="camera-item">Camera URL 1 - Registration Date and Time</li>
-          <li class="camera-item">Camera URL 2 - Registration Date and Time</li>
-          <li class="camera-item">Camera URL 3 - Registration Date and Time</li>
+<!--         <li class="camera-item">Camera URL 1 - Registration Date and Time</li> -->
 <!--           Populate this list of cameras -->
         </ul>
       </div>
@@ -314,7 +377,7 @@
     <div>
       <h2 style="color: #333;">Transmissão · Camera #1</h2>
       <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-        <video controls></video>
+        <img id="video-player">
       </div>
       <div>
         <h2 style="color: #333;">Configuração · Camera #1</h2>
@@ -328,35 +391,27 @@
     </div>
     <div>
       <h2 style="color: #333;">Feed</h2>
-      <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; margin: 20px 0;">
+      <div id="spinner-get-objects"></div>
+      <div id="event-list-container" style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; margin: 20px 0;">
+        <div class="event-list">
+        <li style="background-color: #e9e9e9;">
+          <div class="event-info">
+            <div class="event-title">ID</div>
+            <div class="event-title">Tipo</div>
+            <div class="event-title">Confiança</div>
+            <div class="event-title">Data e hora</div>
+          </div>
+        </li>
+        </div>
         <ul id="event-list" class="scrollable-list-events event-list">
-          <li>
-            <div class="event-info">
-              <div class="event-title">Event 1</div>
-              <div class="event-title">Type</div>
-              <div class="event-date">Date and Time</div>
-            </div>
-          </li>
-          <li>
-            <div class="event-info">
-              <div class="event-title">Event 2</div>
-              <div class="event-title">Type</div>
-              <div class="event-date">Date and Time</div>
-            </div>
-          </li>
-          <li>
-            <div class="event-info">
-              <div class="event-title">Event 3</div>
-              <div class="event-title">Type</div>
-              <div class="event-date">Date and Time</div>
-            </div>
-          </li>
         </ul>
       </div>
     </div>
   </div>
   <script>
       
+      // List of objects for YOLO model
+      const yoloObjects = 'person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, tv, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair dryer, toothbrush';
       
     // Protocol and Host information ----------------------------
       
@@ -416,13 +471,18 @@
     });
       
       
-    // Handlie selection of camera items ----------------------------
+    // Handlie selection of camera item ----------------------------
       
-    const cameraList = document.getElementById('camera-list');
-    const cameraItems = cameraList.getElementsByClassName('camera-item');
+    let intervalId;
+    let inactivityTimeout;
+    let inactiveTime = 75000;
+    let updateTime = 10000;
+    let isActive = false;
 
     function selectCameraItem(event) {
+                
       const selectedItem = event.currentTarget;
+      const cameraList = document.getElementById('camera-list');
       const selectedItems = cameraList.getElementsByClassName('selected');
 
       // Deselect previously selected items
@@ -432,45 +492,192 @@
 
       // Select the clicked item
       selectedItem.classList.add('selected');
+
+      // Get the request query values
+      let url = selectedItem.id
+      let confidence = 0.30;
+      let objects = yoloObjects;
+      let seconds = 15;
+      let detector = "yolo";
+        
+      // Construct the track view URL
+      const trackViewURL = `${baseURL}/track/view?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${confidence}&detector=${detector}&dt=${new Date().getTime()}`;
+
+      // Construct the track post URL
+      const trackPostURL = `${baseURL}/track/post?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${confidence}&detector=${detector}&dt=${new Date().getTime()}`;
+
+        
+      async function fetchData(url) {
+        try {
+           console.log('Fetching data...');
+           const response = await fetch(url);
+           console.log('Data fetched successfully.');
+
+           const data = await response.json();
+           console.log('Data successfully.');
+
+           // Handle the received data
+           console.log('Response:', data);
+         } catch (error) {
+           // Handle any errors that occurred during the request
+           console.error('Error:', error);
+         }
+       }
+
+      // Request object identificataion posting asyncronously
+      console.log('Starting data fetch...');
+      fetchData(trackPostURL);
+
+      // Update the image source
+      const img = document.getElementById('video-player');
+      img.src = trackViewURL;
+
+      // Function to start updates
+      function startUpdates() {
+        isActive = true;
+        clearInterval(intervalId); // Clear any existing interval
+
+        // Fetch and populate identified objects immediately
+        fetchAndPopulateObjects(url);
+
+        // Schedule periodic updates every 8 seconds
+        intervalId = setInterval(() => fetchAndPopulateObjects(url), updateTime);
+
+        console.log("Updates started.");
+      }
+
+      // Function to stop updates
+      function stopUpdates() {
+        clearInterval(intervalId); // Clear the interval
+        isActive = false;
+        console.log("Updates stopped.");
+      }
+
+      // Check for user inactivity
+      function onUserActive() {
+        if (!isActive) {
+          // Start the updates
+          startUpdates();
+
+          // Sechedule stop of updates
+          setTimeout(stopUpdates, inactiveTime);
+        }
+      }
+
+      // Add event listeners for user inactivity
+      isActive = false;
+      onUserActive();
+
+      window.addEventListener('scroll', onUserActive);
+      document.addEventListener('mousemove', onUserActive);
+      document.addEventListener('keypress', onUserActive);
+        
     }
 
-    // Add event listeners to camera items
-    Array.from(cameraItems).forEach(item => {
-      item.addEventListener('click', selectCameraItem);
-    });
+    // Function to handle camera deletion
+    function deleteCamera(event) {
+      event.stopPropagation(); // Stop event propagation
+      
+      const cameraItem = event.currentTarget.parentNode.parentNode;
+      const cameraURL = cameraItem.id
+      
+      const deleteCameraURL = `${baseURL}/camera/delete`;
+      // const deleteCameraURL = `${baseURL}/camera?url=${encodeURIComponent(cameraURL)}`;
 
+        fetch(deleteCameraURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', // Set the appropriate content type
+          },
+          // You can include a request body if necessary
+          body: JSON.stringify({
+              url: cameraURL
+          }),
+        })
+          .then(response => {
+            if (response.ok) {
+              // Request was successful
+              return response.json(); // You can parse the response data if needed
+            } else {
+              // Request failed
+              alert('Deletar câmera falhou. Erro do servidor: ' + response.status);
+              // Request failed
+              throw new Error('Error: ' + response.status);            }
+          })
+          .then(data => {
+            cameraItem.remove();
+            // Process the response data
+            console.log(data);
+          })
+          .catch(error => {
+            // Handle any errors that occurred during the request
+            console.error(error);
+          });      
+      
+    }
       
     // Function to populate registered cameras
+      
+    let currentCameras;
       
     function fetchAndPopulateCameras() {
       const spinner = document.getElementById("spinner-get-cameras");
       if (spinner.classList.contains("spinner")) {
-          console.log("Fetching objects is still running. Skipped.")
+          console.log("Fetching cameras is still running. Skipped.")
           return
       }
-      spinner.classList.add("spinner-get-cams");
-      const camerasURL = `${baseURL}/cameras?dt=${new Date().getTime()}`;
+        
+      spinner.classList.add("spinner");
+        
+      const camerasURL = `${baseURL}/cameras?dt=${new Date().getTime()}`;      
       console.log("Fetching cameras from:", camerasURL);
       fetch(camerasURL)
         .then((response) => response.json())
         .then((data) => {
           console.log("Received data:", data);
-
+          
+          // Update collection of current cameras variable
+          currentCameras = data
+          
           const cameraList = document.getElementById("camera-list");
           cameraList.innerHTML = "";
           
           // Create and prepend rows for each camera
           data.forEach((item) => {
             const cameraItem = document.createElement("li")
-            
-            cameraItem.classList.add("camera-item")
-            cameraItem.setAttribute("id", item.id);              
 
-            cameraItem.innerHTML = item.url + ' - ' + new Date(
-              item.timestamp
-            ).toLocaleString(); // Convert timestamp to localized date and time string
+            // cameraItem.classList.add("camera-item")
+            cameraItem.setAttribute("id", item.url);
+            cameraItem.addEventListener('click', selectCameraItem);
+
+            // const cameraID = document.createElement("div")
+            const cameraURL = document.createElement("div")
+            const cameraTimestamp = document.createElement("div")
+            const cameraDeleteDiv = document.createElement("div")
+            const cameraDeleteButton = document.createElement("i")
             
-            cameraList.appendChild(row);
+            // cameraID.textContent = "ID-" + item.id
+            cameraURL.textContent = item.url
+            cameraTimestamp.textContent = new Date(item.timestamp).toLocaleString(); // Convert timestamp to localized date and time string
+              
+            // cameraID.classList.add("camera-item-id")
+            cameraURL.classList.add("camera-item-url")
+            cameraTimestamp.classList.add("camera-timestamp")
+            cameraDeleteDiv.classList.add("camera-delete-div")
+            cameraDeleteButton.classList.add("camera-delete")
+            cameraDeleteButton.classList.add("fas")
+            cameraDeleteButton.classList.add("fa-trash-alt")
+            
+            cameraDeleteButton.addEventListener('click', deleteCamera);
+              
+            // cameraItem.innerHTML = item.url + ' - ' + new Date(item.timestamp).toLocaleString(); // Convert timestamp to localized date and time string
+            
+            cameraDeleteDiv.appendChild(cameraDeleteButton)
+            // cameraItem.appendChild(cameraID);
+            cameraItem.appendChild(cameraURL);
+            cameraItem.appendChild(cameraTimestamp);
+            cameraItem.appendChild(cameraDeleteDiv);
+            cameraList.appendChild(cameraItem);
 
           });
 
@@ -485,6 +692,107 @@
         });
     }
 
+    // POPULATE LIST OF IDENTIFIED OBJECTS
+      
+    function fetchAndPopulateObjects(url) {
+      const spinner = document.getElementById("spinner-get-objects");
+      if (spinner.classList.contains("spinner")) {
+          console.log("Fetching objects is still running. Skipped.")
+          return
+      }
+      spinner.classList.add("spinner");
+      const objectsURL = `${baseURL}/objects?url=${encodeURIComponent(url)}&dt=${new Date().getTime()}`;
+      console.log("Fetching objects from:", objectsURL);
+      fetch(objectsURL)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Received data:", data);
+
+          // Sample list item
+      // <div id="event-list-container" style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; margin: 20px 0;">
+      //   <ul id="event-list" class="scrollable-list-events event-list">
+          // <li>
+          //   <div class="event-info">
+          //     <div class="event-title">Event 1</div>
+          //     <div class="event-title">Type</div>
+          //     <div class="event-date">Date and Time</div>
+          //   </div>
+          // </li>
+
+          
+          const existingRows = Array.from(
+            document.querySelectorAll("#event-list-container ul li")
+          );
+          const existingObjects = existingRows.map((row) =>
+            row.getAttribute("id")
+          );
+
+          // Filter new objects that are not already in the table
+          const newObjects = data.filter(
+            (item) => !existingObjects.includes(item.id)
+          );
+
+          // Create and prepend rows for new objects
+          const fragment = document.createDocumentFragment();
+          newObjects.forEach((item) => {
+            const li = document.createElement("li");
+            const row = document.createElement("div");
+            const objectIdCell = document.createElement("div");
+            const objectCell = document.createElement("div");
+            const confidenceCell = document.createElement("div");
+            const timestampCell = document.createElement("div");
+
+            row.setAttribute("id", item.id);
+            row.classList.add("event-info");
+            objectIdCell.classList.add("event-title")
+            objectCell.classList.add("event-title")
+            confidenceCell.classList.add("event-title")
+            timestampCell.classList.add("event-date")
+
+            objectIdCell.textContent = item.id; // Object identity field
+            objectCell.textContent = item.class_name;
+            confidenceCell.textContent = (item.confidence * 100).toFixed(0) + "%";
+            timestampCell.textContent = new Date(item.timestamp).toLocaleString(); // Convert timestamp to localized date and time string
+
+            row.appendChild(objectIdCell);
+            row.appendChild(objectCell);
+            row.appendChild(confidenceCell);
+            row.appendChild(timestampCell);
+            
+            li.appendChild(row)
+            fragment.appendChild(li);
+
+            // Highlight the new row
+            // row.style.backgroundColor = "#ffff99";
+          });
+
+          // Remove rows for objects that are no longer present
+          existingRows.forEach((row) => {
+            const objectId = row.getAttribute("id");
+            if (!data.find((item) => item.id === objectId)) {
+              row.remove();
+            // } else {
+              // // remove highlight for existing row
+              // row.style.backgroundColor = null;                
+            }
+          });
+
+          // Prepend new rows to the table
+          const tableBody = document.querySelector("#event-list-container ul");
+          tableBody.prepend(fragment);
+
+          // Remove spinner class
+          spinner.classList.remove("spinner");
+        })
+        .catch((error) => {
+          console.error("Error fetching identified objects:", error);
+
+          // Remove spinner class
+          spinner.classList.remove("spinner");
+        });
+    }
+
+      
     // DOM Content Load event ---------------------------  
     
     window.addEventListener('DOMContentLoaded', () => {
@@ -515,7 +823,7 @@
       // Post Camera functionality ---------------------------
         
       var postCameraButton = document.getElementById('btn-post-camera');
-      var spinner = document.getElementById('spinner-post-cameras');
+      var spinner = document.getElementById('spinner-post-camera');
       if (spinner.classList.contains("spinner")) {
           console.log("Fetching objects is still running. Skipped.")
           return
@@ -523,6 +831,7 @@
 
       postCameraButton.addEventListener('click', function(event) {
         event.preventDefault();
+
         var url = document.getElementById('camera-url').value;
         // var objects = document.getElementById('objects').value;
         var objects = ''
@@ -556,11 +865,12 @@
         })
         .then(function(response) {
           if (response.ok) {
-            alert('Sign up successful!');
+            // alert('Cadastro da câmera bem sucedido!');
+            fetchAndPopulateCameras()
             // Redirect the user or perform additional actions
           } else {
             response.json().then(function(data) {
-              alert(`Sign up failed. ${data.error}. Please try again.`);
+              alert(`Cadastro da câmera falhou. Por favor, tente novamente. Erro do servidor: ${data.error}.`);
             });
           }
         })
@@ -575,6 +885,9 @@
       });
         
     });
+
+    // Call the initializeServer function when the page loads
+    window.addEventListener("load", fetchAndPopulateCameras);
 
   </script>
 </body>

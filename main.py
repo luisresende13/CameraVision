@@ -268,6 +268,41 @@ def post_camera(data):
     # Sign-up successful
     return jsonify({'message': 'Camera registration successful'})
 
+class DeleteCameraIn(Schema):
+    url = String(required=True)
+
+@app.post('/camera/delete')
+@app.input(DeleteCameraIn)
+@app.doc(tags=['Web Apps'])
+def delete_camera(data):
+    url = data['url']
+
+    # Check if the camera exists in the BigQuery database
+    query = f"DELETE FROM `octacity.video_analytics.cameras` WHERE url='{url}'"
+    try:
+        # Submit the query
+        job = bqclient.query(query)
+
+        # Wait for the query to complete
+        job.result()
+
+        # Check if the query was successful
+        if job.state == "DONE":
+            return jsonify({'message': 'Record deleted successfully.'}), 200
+        else:
+            return jsonify({'error': 'Error occurred while deleting record.'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.get('/cameras')
+@app.doc(tags=['Web Apps'])
+def get_cameras():
+    query = f"SELECT ROW_NUMBER() OVER () AS id, * FROM (SELECT * FROM `octacity.video_analytics.cameras` ORDER BY timestamp ASC) ORDER BY timestamp DESC"
+    query_job = bqclient.query(query)
+    rows = query_job.result()
+    result = [dict(row) for row in rows]
+    return jsonify(result)
+
 
 class SignUpIn(Schema):
     email = String(required=True)
@@ -432,10 +467,20 @@ def view_and_post_track(query):
     Runs object detection, tracking and identification for live camera image streaming. Streams the annotated images.
     
     """
+    
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
+
+    if query['detector'] == 'ultralytics':
+        model = 'yolo'
+        tracker = 'yolo'
+    else:
+        model = query['detector']
+        tracker = 'deepsort'
+    
     return Response(stream_with_context(tracking_reid(
         query['url'],
-        model=query['detector'],
+        model=model,
+        tracker=tracker,
         confidence_threshold=query['confidence'],
         allowed_objects=allowed_objects,
         post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
@@ -458,7 +503,9 @@ def view_track(query):
     Runs object detection, tracking and identification for live camera image streaming. Streams the annotated images.
     
     """
+    
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
+
     if query['detector'] == 'ultralytics':
         model = 'yolo'
         tracker = 'yolo'
@@ -492,10 +539,20 @@ def post_track(query):
     Runs object detection, tracking and identification for live camera image streaming and posts identified objects to database in real time.
     
     """
+    
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
+    
+    if query['detector'] == 'ultralytics':
+        model = 'yolo'
+        tracker = 'yolo'
+    else:
+        model = query['detector']
+        tracker = 'deepsort'
+
     post_new_objects_records = tracking_reid(
         query['url'],
-        model=query['detector'],
+        model=model,
+        tracker=tracker,
         confidence_threshold=query['confidence'],
         allowed_objects=allowed_objects,
         max_frames=int(query['seconds'] * query['fps']),

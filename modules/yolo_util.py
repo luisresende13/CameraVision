@@ -17,11 +17,11 @@ class YoloWrap:
             imgsz=640,
             conf=0.25, iou=0.7,
             max_det=300,  # vid_stride=0,
-            stream=False, device=0, persist=True
-        )[0]
+            stream=False, device='cpu',
+        )
 
         # formatted yolo detections
-        detections = self.formatted_detections(detections)
+        detections = self.formatted_detections(detections[0])
 
         # return standard format detections
         return detections
@@ -35,11 +35,14 @@ class YoloWrap:
             imgsz=640,
             conf=0.3, iou=0.7,
             max_det=300,  # vid_stride=0,
-            stream=False, device=0, persist=True
+            stream=False, device='cpu', persist=True
         )  # , tracker="bytetrack.yaml")
 
         result = results[0]
-        
+
+        # formatted yolo detections
+        detections = self.formatted_detections(result)
+
         # initialize list for formatted tracker output
         tracking = []
 

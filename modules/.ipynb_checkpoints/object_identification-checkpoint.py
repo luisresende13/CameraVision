@@ -72,11 +72,15 @@ def tracking_reid(
 
     # initialize DeepSORT real-time tracker
     max_age = 3
+    is_yolo_tracker = False
     if tracker == 'deepsort':
         tracker = DeepSortWrap(max_age, confidence_threshold, allowed_objects)
     elif tracker == 'centroid':
         tracker = CentroidTrackerWrap(class_names=class_names)
-    
+    elif tracker == 'yolo':
+        tracker = model
+        is_yolo_tracker = True
+        
     # Get class names from model
     # class_names = model.class_names
     
@@ -173,7 +177,9 @@ def tracking_reid(
                     frame = cv2.resize(frame, resize_shape, interpolation=cv2.INTER_AREA)
                 
                 # formatted yolo detections
-                detections = model.detect(frame)
+                detections = None
+                if not is_yolo_tracker:
+                    detections = model.detect(frame)
 
                 ######################################
                 # RUN TRACKING

@@ -6,6 +6,11 @@ import cv2
 from urllib.parse import quote
 import warnings
 warnings.filterwarnings("ignore"); # Suppress warnings
+import datetime
+import pytz
+
+# Get the Brazil time zone
+brazil_tz = pytz.timezone('America/Sao_Paulo')
 
 # Flask
 
@@ -202,8 +207,8 @@ def initialize():
 # User login and signup
 
 class LoginIn(Schema):
-    email = String(requird=True)
-    password = String(requird=True)
+    email = String(required=True)
+    password = String(required=True)
     
 @app.post('/login')
 @app.input(LoginIn)
@@ -233,6 +238,36 @@ def login(data):
 
     # Login successful
     return jsonify({'message': 'Login successful'})
+
+class CameraIn(Schema):
+    url = String(required=True)
+    objects = DelimitedList(String(), sep=[',', ', '], allow_none=True, load_default=None)
+
+@app.post('/camera')
+@app.input(CameraIn)
+@app.doc(tags=['Web Apps'])
+def post_camera(data):
+    url = data['url']
+    objects = data['objects']
+    # get the current time and date for Brazil time zone
+    timestamp = datetime.datetime.now(brazil_tz)
+
+    # Check if the camera exists in the BigQuery database
+    query = f"SELECT * FROM `octacity.video_analytics.cameras` WHERE url='{url}'"
+    query_job = bqclient.query(query)
+    rows = query_job.result()
+
+    for row in rows:
+        return jsonify({'error': 'Camera URL already exists'}), 409
+
+    # Create a new user in the BigQuery database
+    query = f"INSERT INTO `octacity.video_analytics.cameras` (url, objects, timestamp) VALUES ('{url}', '{objects}', '{timestamp}')"
+    query_job = bqclient.query(query)
+    query_job.result()
+
+    # Sign-up successful
+    return jsonify({'message': 'Camera registration successful'})
+
 
 class SignUpIn(Schema):
     email = String(required=True)
@@ -424,9 +459,17 @@ def view_track(query):
     
     """
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
+    if query['detector'] == 'ultralytics':
+        model = 'yolo'
+        tracker = 'yolo'
+    else:
+        model = query['detector']
+        tracker = 'deepsort'
+    
     return Response(stream_with_context(tracking_reid(
         query['url'],
-        model=query['detector'],
+        model=model,
+        tracker=tracker,
         confidence_threshold=query['confidence'],
         allowed_objects=allowed_objects,
         post_processing_function=None,

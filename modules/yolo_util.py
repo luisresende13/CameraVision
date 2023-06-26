@@ -7,16 +7,84 @@ class YoloWrap:
         # initialize YOLO object detection model
         self.model = YOLO(model)
         self.class_names = self.model.names
-    
+        # initialize set for track ids 
+        self.unique_track_ids = set()
+
     def detect(self, frame):
         # run the YOLO model on the frame
-        detections = self.model(frame)[0]
+        detections = self.model.predict(
+            frame, save=False, show=False,
+            imgsz=640,
+            conf=0.25, iou=0.7,
+            max_det=300,  # vid_stride=0,
+            stream=False, device=0, persist=True
+        )[0]
 
         # formatted yolo detections
         detections = self.formatted_detections(detections)
 
         # return standard format detections
         return detections
+    
+    def update_tracks(self, frame, detections, start):
+        ######################################
+        # RUN TRACKING
+
+        results = self.model.track(
+            frame, save=False, show=False,
+            imgsz=640,
+            conf=0.3, iou=0.7,
+            max_det=300,  # vid_stride=0,
+            stream=False, device=0, persist=True
+        )  # , tracker="bytetrack.yaml")
+
+        result = results[0]
+        
+        # initialize list for formatted tracker output
+        tracking = []
+
+        # list tracking result
+        for track_id, class_id, confidence, bbox in zip(result.id, result.cls, result.conf, result.boxes):
+            class_name = result.names[class_id]
+            # append attributes of tracked objects
+            tracking.append([track_id, class_name, confidence, bbox])
+        
+        # initialize list for formatted tracker output
+        tracking = []
+
+        ######################################
+        # GET NEW IDENTIFIED OBJECTS
+
+        # initialize list for newly detected objects
+        new_objects = []
+
+        # loop over the formatted tracks and get newly identified objects
+        for track in tracking:
+
+            # get track attributes
+            track_id, class_name, confidence, bbox = track
+
+            # check if track ID is unique
+            if track_id not in self.unique_track_ids:
+
+                # prepare record of newly identified object
+                record = {
+                    # 'class_label': class_label,
+                    'class_name': class_name,
+                    'confidence': confidence,
+                    'timestamp': start,
+                    'track_id': track_id,
+                    'bbox': list(bbox),
+                }
+
+                # append record to list of new objects
+                new_objects.append(record)
+
+                # add the tracked object ID to the set of unique track IDs
+                self.unique_track_ids.add(track_id)
+                
+        return tracking, new_objects
+
     
     def formatted_detections(self, detections):
         """

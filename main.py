@@ -261,6 +261,7 @@ def post_camera(data):
         return jsonify({'error': 'Camera URL already exists'}), 409
 
     # Create a new user in the BigQuery database
+    objects = ', '.join(objects)
     query = f"INSERT INTO `octacity.video_analytics.cameras` (url, objects, timestamp) VALUES ('{url}', '{objects}', '{timestamp}')"
     query_job = bqclient.query(query)
     query_job.result()

@@ -24,6 +24,9 @@ from apiflask import APIFlask, Schema, abort
 from apiflask.fields import Integer, String, Float, Boolean, Dict, List, DelimitedList, DateTime
 from apiflask.validators import Length, OneOf
 
+# Flask ngrok
+from flask_ngrok import run_with_ngrok
+
 # Custom modules
 
 from modules.object_identification import tracking_reid
@@ -157,6 +160,7 @@ def write_demo(frame, inference, time_info, resize_shape=None):
 # FLASK APP CONFIG
 
 app = APIFlask(__name__); CORS(app)
+run_with_ngrok(app)
 
 @app.after_request
 def apply_caching(response):

@@ -525,11 +525,11 @@
       
       // Get the request query values
       let url = selectedItem.id
-      let confidence = 0.25;
+      let confidence = 0.3;
       // let objects = yoloObjects;
       let objects = selectedCamObjects;
-      let seconds = 15;
-      let detector = "yolo";
+      let seconds = 40;
+      let detector = "ultralytics";
         
       // Construct the track view URL
       const trackViewURL = `${baseURL}/track/view?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${confidence}&detector=${detector}&dt=${new Date().getTime()}`;

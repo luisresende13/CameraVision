@@ -360,7 +360,8 @@
     } 
     // If none of the conditions match, set the base URL to 'api.' followed by the host
     else {
-      baseURL = `https://analytics.octacity.dev`; // Set base URL to 'api.example.com'
+      baseURL = `${protocol}//${host}`; 
+      // baseURL = `https://analytics.octacity.dev`; // Set base URL to 'api.example.com'
     }
     
     // Log the final base URL and host
@@ -515,6 +516,7 @@
           setTimeout(stopUpdates, inactiveTime);
         }
       }
+
       // Get the form input values
       url = document.getElementById('urlInput').value;
       objects = document.getElementById('objectsInput').value;

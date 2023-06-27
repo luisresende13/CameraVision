@@ -2,7 +2,7 @@ from ultralytics import YOLO
 
 class YoloWrap:
     
-    def __init__(self, model="yolov8n.pt"):
+    def __init__(self, model="yolov8x.pt"):
         
         # initialize YOLO object detection model
         self.model = YOLO(model)
@@ -41,20 +41,23 @@ class YoloWrap:
         result = results[0]
 
         # formatted yolo detections
-        detections = self.formatted_detections(result)
+        # detections = self.formatted_detections(result)
 
         # initialize list for formatted tracker output
         tracking = []
 
         # list tracking result
-        for track_id, class_id, confidence, bbox in zip(result.id, result.cls, result.conf, result.boxes):
-            class_name = result.names[class_id]
-            # append attributes of tracked objects
-            tracking.append([track_id, class_name, confidence, bbox])
+        # print(result.boxes)
+        boxes = result.boxes
+        if boxes.id is not None:
+            for track_id, class_id, confidence, bbox in zip(boxes.id.tolist(), boxes.cls.tolist(), boxes.conf.tolist(), boxes.data.tolist()):
+                class_name = result.names[class_id]
+                # Get bounding box
+                xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
+                bbox = [xmin, ymin, xmax, ymax]
+                # append attributes of tracked objects
+                tracking.append([track_id, class_name, confidence, bbox])
         
-        # initialize list for formatted tracker output
-        tracking = []
-
         ######################################
         # GET NEW IDENTIFIED OBJECTS
 

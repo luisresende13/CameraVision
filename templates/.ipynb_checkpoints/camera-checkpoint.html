@@ -455,7 +455,8 @@
     } 
     // If none of the conditions match, set the base URL to 'api.' followed by the host
     else {
-      baseURL = `https://analytics.octacity.dev`; // Set base URL to 'api.example.com'
+      baseURL = `${protocol}//${host}`; // Set base URL to 'api.example.com'
+      // baseURL = `https://analytics.octacity.dev`; // Set base URL to 'api.example.com'
     }
     
     // Log the final base URL and host
@@ -524,7 +525,7 @@
       
       // Get the request query values
       let url = selectedItem.id
-      let confidence = 0.2;
+      let confidence = 0.25;
       // let objects = yoloObjects;
       let objects = selectedCamObjects;
       let seconds = 15;

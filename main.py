@@ -385,7 +385,25 @@ def send_password_reset_email(email):
 
 # WEB APPS
 
+
+@app.get("/camera_app")
+@app.doc(tags=['Web Apps'])
+def camera_control():
+    """
+    Object Identification WebApp 2.0
+    Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
+    """
+    return render_template('camera.html')    
+
 @app.get("/tracker")
+@app.doc(tags=['Web Apps'])
+def camera_tracker():
+    """
+    Object Identification WebApp 2.0
+    Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
+    """
+    return render_template('tracker.html')    
+
 @app.get("/tracker/v2")
 @app.doc(tags=['Web Apps'])
 def camera_tracker_v2():
@@ -637,4 +655,5 @@ def upload_video():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    app.run()
+    # app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

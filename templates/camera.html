@@ -14,7 +14,6 @@
     
     body {
       font-family: Arial, sans-serif;
-/*       height: 100vh; */
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -84,9 +83,11 @@
     }
     
     .scrollable-list-cams {
+/*       max-height: 100%; */
       max-height: 40vh;
       overflow-y: auto;
       padding: 0;
+/*       padding-right: 20px; */
       margin: 0;
     }
 
@@ -204,7 +205,7 @@
         max-height: 600px;
       }
     }
-    
+      
     #camera-form {
       display: flex;
       flex-direction: column;
@@ -224,7 +225,7 @@
     }
     
     #camera-form button[type="submit"] {
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
 
     /* Changes for Cameras Cadastradas section */
@@ -262,7 +263,7 @@
     .camera-list {
       font-size: 16px;
       margin-top: 20px;
-/*       padding: 0 20px; */
+/*       padding-right: 20px; */
     }
 
     /* Additional styles for selectable camera list */
@@ -390,7 +391,7 @@
         <button id="btn-post-camera" type="submit" style="background-color: #333; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Cadastrar</button>
         <div id="spinner-post-camera"></div>
       </form>
-      <div class="camera-section">
+      <div id="camera-list-container" class="camera-section">
         <h2>Câmeras cadastradas</h2>
         <div id="spinner-get-cameras"></div>
         <ul id="camera-list" class="scrollable-list-cams camera-list">
@@ -518,10 +519,14 @@
       // Select the clicked item
       selectedItem.classList.add('selected');
 
+      let selectedCamObjects = currentCameras.filter(cameraInfo => cameraInfo.url == selectedItem.id)
+      selectedCamObjects = selectedCamObjects[0].objects
+      
       // Get the request query values
       let url = selectedItem.id
       let confidence = 0.25;
-      let objects = yoloObjects;
+      // let objects = yoloObjects;
+      let objects = selectedCamObjects;
       let seconds = 15;
       let detector = "yolo";
         

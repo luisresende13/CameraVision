@@ -20,4 +20,4 @@ deep-sort-realtime
 mediapipe==0.10.0
 motrackers==0.0.1
 Flask-Mail==0.9.1
-# lap
+lap

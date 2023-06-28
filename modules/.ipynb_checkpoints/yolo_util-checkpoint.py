@@ -17,7 +17,7 @@ class YoloWrap:
             imgsz=640,
             conf=0.25, iou=0.7,
             max_det=300,  # vid_stride=0,
-            stream=False, device='cpu',
+            stream=False, device=0, verbose=True,
         )
 
         # formatted yolo detections

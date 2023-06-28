@@ -8,6 +8,21 @@ import warnings
 warnings.filterwarnings("ignore"); # Suppress warnings
 import datetime
 import pytz
+import logging
+
+# Configure logging
+logging.basicConfig(
+    filename='app.log',
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+# Usage example
+# logging.debug('This is a debug message')
+# logging.info('This is an info message')
+# logging.warning('This is a warning message')
+# logging.error('This is an error message')
 
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
@@ -97,7 +112,7 @@ def bigquery_post_new_objects(frame, inference, time_info, **kwargs):
 
         # log errors if any
         if errors:
-            print('Error inserting record into BigQuery:', errors)
+            logging.error('Error inserting record into BigQuery:', errors)
 
     # return list with errors
     return {'n_new_objects': len(new_objects), 'n_errors': len(errors), 'errors': errors}

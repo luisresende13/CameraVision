@@ -9,6 +9,7 @@ class Video:
     def writer(self, path):
         if not self.overwrite and os.path.exists(path):
             print(f'ANNOTATE VIDEO TIMESTAMP FAILED. FILE ALREADY EXISTS · FILE-PATH: {path}')
+            logging.error(f'ANNOTATE VIDEO TIMESTAMP FAILED. FILE ALREADY EXISTS · FILE-PATH: {path}')
             return False
         return cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*self.codec), self.fps, self.shape)
 

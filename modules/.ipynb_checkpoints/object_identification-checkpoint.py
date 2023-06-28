@@ -65,7 +65,9 @@ def tracking_reid(
             score_threshold=confidence_threshold,
             category_allowlist=allowed_objects,
             max_results=None,
-        ); print(f'MEDIAPIPE DETECTOR LOADED · {time() - t} s')
+        )
+        print(f'MEDIAPIPE DETECTOR LOADED · {time() - t} s')
+        logging.info(f'MEDIAPIPE DETECTOR LOADED · {time() - t} s')
         class_names = mediapipe_class_names
     else:
         model = YoloWrap(model)
@@ -97,8 +99,11 @@ def tracking_reid(
     total_frames = None if is_video_stream else int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # if capture is from video file
 
     # Get the frames per second (fps)
-    fps = fps if fps is not None else cap.get(cv2.CAP_PROP_FPS)
+    fps = fps if 'CODE' in url else cap.get(cv2.CAP_PROP_FPS)
 
+    # set the streaming time
+    secs = secs if 'CODE' in url else cap.get(cv2.CAP_PROP_FRAME_COUNT) / fps
+    
     # Get the frame dimensions (shape)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -144,7 +149,8 @@ def tracking_reid(
             # log streaming progress
             if log_secs is not None and video_seconds % log_secs == 0:
                 print(f'STREAMING · TIME: {round(n_frames / fps, 1)} s · URL: {url}')
-
+                logging.info(f'STREAMING · TIME: {round(n_frames / fps, 1)} s · URL: {url}')
+                
             # read video frame
             success, frame = cap.read()
             # if not success:
@@ -232,6 +238,7 @@ def tracking_reid(
     # handle exception inside video capture loop
     except Exception as e:
         print(f'STREAMING (EXCEPTION) · ERROR: {str(e)}')
+        logging.error(f'STREAMING (EXCEPTION) · ERROR: {str(e)}')
         traceback.print_exc()
         
     # finish video capture
@@ -247,6 +254,7 @@ def tracking_reid(
 
         # Report end of stream 
         print(f'STREAMING FINISHED · STREAM-TIME: {round(n_frames / fps, 1)} s · EXEC-TIME: {round(time() - start_time, 1)} s · URL {url}')
+        logging.info(f'STREAMING FINISHED · STREAM-TIME: {round(n_frames / fps, 1)} s · EXEC-TIME: {round(time() - start_time, 1)} s · URL {url}')
     
     # return post processing results
     return post_processing_output

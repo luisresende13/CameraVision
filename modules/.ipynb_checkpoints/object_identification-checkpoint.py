@@ -11,6 +11,15 @@ from time import time
 from flask import request
 import pytz
 import traceback
+import logging
+
+# Configure logging
+logging.basicConfig(
+    filename='app.log',
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')

@@ -509,7 +509,7 @@ def view_and_post_track(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
 
     if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8n.pt'
+        model = 'models/yolo/yolov8l.pt'
         tracker = 'yolo'
     else:
         model = query['detector']
@@ -545,7 +545,7 @@ def view_track(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
 
     if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8n.pt'
+        model = 'models/yolo/yolov8l.pt'
         tracker = 'yolo'
     else:
         model = query['detector']
@@ -581,7 +581,7 @@ def post_track(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
     
     if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8n.pt'
+        model = 'models/yolo/yolov8l.pt'
         tracker = 'yolo'
     else:
         model = query['detector']

@@ -35,7 +35,7 @@ class YoloWrap:
             imgsz=640,
             conf=0.3, iou=0.7,
             max_det=300,  # vid_stride=0,
-            stream=False, device='cpu', persist=True
+            stream=False, device=0, persist=True
         )  # , tracker="bytetrack.yaml")
 
         result = results[0]

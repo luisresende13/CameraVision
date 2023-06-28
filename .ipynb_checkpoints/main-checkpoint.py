@@ -8,6 +8,21 @@ import warnings
 warnings.filterwarnings("ignore"); # Suppress warnings
 import datetime
 import pytz
+import logging
+
+# Configure logging
+logging.basicConfig(
+    filename='app.log',
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+# Usage example
+# logging.debug('This is a debug message')
+# logging.info('This is an info message')
+# logging.warning('This is a warning message')
+# logging.error('This is an error message')
 
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
@@ -97,7 +112,7 @@ def bigquery_post_new_objects(frame, inference, time_info, **kwargs):
 
         # log errors if any
         if errors:
-            print('Error inserting record into BigQuery:', errors)
+            logging.error('Error inserting record into BigQuery:', errors)
 
     # return list with errors
     return {'n_new_objects': len(new_objects), 'n_errors': len(errors), 'errors': errors}
@@ -494,7 +509,7 @@ def view_and_post_track(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
 
     if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8n.pt'
+        model = 'models/yolo/yolov8l.pt'
         tracker = 'yolo'
     else:
         model = query['detector']
@@ -530,7 +545,7 @@ def view_track(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
 
     if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8n.pt'
+        model = 'models/yolo/yolov8l.pt'
         tracker = 'yolo'
     else:
         model = query['detector']
@@ -566,7 +581,7 @@ def post_track(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
     
     if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8n.pt'
+        model = 'models/yolo/yolov8l.pt'
         tracker = 'yolo'
     else:
         model = query['detector']

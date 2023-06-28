@@ -1,0 +1,402 @@
+2023-06-28 13:06:06 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 13:06:06 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 13:06:06 DEBUG: interactive is False
+2023-06-28 13:06:06 DEBUG: platform is win32
+2023-06-28 13:06:07 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 13:06:07 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 13:07:35 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 13:07:35 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:07:35 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:07:35 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:07:37 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:07:37 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:07:38 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:07:40 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2023-06-28 13:07:40 INFO: [33mPress CTRL+C to quit[0m
+2023-06-28 13:07:40 INFO:  * Restarting with stat
+2023-06-28 13:08:22 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 13:08:22 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 13:08:22 DEBUG: interactive is False
+2023-06-28 13:08:22 DEBUG: platform is win32
+2023-06-28 13:08:23 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 13:08:23 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 13:08:59 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 13:08:59 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:08:59 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:08:59 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:08:59 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:08:59 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:09:00 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:09:55 INFO: 127.0.0.1 - - [28/Jun/2023 13:09:55] "GET /tracker HTTP/1.1" 200 -
+2023-06-28 13:09:56 INFO: 127.0.0.1 - - [28/Jun/2023 13:09:56] "GET /init HTTP/1.1" 200 -
+2023-06-28 13:10:14 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:10:15 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:10:15 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:10:15 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:10:15 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:10:17 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:17 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/52871af8-f281-4c8a-8ef7-4118009c68a1?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:17 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/52871af8-f281-4c8a-8ef7-4118009c68a1?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:17 INFO: 127.0.0.1 - - [28/Jun/2023 13:10:17] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968614978 HTTP/1.1" 200 -
+2023-06-28 13:10:25 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:10:25 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:10:25 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:10:25 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:10:25 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:10:26 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:27 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/12b50b1f-c70e-4250-9f18-1a1c9f7189ba?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:27 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/12b50b1f-c70e-4250-9f18-1a1c9f7189ba?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:27 INFO: 127.0.0.1 - - [28/Jun/2023 13:10:27] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968624991 HTTP/1.1" 200 -
+2023-06-28 13:10:30 ERROR: Exception on /track/post [GET]
+Traceback (most recent call last):
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\video-analytics\modules\object_identification.py", line 152, in tracking_reid
+    logging.info(f'STREAMING · TIME: {round(n_frames / fps, 1)} s · URL: {url}')
+NameError: name 'logging' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\video-analytics\modules\object_identification.py", line 241, in tracking_reid
+    logging.error(f'STREAMING (EXCEPTION) · ERROR: {str(e)}')
+NameError: name 'logging' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\flask\app.py", line 2077, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\flask\app.py", line 1525, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\flask_cors\extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\flask\app.py", line 1523, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\apiflask\app.py", line 446, in dispatch_request
+    return view_function(*req.view_args.values())  # type: ignore
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\webargs\core.py", line 594, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\apiflask\scaffold.py", line 87, in wrapper
+    return current_app.ensure_sync(f)(*args, **kwargs)
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\video-analytics\main.py", line 608, in post_track
+    return list(post_new_objects_records)
+  File "C:\Users\luisr\Desktop\Repositories\Apps\APIs\video-analytics\modules\object_identification.py", line 257, in tracking_reid
+    logging.info(f'STREAMING FINISHED · STREAM-TIME: {round(n_frames / fps, 1)} s · EXEC-TIME: {round(time() - start_time, 1)} s · URL {url}')
+NameError: name 'logging' is not defined
+2023-06-28 13:10:31 INFO: 127.0.0.1 - - [28/Jun/2023 13:10:31] "[35m[1mGET /track/post?url=samples%2Fstreet-humans.mp4&objects=person,%20car,%20bus&seconds=60&confidence=0.35&detector=ultralytics&dt=1687968614976 HTTP/1.1[0m" 500 -
+2023-06-28 13:10:32 INFO: 127.0.0.1 - - [28/Jun/2023 13:10:32] "GET /track/view?url=samples%2Fstreet-humans.mp4&objects=person,%20car,%20bus&seconds=60&confidence=0.35&detector=ultralytics&dt=1687968614976 HTTP/1.1" 200 -
+2023-06-28 13:10:34 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:10:34 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:10:35 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:10:35 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:10:35 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:10:36 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:36 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/925b83f5-6df0-4292-b189-50d561f0f9c9?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:37 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/925b83f5-6df0-4292-b189-50d561f0f9c9?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:37 INFO: 127.0.0.1 - - [28/Jun/2023 13:10:37] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968634981 HTTP/1.1" 200 -
+2023-06-28 13:10:44 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:10:45 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:10:45 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:10:45 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:10:45 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:10:46 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:46 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/889d2e04-654c-4869-8c9a-13b140f5b445?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:47 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/889d2e04-654c-4869-8c9a-13b140f5b445?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:47 INFO: 127.0.0.1 - - [28/Jun/2023 13:10:47] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968644987 HTTP/1.1" 200 -
+2023-06-28 13:10:55 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:10:55 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:10:55 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:10:55 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:10:55 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:10:56 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:56 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/f07f6074-47a6-42a4-9fe0-d3699cef4529?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:57 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/f07f6074-47a6-42a4-9fe0-d3699cef4529?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:10:57 INFO: 127.0.0.1 - - [28/Jun/2023 13:10:57] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968654991 HTTP/1.1" 200 -
+2023-06-28 13:11:04 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:11:05 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:11:05 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:11:05 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:11:05 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:11:06 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:06 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/de7a3c2b-2ccd-43df-aae2-e383c4bc884c?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:07 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/de7a3c2b-2ccd-43df-aae2-e383c4bc884c?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:07 INFO: 127.0.0.1 - - [28/Jun/2023 13:11:07] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968664991 HTTP/1.1" 200 -
+2023-06-28 13:11:15 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:11:15 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:11:15 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:11:15 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:11:15 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:11:16 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:16 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/4b846bcf-f73e-4246-ace2-d0e45c3fc913?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:17 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/4b846bcf-f73e-4246-ace2-d0e45c3fc913?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:17 INFO: 127.0.0.1 - - [28/Jun/2023 13:11:17] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968674988 HTTP/1.1" 200 -
+2023-06-28 13:11:25 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:11:25 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:11:25 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:11:25 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:11:25 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:11:26 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:26 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/c0495641-b726-42a7-91ec-9658bfdd2841?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:26 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/c0495641-b726-42a7-91ec-9658bfdd2841?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:26 INFO: 127.0.0.1 - - [28/Jun/2023 13:11:26] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968684991 HTTP/1.1" 200 -
+2023-06-28 13:11:30 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:11:30 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:11:30 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:11:30 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:11:30 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:11:31 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:32 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/4e4232be-a847-4824-8696-7f741a2ba77c?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:32 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/4e4232be-a847-4824-8696-7f741a2ba77c?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:32 INFO: 127.0.0.1 - - [28/Jun/2023 13:11:32] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968689984 HTTP/1.1" 200 -
+2023-06-28 13:11:40 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:11:40 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:11:40 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:11:41 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:11:41 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:11:42 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:42 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/93a57f72-9ef7-40e5-8884-2b80c8aa7f8e?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:42 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/93a57f72-9ef7-40e5-8884-2b80c8aa7f8e?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:42 INFO: 127.0.0.1 - - [28/Jun/2023 13:11:42] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968700896 HTTP/1.1" 200 -
+2023-06-28 13:11:50 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:11:50 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:11:50 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:11:51 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:11:51 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:11:52 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:52 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/d835107b-e283-4a8a-bc37-9d245350bcf9?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:52 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/d835107b-e283-4a8a-bc37-9d245350bcf9?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:11:52 INFO: 127.0.0.1 - - [28/Jun/2023 13:11:52] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968710892 HTTP/1.1" 200 -
+2023-06-28 13:12:00 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:12:00 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:12:00 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:12:01 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:12:01 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:12:02 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:12:02 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/15f8c19a-b58e-42ca-b4b0-da3dfed96ef4?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:12:02 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/15f8c19a-b58e-42ca-b4b0-da3dfed96ef4?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:12:02 INFO: 127.0.0.1 - - [28/Jun/2023 13:12:02] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687968720894 HTTP/1.1" 200 -
+2023-06-28 13:12:03 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\object_identification.py', reloading
+2023-06-28 13:12:19 INFO:  * Restarting with stat
+2023-06-28 13:15:11 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 13:15:12 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 13:15:12 DEBUG: interactive is False
+2023-06-28 13:15:12 DEBUG: platform is win32
+2023-06-28 13:15:13 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 13:15:13 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 13:16:43 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 13:16:43 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:16:43 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:16:43 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:16:43 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:16:43 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:16:44 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:16:46 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2023-06-28 13:16:46 INFO: [33mPress CTRL+C to quit[0m
+2023-06-28 13:16:46 INFO:  * Restarting with stat
+2023-06-28 13:17:55 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 13:17:55 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 13:17:55 DEBUG: interactive is False
+2023-06-28 13:17:55 DEBUG: platform is win32
+2023-06-28 13:17:56 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 13:17:56 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 13:18:01 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 13:18:01 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:18:01 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:18:01 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:18:01 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:18:01 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:18:02 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:18:02 INFO: 127.0.0.1 - - [28/Jun/2023 13:18:02] "GET /tracker HTTP/1.1" 200 -
+2023-06-28 13:18:02 INFO: 127.0.0.1 - - [28/Jun/2023 13:18:02] "GET /tracker HTTP/1.1" 200 -
+2023-06-28 13:21:21 INFO: 127.0.0.1 - - [28/Jun/2023 13:21:21] "GET /tracker HTTP/1.1" 200 -
+2023-06-28 13:21:22 INFO: 127.0.0.1 - - [28/Jun/2023 13:21:22] "GET /init HTTP/1.1" 200 -
+2023-06-28 13:21:28 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:21:28 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:21:28 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:21:28 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:21:28 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:21:28 INFO: STREAMING · TIME: 0.0 s · URL: samples/street-humans.mp4
+2023-06-28 13:21:29 INFO: STREAMING · TIME: 0.0 s · URL: samples/street-humans.mp4
+2023-06-28 13:21:29 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:29 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/a2e8b242-ca21-4b90-8bc5-95d4137e5388?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:30 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/a2e8b242-ca21-4b90-8bc5-95d4137e5388?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:30 INFO: 127.0.0.1 - - [28/Jun/2023 13:21:30] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969288107 HTTP/1.1" 200 -
+2023-06-28 13:21:38 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:21:38 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:21:38 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:21:38 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:21:38 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:21:39 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:39 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/38d9d345-cf16-48bd-89eb-8a6e317b8b7c?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:40 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/38d9d345-cf16-48bd-89eb-8a6e317b8b7c?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:40 INFO: 127.0.0.1 - - [28/Jun/2023 13:21:40] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969298120 HTTP/1.1" 200 -
+2023-06-28 13:21:48 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:21:48 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:21:48 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:21:48 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:21:48 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:21:49 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:50 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/42090c21-af5c-445a-8b29-8f8b693d127f?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:50 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/42090c21-af5c-445a-8b29-8f8b693d127f?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:50 INFO: 127.0.0.1 - - [28/Jun/2023 13:21:50] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969308332 HTTP/1.1" 200 -
+2023-06-28 13:21:58 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:21:58 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:21:58 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:21:58 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:21:58 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:21:59 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:21:59 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/4ef6dd46-9032-4e2e-abf7-501ab8d7ac62?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:00 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/4ef6dd46-9032-4e2e-abf7-501ab8d7ac62?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:00 INFO: 127.0.0.1 - - [28/Jun/2023 13:22:00] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969318116 HTTP/1.1" 200 -
+2023-06-28 13:22:08 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:22:08 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:22:08 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:22:08 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:22:08 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:22:09 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:09 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/7c67aa0c-b4d3-4291-bc12-cfcbe0e58359?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:10 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/7c67aa0c-b4d3-4291-bc12-cfcbe0e58359?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:10 INFO: 127.0.0.1 - - [28/Jun/2023 13:22:10] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969328120 HTTP/1.1" 200 -
+2023-06-28 13:22:15 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:22:15 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:22:15 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:22:16 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:22:16 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:22:17 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:17 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/d0721535-b6dc-4b28-80b5-79bda58e2476?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:18 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/d0721535-b6dc-4b28-80b5-79bda58e2476?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:18 INFO: 127.0.0.1 - - [28/Jun/2023 13:22:18] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969335879 HTTP/1.1" 200 -
+2023-06-28 13:22:19 INFO: MobileNetV2 Embedder for Deep Sort initialised
+2023-06-28 13:22:19 INFO: - gpu enabled: False
+2023-06-28 13:22:19 INFO: - half precision: False
+2023-06-28 13:22:19 INFO: - max batch size: 16
+2023-06-28 13:22:19 INFO: - expects BGR: True
+2023-06-28 13:22:19 INFO: MobileNetV2 Embedder for Deep Sort initialised
+2023-06-28 13:22:19 INFO: - gpu enabled: False
+2023-06-28 13:22:19 INFO: - half precision: False
+2023-06-28 13:22:19 INFO: - max batch size: 16
+2023-06-28 13:22:19 INFO: - expects BGR: True
+2023-06-28 13:22:25 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:22:25 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:22:25 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:22:26 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:22:26 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:22:26 INFO: DeepSort Tracker initialised
+2023-06-28 13:22:26 INFO: - max age: 3
+2023-06-28 13:22:26 INFO: - appearance threshold: 0.2
+2023-06-28 13:22:26 INFO: - nms threshold: OFF
+2023-06-28 13:22:26 INFO: - max num of appearance features: None
+2023-06-28 13:22:26 INFO: - overriding track class : No
+2023-06-28 13:22:26 INFO: - today given : No
+2023-06-28 13:22:26 INFO: - in-build embedder : Yes
+2023-06-28 13:22:26 INFO: - polygon detections : No
+2023-06-28 13:22:26 INFO: DeepSort Tracker initialised
+2023-06-28 13:22:26 INFO: - max age: 3
+2023-06-28 13:22:26 INFO: - appearance threshold: 0.2
+2023-06-28 13:22:26 INFO: - nms threshold: OFF
+2023-06-28 13:22:26 INFO: - max num of appearance features: None
+2023-06-28 13:22:26 INFO: - overriding track class : No
+2023-06-28 13:22:26 INFO: - today given : No
+2023-06-28 13:22:26 INFO: - in-build embedder : Yes
+2023-06-28 13:22:26 INFO: - polygon detections : No
+2023-06-28 13:22:26 INFO: STREAMING · TIME: 0.0 s · URL: samples/street-humans.mp4
+2023-06-28 13:22:26 INFO: STREAMING · TIME: 0.0 s · URL: samples/street-humans.mp4
+2023-06-28 13:22:26 ERROR: STREAMING (EXCEPTION) · ERROR: Invalid CUDA 'device=0' requested. Use 'device=cpu' or pass valid CUDA device(s) if available, i.e. 'device=0' or 'device=0,1,2,3' for Multi-GPU.
+
+torch.cuda.is_available(): False
+torch.cuda.device_count(): 0
+os.environ['CUDA_VISIBLE_DEVICES']: None
+See https://pytorch.org/get-started/locally/ for up-to-date torch install instructions if no CUDA devices are seen by torch.
+
+2023-06-28 13:22:26 ERROR: STREAMING (EXCEPTION) · ERROR: Invalid CUDA 'device=0' requested. Use 'device=cpu' or pass valid CUDA device(s) if available, i.e. 'device=0' or 'device=0,1,2,3' for Multi-GPU.
+
+torch.cuda.is_available(): False
+torch.cuda.device_count(): 0
+os.environ['CUDA_VISIBLE_DEVICES']: 0
+See https://pytorch.org/get-started/locally/ for up-to-date torch install instructions if no CUDA devices are seen by torch.
+
+2023-06-28 13:22:27 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:27 INFO: STREAMING FINISHED · STREAM-TIME: 0.0 s · EXEC-TIME: 1.2 s · URL samples/street-humans.mp4
+2023-06-28 13:22:27 INFO: STREAMING FINISHED · STREAM-TIME: 0.0 s · EXEC-TIME: 1.2 s · URL samples/street-humans.mp4
+2023-06-28 13:22:27 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/8222aad9-de81-441c-bb0f-095f5ec7ff56?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:27 INFO: 127.0.0.1 - - [28/Jun/2023 13:22:27] "GET /track/post?url=samples%2Fstreet-humans.mp4&objects=person,%20car,%20bus&seconds=60&confidence=0.35&detector=yolo&dt=1687969335878 HTTP/1.1" 200 -
+2023-06-28 13:22:27 INFO: 127.0.0.1 - - [28/Jun/2023 13:22:27] "GET /track/view?url=samples%2Fstreet-humans.mp4&objects=person,%20car,%20bus&seconds=60&confidence=0.35&detector=yolo&dt=1687969335878 HTTP/1.1" 200 -
+2023-06-28 13:22:27 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/8222aad9-de81-441c-bb0f-095f5ec7ff56?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:27 INFO: 127.0.0.1 - - [28/Jun/2023 13:22:27] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969345895 HTTP/1.1" 200 -
+2023-06-28 13:22:35 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:22:35 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:22:35 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:22:36 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:22:36 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:22:38 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:38 INFO: MEDIAPIPE DETECTOR LOADED · 1.5936496257781982 s
+2023-06-28 13:22:38 INFO: MEDIAPIPE DETECTOR LOADED · 1.5916554927825928 s
+2023-06-28 13:22:38 INFO: MobileNetV2 Embedder for Deep Sort initialised
+2023-06-28 13:22:38 INFO: - gpu enabled: False
+2023-06-28 13:22:38 INFO: - half precision: False
+2023-06-28 13:22:38 INFO: - max batch size: 16
+2023-06-28 13:22:38 INFO: - expects BGR: True
+2023-06-28 13:22:38 INFO: MobileNetV2 Embedder for Deep Sort initialised
+2023-06-28 13:22:38 INFO: - gpu enabled: False
+2023-06-28 13:22:38 INFO: - half precision: False
+2023-06-28 13:22:38 INFO: - max batch size: 16
+2023-06-28 13:22:38 INFO: - expects BGR: True
+2023-06-28 13:22:38 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/f1a6a5a5-e520-41e0-a5d7-75b69c6eb73e?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:38 INFO: DeepSort Tracker initialised
+2023-06-28 13:22:38 INFO: - max age: 3
+2023-06-28 13:22:38 INFO: - appearance threshold: 0.2
+2023-06-28 13:22:38 INFO: - nms threshold: OFF
+2023-06-28 13:22:38 INFO: - max num of appearance features: None
+2023-06-28 13:22:38 INFO: - overriding track class : No
+2023-06-28 13:22:38 INFO: - today given : No
+2023-06-28 13:22:38 INFO: - in-build embedder : Yes
+2023-06-28 13:22:38 INFO: - polygon detections : No
+2023-06-28 13:22:38 INFO: DeepSort Tracker initialised
+2023-06-28 13:22:38 INFO: - max age: 3
+2023-06-28 13:22:38 INFO: - appearance threshold: 0.2
+2023-06-28 13:22:38 INFO: - nms threshold: OFF
+2023-06-28 13:22:38 INFO: - max num of appearance features: None
+2023-06-28 13:22:38 INFO: - overriding track class : No
+2023-06-28 13:22:38 INFO: - today given : No
+2023-06-28 13:22:38 INFO: - in-build embedder : Yes
+2023-06-28 13:22:38 INFO: - polygon detections : No
+2023-06-28 13:22:38 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/f1a6a5a5-e520-41e0-a5d7-75b69c6eb73e?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:38 INFO: 127.0.0.1 - - [28/Jun/2023 13:22:38] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969355881 HTTP/1.1" 200 -
+2023-06-28 13:22:40 INFO: STREAMING · TIME: 0.0 s · URL: samples/street-humans.mp4
+2023-06-28 13:22:40 INFO: STREAMING · TIME: 0.0 s · URL: samples/street-humans.mp4
+2023-06-28 13:22:43 INFO: 127.0.0.1 - - [28/Jun/2023 13:22:43] "GET /track/view?url=samples%2Fstreet-humans.mp4&objects=person,%20car,%20bus&seconds=60&confidence=0.35&detector=mediapipe&dt=1687969356503 HTTP/1.1" 200 -
+2023-06-28 13:22:48 DEBUG: Resetting dropped connection: bigquery.googleapis.com
+2023-06-28 13:22:49 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados/insertAll?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:22:57 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados/insertAll?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:03 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados/insertAll?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:06 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados/insertAll?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:11 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados/insertAll?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:13 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:23:13 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:23:13 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:23:13 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:23:13 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:23:15 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:15 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/d04f83fa-69f7-456d-8a00-68150aa3f98a?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:16 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/d04f83fa-69f7-456d-8a00-68150aa3f98a?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:16 INFO: 127.0.0.1 - - [28/Jun/2023 13:23:16] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969393048 HTTP/1.1" 200 -
+2023-06-28 13:23:21 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados/insertAll?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:23 INFO: STREAMING FINISHED · STREAM-TIME: 7.6 s · EXEC-TIME: 43.2 s · URL samples/street-humans.mp4
+2023-06-28 13:23:24 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 13:23:24 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 13:23:24 INFO: 127.0.0.1 - - [28/Jun/2023 13:23:24] "GET /track/post?url=samples%2Fstreet-humans.mp4&objects=person,%20car,%20bus&seconds=60&confidence=0.35&detector=mediapipe&dt=1687969356503 HTTP/1.1" 200 -
+2023-06-28 13:23:24 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 13:23:25 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 13:23:25 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 13:23:26 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:26 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/5888adb9-f4ff-41a5-83c8-7bbeccfc5a30?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:27 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/5888adb9-f4ff-41a5-83c8-7bbeccfc5a30?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 13:23:27 INFO: 127.0.0.1 - - [28/Jun/2023 13:23:27] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687969403899 HTTP/1.1" 200 -
+2023-06-28 13:24:32 INFO: STREAMING FINISHED · STREAM-TIME: 31.3 s · EXEC-TIME: 111.8 s · URL samples/street-humans.mp4
+2023-06-28 13:25:20 ERROR: STREAMING (EXCEPTION) · ERROR: No module named 'lap'
+2023-06-28 13:25:22 INFO: STREAMING FINISHED · STREAM-TIME: 0.0 s · EXEC-TIME: 233.5 s · URL samples/street-humans.mp4
+2023-06-28 13:25:23 INFO: 127.0.0.1 - - [28/Jun/2023 13:25:23] "GET /track/view?url=samples%2Fstreet-humans.mp4&objects=person,%20car,%20bus&seconds=60&confidence=0.35&detector=ultralytics&dt=1687969288105 HTTP/1.1" 200 -
+2023-06-28 13:26:39 ERROR: STREAMING (EXCEPTION) · ERROR: No module named 'lap'
+2023-06-28 13:26:40 INFO: STREAMING FINISHED · STREAM-TIME: 0.0 s · EXEC-TIME: 311.6 s · URL samples/street-humans.mp4
+2023-06-28 13:26:41 INFO: 127.0.0.1 - - [28/Jun/2023 13:26:41] "GET /track/post?url=samples%2Fstreet-humans.mp4&objects=person,%20car,%20bus&seconds=60&confidence=0.35&detector=ultralytics&dt=1687969288105 HTTP/1.1" 200 -

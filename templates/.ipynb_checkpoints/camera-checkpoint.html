@@ -532,10 +532,10 @@
       let detector = "ultralytics";
         
       // Construct the track view URL
-      const trackViewURL = `${baseURL}/track/view?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${confidence}&detector=${detector}&dt=${new Date().getTime()}`;
+      const trackViewURL = `${baseURL}/track/view?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
       // Construct the track post URL
-      const trackPostURL = `${baseURL}/track/post?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${confidence}&detector=${detector}&dt=${new Date().getTime()}`;
+      const trackPostURL = `${baseURL}/track/post?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
         
       async function fetchData(url) {

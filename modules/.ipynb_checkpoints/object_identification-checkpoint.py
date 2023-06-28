@@ -90,6 +90,8 @@ def tracking_reid(
         tracker = CentroidTrackerWrap(class_names=class_names)
     elif tracker == 'yolo':
         tracker = model
+        if allowed_objects is not None:
+            allowed_objects = [model.names_ids[name] for name in allowed_objects]
         is_yolo_tracker = True
         
     # Get class names from model
@@ -107,11 +109,14 @@ def tracking_reid(
     # total frames of video file
     total_frames = None if is_video_stream else int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # if capture is from video file
 
+    if 'CODE' not in url:
+        proccess_each = 6
+    
     # Get the frames per second (fps)
     fps = fps if 'CODE' in url else cap.get(cv2.CAP_PROP_FPS)
 
     # set the streaming time
-    secs = secs if 'CODE' in url else cap.get(cv2.CAP_PROP_FRAME_COUNT) / fps
+    secs = secs if 'CODE' in url else int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / fps)
     
     # Get the frame dimensions (shape)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -200,7 +205,10 @@ def tracking_reid(
                 # RUN TRACKING
 
                 # update the tracker with the new detections
-                tracking, new_objects = tracker.update_tracks(frame, detections, start)
+                if not is_yolo_tracker:
+                    tracking, new_objects = tracker.update_tracks(frame, detections, start)
+                else:
+                    tracking, new_objects = tracker.update_tracks(frame, detections, start, conf=confidence_threshold, classes=allowed_objects)
 
 
                 # add the tracked object ID to the set of unique track IDs

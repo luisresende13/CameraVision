@@ -24,9 +24,6 @@ from apiflask import APIFlask, Schema, abort
 from apiflask.fields import Integer, String, Float, Boolean, Dict, List, DelimitedList, DateTime
 from apiflask.validators import Length, OneOf
 
-# Flask ngrok
-# from flask_ngrok import run_with_ngrok
-
 # Custom modules
 
 from modules.object_identification import tracking_reid
@@ -160,6 +157,9 @@ def write_demo(frame, inference, time_info, resize_shape=None):
 # FLASK APP CONFIG
 
 app = APIFlask(__name__); CORS(app)
+
+# Flask ngrok
+# from flask_ngrok import run_with_ngrok
 # run_with_ngrok(app)
 
 @app.after_request
@@ -494,7 +494,7 @@ def view_and_post_track(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
 
     if query['detector'] == 'ultralytics':
-        model = 'yolo'
+        model = 'models/yolo/yolov8n.pt'
         tracker = 'yolo'
     else:
         model = query['detector']
@@ -530,7 +530,7 @@ def view_track(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
 
     if query['detector'] == 'ultralytics':
-        model = 'yolo'
+        model = 'models/yolo/yolov8n.pt'
         tracker = 'yolo'
     else:
         model = query['detector']
@@ -566,7 +566,7 @@ def post_track(query):
     allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
     
     if query['detector'] == 'ultralytics':
-        model = 'yolo'
+        model = 'models/yolo/yolov8n.pt'
         tracker = 'yolo'
     else:
         model = query['detector']

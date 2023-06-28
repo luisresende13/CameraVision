@@ -400,3 +400,355 @@ See https://pytorch.org/get-started/locally/ for up-to-date torch install instru
 2023-06-28 13:26:39 ERROR: STREAMING (EXCEPTION) · ERROR: No module named 'lap'
 2023-06-28 13:26:40 INFO: STREAMING FINISHED · STREAM-TIME: 0.0 s · EXEC-TIME: 311.6 s · URL samples/street-humans.mp4
 2023-06-28 13:26:41 INFO: 127.0.0.1 - - [28/Jun/2023 13:26:41] "GET /track/post?url=samples%2Fstreet-humans.mp4&objects=person,%20car,%20bus&seconds=60&confidence=0.35&detector=ultralytics&dt=1687969288105 HTTP/1.1" 200 -
+2023-06-28 15:21:38 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 15:21:39 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:21:39 DEBUG: interactive is False
+2023-06-28 15:21:39 DEBUG: platform is win32
+2023-06-28 15:21:39 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:21:39 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 15:22:26 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 15:22:26 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 15:22:26 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 15:22:26 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 15:22:27 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 15:22:27 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 15:22:28 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 15:22:30 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2023-06-28 15:22:30 INFO: [33mPress CTRL+C to quit[0m
+2023-06-28 15:22:30 INFO:  * Restarting with stat
+2023-06-28 15:22:40 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 15:22:40 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:22:40 DEBUG: interactive is False
+2023-06-28 15:22:40 DEBUG: platform is win32
+2023-06-28 15:22:40 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:22:40 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 15:22:46 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 15:22:46 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 15:22:46 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 15:22:46 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 15:22:47 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 15:22:47 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 15:22:47 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 15:27:00 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 15:27:00 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:27:00 DEBUG: interactive is False
+2023-06-28 15:27:00 DEBUG: platform is win32
+2023-06-28 15:27:01 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:27:01 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 15:27:45 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 15:27:45 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 15:27:45 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 15:27:45 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 15:27:45 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 15:27:45 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 15:27:46 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 15:27:47 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2023-06-28 15:27:47 INFO: [33mPress CTRL+C to quit[0m
+2023-06-28 15:27:47 INFO:  * Restarting with stat
+2023-06-28 15:27:53 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 15:27:53 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:27:53 DEBUG: interactive is False
+2023-06-28 15:27:53 DEBUG: platform is win32
+2023-06-28 15:27:53 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:27:53 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 15:27:59 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 15:27:59 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 15:27:59 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 15:27:59 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 15:27:59 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 15:27:59 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 15:28:00 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 15:38:04 INFO: 127.0.0.1 - - [28/Jun/2023 15:38:04] "GET /tracker HTTP/1.1" 200 -
+2023-06-28 15:38:06 INFO: 127.0.0.1 - - [28/Jun/2023 15:38:06] "GET /init HTTP/1.1" 200 -
+2023-06-28 15:38:15 INFO: 127.0.0.1 - - [28/Jun/2023 15:38:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2023-06-28 15:41:45 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\yolo_util.py', reloading
+2023-06-28 15:41:51 INFO:  * Restarting with stat
+2023-06-28 15:43:04 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 15:43:04 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:43:04 DEBUG: interactive is False
+2023-06-28 15:43:04 DEBUG: platform is win32
+2023-06-28 15:43:04 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:43:04 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 15:43:42 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 15:43:42 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 15:43:42 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 15:43:42 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 15:43:43 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 15:43:43 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 15:43:43 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 15:43:47 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\yolo_util.py', reloading
+2023-06-28 15:43:47 INFO:  * Restarting with stat
+2023-06-28 15:43:54 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 15:43:54 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:43:54 DEBUG: interactive is False
+2023-06-28 15:43:54 DEBUG: platform is win32
+2023-06-28 15:43:55 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 15:43:55 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 15:44:00 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 15:44:00 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 15:44:00 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 15:44:00 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 15:44:00 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 15:44:00 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 15:44:01 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:04:46 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\yolo_util.py', reloading
+2023-06-28 16:04:53 INFO:  * Restarting with stat
+2023-06-28 16:06:21 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:06:22 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:06:22 DEBUG: interactive is False
+2023-06-28 16:06:22 DEBUG: platform is win32
+2023-06-28 16:06:22 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:06:22 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:07:05 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:07:05 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:07:05 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:07:05 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:07:05 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:07:05 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:07:06 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:08:45 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\yolo_util.py', reloading
+2023-06-28 16:08:46 INFO:  * Restarting with stat
+2023-06-28 16:08:53 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:08:53 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:08:53 DEBUG: interactive is False
+2023-06-28 16:08:53 DEBUG: platform is win32
+2023-06-28 16:08:54 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:08:54 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:08:54 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\object_identification.py', reloading
+2023-06-28 16:09:03 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:09:03 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:09:03 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:09:03 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:09:03 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:09:03 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:09:04 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:09:05 INFO:  * Restarting with stat
+2023-06-28 16:09:11 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:09:11 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:09:11 DEBUG: interactive is False
+2023-06-28 16:09:11 DEBUG: platform is win32
+2023-06-28 16:09:11 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:09:11 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:09:16 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:09:16 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:09:16 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:09:16 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:09:16 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:09:16 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:09:17 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:10:46 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\yolo_util.py', reloading
+2023-06-28 16:10:46 INFO:  * Restarting with stat
+2023-06-28 16:10:52 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:10:52 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:10:52 DEBUG: interactive is False
+2023-06-28 16:10:52 DEBUG: platform is win32
+2023-06-28 16:10:53 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:10:53 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:10:58 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:10:58 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:10:58 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:10:58 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:10:59 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:10:59 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:11:00 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:12:46 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\yolo_util.py', reloading
+2023-06-28 16:12:47 INFO:  * Restarting with stat
+2023-06-28 16:12:53 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:12:53 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:12:53 DEBUG: interactive is False
+2023-06-28 16:12:53 DEBUG: platform is win32
+2023-06-28 16:12:53 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:12:53 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:12:58 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:12:58 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:12:58 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:12:58 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:12:58 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:12:58 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:12:59 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:13:24 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\yolo_util.py', reloading
+2023-06-28 16:13:24 INFO:  * Restarting with stat
+2023-06-28 16:13:30 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:13:30 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:13:30 DEBUG: interactive is False
+2023-06-28 16:13:30 DEBUG: platform is win32
+2023-06-28 16:13:30 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:13:30 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:13:35 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:13:35 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:13:35 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:13:35 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:13:35 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:13:35 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:13:36 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:14:54 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\object_identification.py', reloading
+2023-06-28 16:14:55 INFO:  * Restarting with stat
+2023-06-28 16:15:01 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:15:01 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:15:01 DEBUG: interactive is False
+2023-06-28 16:15:01 DEBUG: platform is win32
+2023-06-28 16:15:01 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:15:01 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:15:06 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:15:06 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:15:06 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:15:06 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:15:07 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:15:07 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:15:07 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:16:54 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\object_identification.py', reloading
+2023-06-28 16:16:55 INFO:  * Restarting with stat
+2023-06-28 16:17:01 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:17:01 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:17:01 DEBUG: interactive is False
+2023-06-28 16:17:01 DEBUG: platform is win32
+2023-06-28 16:17:01 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:17:01 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:17:06 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:17:06 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:17:06 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:17:06 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:17:07 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:17:07 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:17:07 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:18:27 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\yolo_util.py', reloading
+2023-06-28 16:18:27 INFO:  * Restarting with stat
+2023-06-28 16:18:34 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:18:34 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:18:34 DEBUG: interactive is False
+2023-06-28 16:18:34 DEBUG: platform is win32
+2023-06-28 16:18:34 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:18:34 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:18:43 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:18:43 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:18:43 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:18:43 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:18:43 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:18:43 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:18:44 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:18:58 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\object_identification.py', reloading
+2023-06-28 16:18:59 INFO:  * Restarting with stat
+2023-06-28 16:20:07 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\object_identification.py', reloading
+2023-06-28 16:20:07 INFO:  * Restarting with stat
+2023-06-28 16:20:12 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:20:12 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:20:12 DEBUG: interactive is False
+2023-06-28 16:20:12 DEBUG: platform is win32
+2023-06-28 16:20:12 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:20:12 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:20:18 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:20:18 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:20:18 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:20:18 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:20:18 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:20:18 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:20:19 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:22:49 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\.ipynb_checkpoints\\object_identification-checkpoint.py', reloading
+2023-06-28 16:22:50 INFO:  * Restarting with stat
+2023-06-28 16:22:56 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:22:56 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:22:56 DEBUG: interactive is False
+2023-06-28 16:22:56 DEBUG: platform is win32
+2023-06-28 16:22:56 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:22:56 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:23:02 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:23:02 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:23:02 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:23:02 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:23:02 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:23:02 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:23:03 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:23:18 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\yolo_util.py', reloading
+2023-06-28 16:23:19 INFO:  * Restarting with stat
+2023-06-28 16:23:25 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:23:25 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:23:25 DEBUG: interactive is False
+2023-06-28 16:23:25 DEBUG: platform is win32
+2023-06-28 16:23:25 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:23:25 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json
+2023-06-28 16:23:30 DEBUG: This service is instrumented using OpenTelemetry. OpenTelemetry or one of its components could not be imported; please add compatible versions of opentelemetry-api and opentelemetry-instrumentation packages in order to get BigQuery Tracing data.
+2023-06-28 16:23:30 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:23:30 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:23:30 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:23:30 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:23:30 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:23:31 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/datasets/video_analytics/tables/objetos_identificados?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:08 INFO: 127.0.0.1 - - [28/Jun/2023 16:24:08] "GET /tracker HTTP/1.1" 200 -
+2023-06-28 16:24:09 INFO: 127.0.0.1 - - [28/Jun/2023 16:24:09] "GET /init HTTP/1.1" 200 -
+2023-06-28 16:24:23 INFO: 127.0.0.1 - - [28/Jun/2023 16:24:23] "GET /camera_app HTTP/1.1" 200 -
+2023-06-28 16:24:25 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:25 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/46c7dca9-379b-4b96-8731-53139371ab55?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:25 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/46c7dca9-379b-4b96-8731-53139371ab55?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:25 INFO: 127.0.0.1 - - [28/Jun/2023 16:24:25] "GET /cameras?dt=1687980264560 HTTP/1.1" 200 -
+2023-06-28 16:24:28 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:24:28 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:24:28 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:24:29 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:24:29 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:24:30 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:30 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/6904bc5a-3039-4d0b-8923-47955a5e7eab?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:31 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/6904bc5a-3039-4d0b-8923-47955a5e7eab?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:31 INFO: 127.0.0.1 - - [28/Jun/2023 16:24:31] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687980268785 HTTP/1.1" 200 -
+2023-06-28 16:24:32 INFO: STREAMING · TIME: 0.0 s · URL: samples/street-humans.mp4
+2023-06-28 16:24:32 INFO: STREAMING · TIME: 0.0 s · URL: samples/street-humans.mp4
+2023-06-28 16:24:33 ERROR: STREAMING (EXCEPTION) · ERROR: name 'confidence' is not defined
+2023-06-28 16:24:33 ERROR: STREAMING (EXCEPTION) · ERROR: name 'confidence' is not defined
+2023-06-28 16:24:33 INFO: STREAMING FINISHED · STREAM-TIME: 0.0 s · EXEC-TIME: 1.2 s · URL samples/street-humans.mp4
+2023-06-28 16:24:34 INFO: STREAMING FINISHED · STREAM-TIME: 0.0 s · EXEC-TIME: 1.4 s · URL samples/street-humans.mp4
+2023-06-28 16:24:34 INFO: 127.0.0.1 - - [28/Jun/2023 16:24:34] "GET /track/post?url=samples%2Fstreet-humans.mp4&objects=person,%20%20car,%20%20bus&seconds=40&confidence=0.3&detector=ultralytics&dt=1687980268783 HTTP/1.1" 200 -
+2023-06-28 16:24:34 INFO: 127.0.0.1 - - [28/Jun/2023 16:24:34] "GET /track/view?url=samples%2Fstreet-humans.mp4&objects=person,%20%20car,%20%20bus&seconds=40&confidence=0.3&detector=ultralytics&dt=1687980268783 HTTP/1.1" 200 -
+2023-06-28 16:24:38 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:24:38 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:24:38 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:24:39 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:24:39 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:24:41 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:41 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/7c45aaed-0f6c-4d7a-a7c2-a3052172d40d?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:42 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/7c45aaed-0f6c-4d7a-a7c2-a3052172d40d?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:42 INFO: 127.0.0.1 - - [28/Jun/2023 16:24:42] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687980278792 HTTP/1.1" 200 -
+2023-06-28 16:24:48 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:24:48 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:24:48 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:24:49 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:24:49 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:24:50 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:50 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/adf0df89-32c9-4e3e-abb9-e3322d256ced?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:50 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/adf0df89-32c9-4e3e-abb9-e3322d256ced?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:24:50 INFO: 127.0.0.1 - - [28/Jun/2023 16:24:50] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687980288800 HTTP/1.1" 200 -
+2023-06-28 16:24:59 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:24:59 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:24:59 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:24:59 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:24:59 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:25:00 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:25:01 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/539b0104-4e1f-445b-ac4b-a7f4ee597430?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:25:01 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/539b0104-4e1f-445b-ac4b-a7f4ee597430?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:25:01 INFO: 127.0.0.1 - - [28/Jun/2023 16:25:01] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687980298892 HTTP/1.1" 200 -
+2023-06-28 16:25:08 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:25:08 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:25:08 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:25:09 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:25:09 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:25:10 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:25:10 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/a8ff932e-d5ca-4103-903c-c52da68d7f6f?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:25:11 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/a8ff932e-d5ca-4103-903c-c52da68d7f6f?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:25:11 INFO: 127.0.0.1 - - [28/Jun/2023 16:25:11] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687980308893 HTTP/1.1" 200 -
+2023-06-28 16:25:18 DEBUG: Converted retries value: 3 -> Retry(total=3, connect=None, read=None, redirect=None, status=None)
+2023-06-28 16:25:18 DEBUG: Making request: POST https://oauth2.googleapis.com/token
+2023-06-28 16:25:18 DEBUG: Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-06-28 16:25:19 DEBUG: https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-06-28 16:25:19 DEBUG: Starting new HTTPS connection (1): bigquery.googleapis.com:443
+2023-06-28 16:25:20 DEBUG: https://bigquery.googleapis.com:443 "POST /bigquery/v2/projects/octacity/jobs?prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:25:20 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/24dc34b6-44f2-4bd4-8829-6ce6ada54946?maxResults=0&location=US&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:25:21 DEBUG: https://bigquery.googleapis.com:443 "GET /bigquery/v2/projects/octacity/queries/24dc34b6-44f2-4bd4-8829-6ce6ada54946?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timestamp=True&prettyPrint=false HTTP/1.1" 200 None
+2023-06-28 16:25:21 INFO: 127.0.0.1 - - [28/Jun/2023 16:25:21] "GET /objects?url=samples%2Fstreet-humans.mp4&dt=1687980318892 HTTP/1.1" 200 -
+2023-06-28 16:25:21 INFO:  * Detected change in 'C:\\Users\\luisr\\Desktop\\Repositories\\Apps\\APIs\\video-analytics\\modules\\object_identification.py', reloading
+2023-06-28 16:25:24 INFO:  * Restarting with stat
+2023-06-28 16:26:26 DEBUG: matplotlib data path: C:\Users\luisr\Desktop\Repositories\Apps\APIs\.venv\lib\site-packages\matplotlib\mpl-data
+2023-06-28 16:26:26 DEBUG: CONFIGDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:26:26 DEBUG: interactive is False
+2023-06-28 16:26:26 DEBUG: platform is win32
+2023-06-28 16:26:27 DEBUG: CACHEDIR=C:\Users\luisr\.matplotlib
+2023-06-28 16:26:27 DEBUG: Using fontManager instance from C:\Users\luisr\.matplotlib\fontlist-v330.json

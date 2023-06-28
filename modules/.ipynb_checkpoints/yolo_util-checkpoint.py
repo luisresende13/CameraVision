@@ -7,6 +7,7 @@ class YoloWrap:
         # initialize YOLO object detection model
         self.model = YOLO(model)
         self.class_names = self.model.names
+        self.names_ids = {value: key for key, value in self.model.names.items()}
         # initialize set for track ids 
         self.unique_track_ids = set()
 
@@ -15,9 +16,9 @@ class YoloWrap:
         detections = self.model.predict(
             frame, save=False, show=False,
             imgsz=640,
-            conf=0.25, iou=0.7,
+            conf=0.3, iou=0.7,
             max_det=300,  # vid_stride=0,
-            stream=False, device=0, verbose=True,
+            stream=False, device=0, verbose=False,
         )
 
         # formatted yolo detections
@@ -26,16 +27,17 @@ class YoloWrap:
         # return standard format detections
         return detections
     
-    def update_tracks(self, frame, detections, start):
+    def update_tracks(self, frame, detections, start, conf=0.3, classes=None):
         ######################################
         # RUN TRACKING
 
         results = self.model.track(
             frame, save=False, show=False,
-            imgsz=640,
-            conf=0.3, iou=0.7,
-            max_det=300,  # vid_stride=0,
-            stream=False, device=0, persist=True
+            imgsz=640, classes=classes,
+            conf=conf, iou=0.7,
+            max_det=300, vid_stride=0,
+            stream=False, device=0, persist=True,
+            verbose=False,
         )  # , tracker="bytetrack.yaml")
 
         result = results[0]

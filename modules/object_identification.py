@@ -45,8 +45,9 @@ def tracking_reid(
     model='yolo',
     tracker='deepsort',
     confidence_threshold=0.3,
+    iou=0.7,
     allowed_objects=None,
-    proccess_each=1,
+    process_each=1,
     run_detection_each=1,
     post_processing_function=None,
     post_processing_args={},
@@ -62,7 +63,7 @@ def tracking_reid(
     resize_shape=(300, 300),
     stream_shape=(),
 ):
-    
+
     # initialize detection model instance
     if model == 'yolo':
         model = object_detection_models[model]
@@ -90,8 +91,6 @@ def tracking_reid(
         tracker = CentroidTrackerWrap(class_names=class_names)
     elif tracker == 'yolo':
         tracker = model
-        if allowed_objects is not None:
-            allowed_objects = [model.names_ids[name] for name in allowed_objects]
         is_yolo_tracker = True
         
     # Get class names from model
@@ -100,8 +99,8 @@ def tracking_reid(
     # check if video capture is a live http image stream
     is_video_stream = url.startswith('http')
 
-    if max_frames is None and secs is None and exec_secs is None:
-        raise "At least one of `max_frames`, `secs` or `exec_secs` should be specified."
+    # if max_frames is None and secs is None and exec_secs is None:
+    #     raise "At least one of `max_frames`, `secs` or `exec_secs` should be specified."
     
     # initialize the video capture object
     cap = cv2.VideoCapture(url)
@@ -109,8 +108,8 @@ def tracking_reid(
     # total frames of video file
     total_frames = None if is_video_stream else int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # if capture is from video file
 
-    if 'CODE' not in url:
-        proccess_each = 6
+    # if 'CODE' not in url:
+        # process_each = 6
     
     # Get the frames per second (fps)
     fps = fps if 'CODE' in url else cap.get(cv2.CAP_PROP_FPS)
@@ -137,7 +136,7 @@ def tracking_reid(
         start_time = time()
 
         # initialize number of frames processed
-        n_frames = 0
+        n_frames = -1
 
         # start stream loop
         while True:
@@ -145,11 +144,14 @@ def tracking_reid(
             # get the current time and date for Brazil time zone
             start = datetime.datetime.now(brazil_tz)
 
+            # update number of frames processed
+            n_frames += 1
+
             # update video time in seconds
             video_seconds = n_frames / fps
 
             # break loop if `max_frames` is reached
-            if max_frames is not None and max_frames == n_frames:
+            if max_frames is not None and n_frames >= max_frames:
                 break
 
             # break loop if execution seconds `exec_secs` is reached
@@ -182,7 +184,7 @@ def tracking_reid(
                 break
 
             # continue if `n_frames` is not zero nor a multiple of `process_each`. continue for n_frames = 0
-            if n_frames % proccess_each != 0:
+            if n_frames % process_each != 0:
                 continue
 
             # skip only detection and tracking if `n_frames` is not zero nor a multiple of `run_detection_each`. skip for n_frames = 0
@@ -208,21 +210,25 @@ def tracking_reid(
                 if not is_yolo_tracker:
                     tracking, new_objects = tracker.update_tracks(frame, detections, start)
                 else:
-                    tracking, new_objects = tracker.update_tracks(frame, detections, start, conf=confidence_threshold, classes=allowed_objects)
-
+                    if allowed_objects is not None:
+                        allowed_objects = [model.names_ids[name] for name in allowed_objects]
+                    tracking, new_objects = tracker.update_tracks(
+                        frame, detections, start,
+                        conf=confidence_threshold,
+                        iou=iou,
+                        classes=allowed_objects,
+                    )
 
                 # add the tracked object ID to the set of unique track IDs
                 unique_track_ids = tracker.unique_track_ids
 
+                
             ######################################
             # PROCESS RESULT
 
             # inference end time 
             end = datetime.datetime.now(brazil_tz)
             end_time = time()
-
-            # update number of frames processed
-            n_frames += 1
 
             # JOIN INFERENCE OUTPUTS AND TIME METADATA
             inference = (detections, tracking, new_objects)

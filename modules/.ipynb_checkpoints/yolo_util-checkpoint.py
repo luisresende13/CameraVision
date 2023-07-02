@@ -1,4 +1,5 @@
 from ultralytics import YOLO
+import cv2
 
 class YoloWrap:
     
@@ -10,6 +11,9 @@ class YoloWrap:
         self.names_ids = {value: key for key, value in self.model.names.items()}
         # initialize set for track ids 
         self.unique_track_ids = set()
+        is_cuda = cv2.cuda.getCudaEnabledDeviceCount()
+        self.device = 0 if is_cuda > 0 else 'cpu'
+        print(f'YOLO Ultralytics model initializing · IS-DEVICE-CUDA: {is_cuda > 0}')
 
     def detect(self, frame):
         # run the YOLO model on the frame
@@ -18,7 +22,7 @@ class YoloWrap:
             imgsz=640,
             conf=0.3, iou=0.7,
             max_det=300,  # vid_stride=0,
-            stream=False, device=0, verbose=False,
+            stream=False, device=self.device, verbose=False,
         )
 
         # formatted yolo detections
@@ -27,16 +31,22 @@ class YoloWrap:
         # return standard format detections
         return detections
     
-    def update_tracks(self, frame, detections, start, conf=0.3, classes=None):
+    def update_tracks(self, frame, detections, start, conf=0.3, iou=0.7, classes=None):
+        
         ######################################
         # RUN TRACKING
 
         results = self.model.track(
             frame, save=False, show=False,
-            imgsz=640, classes=classes,
-            conf=conf, iou=0.7,
-            max_det=300, vid_stride=0,
-            stream=False, device=0, persist=True,
+            classes=classes,
+            conf=conf,
+            imgsz=640,
+            iou=iou,
+            max_det=300,
+            vid_stride=0,
+            stream=False,
+            device=self.device,
+            persist=True,
             verbose=False,
         )  # , tracker="bytetrack.yaml")
 

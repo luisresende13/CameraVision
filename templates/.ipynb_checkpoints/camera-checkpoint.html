@@ -359,22 +359,42 @@
     }
 
     .spinner {
-      background-color: #fff;
-      display: none;
-      width: 20px;
-      height: 20px;
-      margin: 20px auto; /* Increase the margin value as desired */
-      border-radius: 50%;
-      border: 2px solid #f3f3f3;
-      border-top: 2px solid #3498db;
-      animation: spin 1s linear infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 16px;
+      padding: 15px 0;
     }
 
+    .spinner::after {
+      content: "";
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      border-top-color: #333;
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+      
+    #video-player-contaianer {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      
   </style>
 </head>
 <body>
   <header>
-    <h1>Camera App</h1>
+    <h1>Camera App v0.1</h1>
     <button id="user-button">&#x1F464;</button>
   </header>
   
@@ -388,8 +408,8 @@
 <!--         <div class="textarea-container"> -->
           <textarea id="objectsInput" name="objects" rows="3" placeholder="Insira os objetos (ou deixe vazio para selectionar todos)">person, car, bus</textarea>
 <!--         </div> -->
-        <button id="btn-post-camera" type="submit" style="background-color: #333; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Cadastrar</button>
-        <div id="spinner-post-camera"></div>
+        <button id="btn-post-camera" type="submit" style="display: inline; background-color: #333; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Cadastrar</button>
+        <div id="spinner-post-camera" style="display: inline;"></div>
       </form>
       <div id="camera-list-container" class="camera-section">
         <h2>Câmeras cadastradas</h2>
@@ -401,12 +421,12 @@
       </div>
     </div>
     <div>
-      <h2 style="color: #333;">Transmissão · Camera #1</h2>
-      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+      <h2 style="color: #333; padding-bottom: 10px;">Transmissão</h2>
+      <div id="video-player-container">
         <img id="video-player">
       </div>
       <div>
-        <h2 style="color: #333;">Configuração · Camera #1</h2>
+        <h2 style="color: #333; padding-bottom: 10px;">Configuração</h2>
         <div class="mark-all">
           <input type="checkbox" id="mark-all-checkbox">
           <label for="mark-all-checkbox">Selecionar todos</label>
@@ -446,22 +466,28 @@
     let baseURL;
 
     // Check if the host a server 
-    if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev')) {
+    if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev') | host.includes('http://15.229.21.220')) {
       baseURL = `.`;
     } 
     // Check if the host the file system 
     else if (host == '') {
-      baseURL = `http://127.0.0.1:5000`;
+      // baseURL = `http://127.0.0.1:5000`;
+      baseURL = 'http://15.229.21.220';
     } 
     // If none of the conditions match, set the base URL to 'api.' followed by the host
     else {
-      baseURL = `${protocol}//${host}`; // Set base URL to 'api.example.com'
+      baseURL = 'http://15.229.21.220'; // default base url for hosted html document
+      // baseURL = `${protocol}//${host}`; // Set base URL to 'api.example.com'
       // baseURL = `https://analytics.octacity.dev`; // Set base URL to 'api.example.com'
     }
     
+    baseURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app' // cloud run server
+    // baseURL = 'http://15.229.21.220'
+    baseStreamURL = 'http://18.230.198.19'
+
     // Log the final base URL and host
-    console.log('Base URL:', baseURL);
     console.log('Host:', host);
+    console.log('Base URL:', baseURL);
 
       
     // Fill checkbox list -------------------------------
@@ -502,12 +528,53 @@
       
     let intervalId;
     let inactivityTimeout;
-    let inactiveTime = 75000;
-    let updateTime = 10000;
+    let inactiveTime = 60000;
+    let updateTime = 15000;
     let isActive = false;
+    let currentURL;
+      
+    // Function to stop updates
+    function stopUpdates() {
+      clearInterval(intervalId); // Clear the interval
+      isActive = false;
+      console.log("Updates stopped.");
+    }
+
+      // Function to start updates
+      function startUpdates() {
+          
+        isActive = true;
+        clearInterval(intervalId); // Clear any existing interval
+
+        // Fetch and populate identified objects immediately
+        fetchAndPopulateObjects(currentURL);
+
+        // Schedule periodic updates every 8 seconds
+        intervalId = setInterval(() => fetchAndPopulateObjects(currentURL), updateTime);
+
+        console.log("Updates started.");
+      }
+
+      // Check for user inactivity
+      function onUserActive() {
+        if (!isActive) {
+          // Start the updates
+          startUpdates();
+
+          // Sechedule stop of updates
+          setTimeout(stopUpdates, inactiveTime);
+        }
+      }
 
     function selectCameraItem(event) {
-                
+
+      stopUpdates()
+      const spinner = document.getElementById("spinner-get-cameras");
+      if (spinner.classList.contains("spinner")) {
+          console.log("Cameras loading shut down.")
+          spinner.classList.remove("spinner");
+      }
+
       const selectedItem = event.currentTarget;
       const cameraList = document.getElementById('camera-list');
       const selectedItems = cameraList.getElementsByClassName('selected');
@@ -525,125 +592,140 @@
       
       // Get the request query values
       let url = selectedItem.id
+      currentURL = url
       let confidence = 0.3;
       // let objects = yoloObjects;
       let objects = selectedCamObjects;
-      let seconds = 40;
+      let seconds = 120;
       let detector = "ultralytics";
         
       // Construct the track view URL
-      const trackViewURL = `${baseURL}/track/view?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackViewURL = `${baseStreamURL}/track/view?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
       // Construct the track post URL
-      const trackPostURL = `${baseURL}/track/post?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackPostURL = `${baseStreamURL}/track/post?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
         
-      async function fetchData(url) {
-        try {
-           console.log('Fetching data...');
-           const response = await fetch(url);
-           console.log('Data fetched successfully.');
+      // Get the parent container element
+      const container = document.getElementById('video-player-container');
 
+      // Create a new img element
+      const newImg = document.createElement('img');
+
+      // Set the source for the new img element
+      newImg.src = trackViewURL; // Replace 'new-source.jpg' with the desired image source
+
+      // Replace the existing img element with the new img element
+      container.replaceChild(newImg, document.getElementById('video-player'));
+      newImg.id = "video-player";
+      console.log(`Track-View request started · URL: ${trackViewURL}`)
+
+      // Update the image source
+      // const img = document.getElementById('video-player');
+      // img.src = trackViewURL;
+
+        // console.log('Fetching data...');
+        // await fetch(cameraEndpoint, {
+        //   method: 'PUT',
+        //   headers: {
+        //     'Content-Type': 'application/json'
+        //   },
+        //   mode: 'no-cors',
+        //   body: JSON.stringify(requestData)
+        // })
+        //   .then(response => {
+        //     // Handle the response
+        //    const response = await fetch(Url);
+        //    const data = await response.json();
+        //    console.log('Data fetched successfully.');
+        //   })
+        //   .catch(error => {
+        //    // Handle any errors that occurred during the request
+        //    console.error('Error:', error);
+        //   });
+        
+      async function fetchData(Url) {
+        try {
+           console.log('Track Post fetch started');
+           const response = await fetch(Url, {
+          // method: 'GET',
+          // headers: {
+            // 'Content-Type': 'application/json'
+          // },
+          // mode: 'no-cors',
+        });
            const data = await response.json();
-           console.log('Data successfully.');
+           console.log('Track Post fetch successful!');
 
            // Handle the received data
            console.log('Response:', data);
          } catch (error) {
-           // Handle any errors that occurred during the request
-           console.error('Error:', error);
          }
        }
-
-      // Request object identificataion posting asyncronously
-      console.log('Starting data fetch...');
+        
+      // Request object identification posting asyncronously
+      console.log('Fetching Track Post for URL:', url);
       fetchData(trackPostURL);
-
-      // Update the image source
-      const img = document.getElementById('video-player');
-      img.src = trackViewURL;
-
-      // Function to start updates
-      function startUpdates() {
-        isActive = true;
-        clearInterval(intervalId); // Clear any existing interval
-
-        // Fetch and populate identified objects immediately
-        fetchAndPopulateObjects(url);
-
-        // Schedule periodic updates every 8 seconds
-        intervalId = setInterval(() => fetchAndPopulateObjects(url), updateTime);
-
-        console.log("Updates started.");
-      }
-
-      // Function to stop updates
-      function stopUpdates() {
-        clearInterval(intervalId); // Clear the interval
-        isActive = false;
-        console.log("Updates stopped.");
-      }
-
-      // Check for user inactivity
-      function onUserActive() {
-        if (!isActive) {
-          // Start the updates
-          startUpdates();
-
-          // Sechedule stop of updates
-          setTimeout(stopUpdates, inactiveTime);
-        }
-      }
-
-      // Add event listeners for user inactivity
-      isActive = false;
-      onUserActive();
+      console.log('Continued Track Post for URL:', url);
 
       window.addEventListener('scroll', onUserActive);
       document.addEventListener('mousemove', onUserActive);
       document.addEventListener('keypress', onUserActive);
-        
+
+      // Add event listeners for user inactivity
+      isActive = false;
+      onUserActive();
     }
 
     // Function to handle camera deletion
     function deleteCamera(event) {
       event.stopPropagation(); // Stop event propagation
       
+      const spinner = document.getElementById("spinner-get-cameras");
+      if (spinner.classList.contains("spinner")) {
+          console.log("Cameras are still loading. Skipped.")
+          return
+      }
+      spinner.classList.add("spinner");
+
       const cameraItem = event.currentTarget.parentNode.parentNode;
       const cameraURL = cameraItem.id
       
       const deleteCameraURL = `${baseURL}/camera/delete`;
-      // const deleteCameraURL = `${baseURL}/camera?url=${encodeURIComponent(cameraURL)}`;
 
-        fetch(deleteCameraURL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json', // Set the appropriate content type
-          },
-          // You can include a request body if necessary
-          body: JSON.stringify({
-              url: cameraURL
-          }),
+      fetch(deleteCameraURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', // Set the appropriate content type
+        },
+        // You can include a request body if necessary
+        body: JSON.stringify({
+            url: cameraURL
+        }),
+      })
+        .then(response => {
+          if (response.ok) {
+            // Request was successful
+            return response.json(); // You can parse the response data if needed
+         } else {
+            // Request failed
+            alert('Deletar câmera falhou. Erro do servidor: ' + response.status);
+            // Request failed
+            throw new Error('Error: ' + response.status);            }
         })
-          .then(response => {
-            if (response.ok) {
-              // Request was successful
-              return response.json(); // You can parse the response data if needed
-            } else {
-              // Request failed
-              alert('Deletar câmera falhou. Erro do servidor: ' + response.status);
-              // Request failed
-              throw new Error('Error: ' + response.status);            }
-          })
-          .then(data => {
-            cameraItem.remove();
-            // Process the response data
-            console.log(data);
-          })
-          .catch(error => {
-            // Handle any errors that occurred during the request
-            console.error(error);
-          });      
+        .then(data => {
+          cameraItem.remove();
+          // Process the response data
+          console.log(data);
+        })
+        .catch(error => {
+          // Handle any errors that occurred during the request
+          console.error(error);
+        })
+        .finally(() => {
+          // Remove spinner class
+          spinner.classList.remove("spinner");
+        });
       
     }
       
@@ -657,7 +739,6 @@
           console.log("Fetching cameras is still running. Skipped.")
           return
       }
-        
       spinner.classList.add("spinner");
         
       const camerasURL = `${baseURL}/cameras?dt=${new Date().getTime()}`;      
@@ -732,24 +813,14 @@
           return
       }
       spinner.classList.add("spinner");
+        
       const objectsURL = `${baseURL}/objects?url=${encodeURIComponent(url)}&dt=${new Date().getTime()}`;
-      console.log("Fetching objects from:", objectsURL);
+
+      console.log("Fetching objects for URL:", url);
       fetch(objectsURL)
         .then((response) => response.json())
         .then((data) => {
           console.log("Received data:", data);
-
-          // Sample list item
-      // <div id="event-list-container" style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; margin: 20px 0;">
-      //   <ul id="event-list" class="scrollable-list-events event-list">
-          // <li>
-          //   <div class="event-info">
-          //     <div class="event-title">Event 1</div>
-          //     <div class="event-title">Type</div>
-          //     <div class="event-date">Date and Time</div>
-          //   </div>
-          // </li>
-
           
           const existingRows = Array.from(
             document.querySelectorAll("#event-list-container ul li")
@@ -812,15 +883,15 @@
           const tableBody = document.querySelector("#event-list-container ul");
           tableBody.prepend(fragment);
 
-          // Remove spinner class
-          spinner.classList.remove("spinner");
         })
         .catch((error) => {
           console.error("Error fetching identified objects:", error);
 
+        })
+        .finally(() => {
           // Remove spinner class
-          spinner.classList.remove("spinner");
-        });
+          spinner.classList.remove("spinner");          
+      });
     }
 
       
@@ -854,15 +925,17 @@
       // Post Camera Registration Functionality ---------------------------
         
       var postCameraButton = document.getElementById('btn-post-camera');
-      var spinner = document.getElementById('spinner-post-camera');
-      if (spinner.classList.contains("spinner")) {
-          console.log("Fetching objects is still running. Skipped.")
-          return
-      }
 
       postCameraButton.addEventListener('click', function(event) {
         event.preventDefault();
 
+        var spinner = document.getElementById('spinner-post-camera');
+        if (spinner.classList.contains("spinner")) {
+            console.log("Post camera is still running. Skipped.")
+            return
+        }
+        spinner.classList.add("spinner");
+  
         var url = document.getElementById('camera-url').value;
         var objects = document.getElementById('objectsInput').value;
         // var objects = ''
@@ -910,8 +983,8 @@
           alert('An error occurred. Please try again later.');
         })
         .finally(function() {
-          // Hide the spinner
-          spinner.style.display = 'none';
+          // Remove spinner class
+          spinner.classList.remove("spinner");          
         });
       });
         

@@ -471,8 +471,8 @@
     } 
     // Check if the host the file system 
     else if (host == '') {
-      // baseURL = `http://127.0.0.1:5000`;
-      baseURL = 'http://15.229.21.220';
+      baseURL = `http://127.0.0.1:5000`;
+      // baseURL = 'http://15.229.21.220';
     } 
     // If none of the conditions match, set the base URL to 'api.' followed by the host
     else {
@@ -483,11 +483,13 @@
     
     baseURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app' // cloud run server
     // baseURL = 'http://15.229.21.220'
+    // baseStreamURL = 'http://15.229.21.220'
     baseStreamURL = 'http://18.230.198.19'
-
+      
     // Log the final base URL and host
     console.log('Host:', host);
     console.log('Base URL:', baseURL);
+    console.log('Base Streaming URL:', baseStreamURL);
 
       
     // Fill checkbox list -------------------------------
@@ -507,22 +509,55 @@
       'Laptop',
       'Notebook',
       'Celular',
-      'Pose-deitado',
-      'Pose-mãos-pro-alto'
+      'Pose deitado',
+      'Pose mãos pro alto'
     ];
 
-    const checkboxList = document.getElementById('checkbox-list');
+    const portugueseToEnglish = {
+      'Pessoa': 'Person',
+      'Mochila': 'Backpack',
+      'Bolsa': 'Bag',
+      'Carro': 'Car',
+      'Moto': 'Motorcycle',
+      'Ônibus': 'Bus',
+      'Caminhão': 'Truck',
+      'Bicicleta': 'Bicycle',
+      'Cachorro': 'Dog',
+      'Gato': 'Cat',
+      'TV': 'TV',
+      'Laptop': 'Laptop',
+      'Notebook': 'Notebook',
+      'Celular': 'Cellphone',
+      'Pose deitado': 'Lying pose',
+      'Pose mãos pro alto': 'Hands up pose',
+    };
 
-    checkboxes.forEach((value, index) => {
-      const listItem = document.createElement('li');
-      listItem.classList.add("checkbox-item");
-      listItem.innerHTML = `
-        <input type="checkbox" id="checkbox${index + 1}" name="checkbox${index + 1}" value="${value}">
-        <label for="checkbox${index + 1}" style="color: #333;">${value}</label>
-      `;
-      checkboxList.appendChild(listItem);
-    });
-      
+    const englishToPortuguese = {
+      'Person': 'Pessoa',
+      'Backpack': 'Mochila',
+      'Bag': 'Bolsa',
+      'Car': 'Carro',
+      'Motorcycle': 'Moto',
+      'Bus': 'Ônibus',
+      'Truck': 'Caminhão',
+      'Bicycle': 'Bicicleta',
+      'Dog': 'Cachorro',
+      'Cat': 'Gato',
+      'TV': 'TV',
+      'Laptop': 'Laptop',
+      'Notebook': 'Notebook',
+      'Cellphone': 'Celular',
+      'Lying pose': 'Pose deitado',
+      'Hands up pose': 'Pose mãos pro alto',
+    };
+
+    function capitalizeString(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function decapitalizeString(string) {
+      return string.charAt(0).toLowerCase() + string.slice(1);
+    }
       
     // Handlie selection of camera item ----------------------------
       
@@ -567,7 +602,6 @@
       }
 
     function selectCameraItem(event) {
-
       stopUpdates()
       const spinner = document.getElementById("spinner-get-cameras");
       if (spinner.classList.contains("spinner")) {
@@ -587,25 +621,29 @@
       // Select the clicked item
       selectedItem.classList.add('selected');
 
+      // Get the list of objects registered with the selected camera
       let selectedCamObjects = currentCameras.filter(cameraInfo => cameraInfo.url == selectedItem.id)
       selectedCamObjects = selectedCamObjects[0].objects
+      let objectsArray = selectedCamObjects.split(/,\s*/);
       
-      // Get the request query values
+      // Call the selectCheckboxes function with the initial selectedCamObjects value
+      const portugueseArray = objectsArray.map(word => englishToPortuguese[capitalizeString(word)]);
+      selectCheckboxes(portugueseArray);
+
+      // Get and set the inference streaming request query values
       let url = selectedItem.id
       currentURL = url
       let confidence = 0.3;
-      // let objects = yoloObjects;
       let objects = selectedCamObjects;
       let seconds = 120;
       let detector = "ultralytics";
         
       // Construct the track view URL
-      const trackViewURL = `${baseStreamURL}/track/view?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackViewURL = `${baseStreamURL}/track?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
       // Construct the track post URL
-      const trackPostURL = `${baseStreamURL}/track/post?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackPostURL = `${baseURL}/track/post?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
-        
       // Get the parent container element
       const container = document.getElementById('video-player-container');
 
@@ -618,55 +656,32 @@
       // Replace the existing img element with the new img element
       container.replaceChild(newImg, document.getElementById('video-player'));
       newImg.id = "video-player";
-      console.log(`Track-View request started · URL: ${trackViewURL}`)
 
       // Update the image source
       // const img = document.getElementById('video-player');
       // img.src = trackViewURL;
 
-        // console.log('Fetching data...');
-        // await fetch(cameraEndpoint, {
-        //   method: 'PUT',
-        //   headers: {
-        //     'Content-Type': 'application/json'
-        //   },
-        //   mode: 'no-cors',
-        //   body: JSON.stringify(requestData)
-        // })
-        //   .then(response => {
-        //     // Handle the response
-        //    const response = await fetch(Url);
-        //    const data = await response.json();
-        //    console.log('Data fetched successfully.');
-        //   })
-        //   .catch(error => {
-        //    // Handle any errors that occurred during the request
-        //    console.error('Error:', error);
-        //   });
-        
       async function fetchData(Url) {
         try {
-           console.log('Track Post fetch started');
-           const response = await fetch(Url, {
-          // method: 'GET',
-          // headers: {
-            // 'Content-Type': 'application/json'
-          // },
-          // mode: 'no-cors',
-        });
+           console.log('Fetching data...');
+           const response = await fetch(Url);
+           console.log('Data fetched successfully.');
+
            const data = await response.json();
-           console.log('Track Post fetch successful!');
+           console.log('Data successfully.');
 
            // Handle the received data
            console.log('Response:', data);
          } catch (error) {
+           // Handle any errors that occurred during the request
+           console.error('Error:', error);
          }
        }
         
-      // Request object identification posting asyncronously
-      console.log('Fetching Track Post for URL:', url);
-      fetchData(trackPostURL);
-      console.log('Continued Track Post for URL:', url);
+      // // Request object identification posting asyncronously
+      // console.log('Fetching Track Post for URL:', url);
+      // fetchData(trackPostURL);
+      // console.log('Continued Track Post for URL:', url);
 
       window.addEventListener('scroll', onUserActive);
       document.addEventListener('mousemove', onUserActive);
@@ -990,6 +1005,56 @@
         
     });
 
+    // Retrieve the checkbox list
+    const checkboxList = document.getElementById('checkbox-list');
+
+    checkboxes.forEach((value, index) => {
+      const listItem = document.createElement('li');
+      listItem.classList.add("checkbox-item");
+      listItem.innerHTML = `
+        <input type="checkbox" id="checkbox${index + 1}" name="checkbox${index + 1}" value="${value}">
+        <label for="checkbox${index + 1}" style="color: #333;">${value}</label>
+      `;
+      checkboxList.appendChild(listItem);
+    });
+
+    // Retrieve the mark-all checkbox
+    const markAllCheckbox = document.getElementById('mark-all-checkbox');
+
+    // Function to select the checkboxes based on the selectedCamObjects
+    function selectCheckboxes(selectedCamObjects) {
+      // Uncheck all checkboxes
+      markAllCheckbox.checked = false;
+      Array.from(checkboxList.getElementsByTagName('input')).forEach(checkbox => {
+        checkbox.checked = false;
+      });
+
+      // Check the checkboxes for selectedCamObjects
+      selectedCamObjects.forEach(object => {
+        const checkbox = checkboxList.querySelector(`input[value="${object}"]`);
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      });
+    }
+
+    // Event listener for camera selection change
+    checkboxList.addEventListener('change', () => {
+      // Check if all checkboxes are checked
+      const allChecked = Array.from(checkboxList.getElementsByTagName('input')).every(checkbox => checkbox.checked);
+
+      // Update the mark-all checkbox
+      markAllCheckbox.checked = allChecked;
+    });
+
+    // Event listener for mark-all checkbox
+    markAllCheckbox.addEventListener('change', () => {
+      // Check or uncheck all checkboxes based on the mark-all checkbox state
+      Array.from(checkboxList.getElementsByTagName('input')).forEach(checkbox => {
+        checkbox.checked = markAllCheckbox.checked;
+      });
+    });
+      
     // Call the initializeServer function when the page loads
     window.addEventListener("load", fetchAndPopulateCameras);
 

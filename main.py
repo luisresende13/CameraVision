@@ -24,6 +24,12 @@ logging.basicConfig(
 # logging.warning('This is a warning message')
 # logging.error('This is an error message')
 
+# Adjustments:
+# 1. lap module in requirements
+# 2. camera.html inference request parameter to ultralytics
+# 3. yolo_util device set to gpu
+
+
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
 
@@ -193,7 +199,7 @@ app.config['EXTERNAL_DOCS'] = {
 app.config['INFO'] = {
     'title': 'Video Analytics',
     'version': '1.0',
-    'description': open('README.MD').read(),
+    'description': open('README.md').read(),
     'contact': {
         'name': 'OCTA CITY SOLUTIONS',
         'url': 'http://octacity.org',
@@ -485,17 +491,21 @@ def get_objects_from_bigquery(query):
     return jsonify(result)
 
 
-
 # IMAGE TRANSMISSION
 
 class TrackIn(Schema):
     url = String(required=True)
     objects = DelimitedList(String(), sep=[',', ', '], allow_none=True, load_default=None)
-    seconds = Integer(load_default=10)
-    confidence = Float(load_default=0.4)
-    fps = Integer(load_default=3)
+    confidence = Float(load_default=0.3)
+    iou = Float(load_default=0.7)
     detector = String(load_default='yolo')
-
+    seconds = Integer(load_default=10)
+    max_frames = Integer(allow_none=True, load_default=None)
+    process_each = Integer(load_default=1)
+    run_detection_each = Integer(load_default=1)
+    fps = Integer(load_default=3)
+    
+    
 @app.get("/track")
 @app.input(TrackIn, 'query')
 @app.doc(tags=['Streaming'])
@@ -506,7 +516,9 @@ def view_and_post_track(query):
     
     """
     
-    allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
+    allowed_objects = query['objects']
+    if allowed_objects is not None:
+        allowed_objects = None if len(allowed_objects) == 0 else [class_name.strip() for class_name in query['objects']]
 
     if query['detector'] == 'ultralytics':
         model = 'models/yolo/yolov8l.pt'
@@ -516,20 +528,22 @@ def view_and_post_track(query):
         tracker = 'deepsort'
     
     return Response(stream_with_context(tracking_reid(
-        query['url'],
+        url=query['url'],
         model=model,
         tracker=tracker,
         confidence_threshold=query['confidence'],
+        iou=query['iou'],
         allowed_objects=allowed_objects,
+        secs=query['seconds'],
+        max_frames=query['max_frames'],
+        fps=query['fps'],
+        process_each=query['process_each'],
+        run_detection_each=query['run_detection_each'],
         post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
         post_processing_args={'url': query['url']},
-        proccess_each=1,
-        run_detection_each=1,
         frame_annotator=write_demo, # annotates frames using detection output
         to_url=None,
         generator=True, # yields annotated frames
-        secs=float(query['seconds']),
-        fps=3
     )), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.get("/track/view")
@@ -542,7 +556,9 @@ def view_track(query):
     
     """
     
-    allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
+    allowed_objects = query['objects']
+    if allowed_objects is not None:
+        allowed_objects = None if len(allowed_objects) == 0 else [class_name.strip() for class_name in query['objects']]
 
     if query['detector'] == 'ultralytics':
         model = 'models/yolo/yolov8l.pt'
@@ -556,18 +572,20 @@ def view_track(query):
         model=model,
         tracker=tracker,
         confidence_threshold=query['confidence'],
+        iou=query['iou'],
         allowed_objects=allowed_objects,
         post_processing_function=None,
         post_processing_args={},
-        proccess_each=1,
-        run_detection_each=1,
+        process_each=query['process_each'],
+        run_detection_each=query['run_detection_each'],
         frame_annotator=write_demo, # annotates frames using detection output
         to_url=None,
         generator=True, # yields annotated frames
-        secs=float(query['seconds']),
-        fps=3
+        secs=query['seconds'],
+        max_frames=query['max_frames'],
+        fps=query['fps'],
     )), mimetype='multipart/x-mixed-replace; boundary=frame')
-
+    
 @app.get("/track/post")
 @app.input(TrackIn, 'query')
 @app.doc(tags=['Streaming'])
@@ -578,7 +596,9 @@ def post_track(query):
     
     """
     
-    allowed_objects = [class_name.strip() for class_name in query['objects']] if len(query['objects']) > 0 else None
+    allowed_objects = query['objects']
+    if allowed_objects is not None:
+        allowed_objects = None if len(allowed_objects) == 0 else [class_name.strip() for class_name in query['objects']]
     
     if query['detector'] == 'ultralytics':
         model = 'models/yolo/yolov8l.pt'
@@ -587,26 +607,28 @@ def post_track(query):
         model = query['detector']
         tracker = 'deepsort'
 
-    post_new_objects_records = tracking_reid(
+    post_new_objects_records = tracking_reid(  # returns generator object
         query['url'],
         model=model,
         tracker=tracker,
         confidence_threshold=query['confidence'],
+        iou=query['iou'],
         allowed_objects=allowed_objects,
-        max_frames=int(query['seconds'] * query['fps']),
+        secs=query['seconds'],
+        max_frames=query['max_frames'],
         post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
         post_processing_args={'url': query['url']},
-        proccess_each=1,
-        run_detection_each=1,
+        process_each=query['process_each'],
+        run_detection_each=query['run_detection_each'],
         frame_annotator=None, # annotates frames using detection output
         to_url=None,
         generator=False, # yields annotated frames if true
-        secs=float(query['seconds']),
-        fps=3
+        fps=query['fps'],
     )
-    # print('post_new_objects_records: ', post_new_objects_records)
-    return list(post_new_objects_records)
 
+    list(post_new_objects_records) # requires `list` function to iterate over the generator object
+    
+    return {'MESSAGE': 'Track post successfull'}
 
 # VIDEO UPLOAD AND PROCESSING
 
@@ -645,7 +667,7 @@ def upload_video():
         allowed_objects=None,
         max_frames=None,
         post_processing_function=None,
-        proccess_each=2,
+        process_each=2,
         run_detection_each=2,
         frame_annotator=write_demo,
         to_video_path=annotated_temp_file_name,

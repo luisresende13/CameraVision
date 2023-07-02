@@ -8,12 +8,13 @@ class YoloWrap:
         # initialize YOLO object detection model
         self.model = YOLO(model)
         self.class_names = self.model.names
-        self.names_ids = {value: key for key, value in self.model.names.items()}
+        self.names_ids = {name: _id for _id, name in self.model.names.items()}
         # initialize set for track ids 
         self.unique_track_ids = set()
-        is_cuda = cv2.cuda.getCudaEnabledDeviceCount()
-        self.device = 0 if is_cuda > 0 else 'cpu'
-        print(f'YOLO Ultralytics model initializing · IS-DEVICE-CUDA: {is_cuda > 0}')
+        self.device = 0  # gpu device
+        # is_cuda = cv2.cuda.getCudaEnabledDeviceCount()  > 0
+        # self.device = 0 if is_cuda else 'cpu'
+        # print(f'YOLO Ultralytics model initializing · IS-DEVICE-CUDA: {is_cuda}')
 
     def detect(self, frame):
         # run the YOLO model on the frame

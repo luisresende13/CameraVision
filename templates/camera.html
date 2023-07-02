@@ -488,6 +488,7 @@
     // Log the final base URL and host
     console.log('Host:', host);
     console.log('Base URL:', baseURL);
+    console.log('Base Streaming URL:', baseStreamURL);
 
       
     // Fill checkbox list -------------------------------
@@ -567,8 +568,8 @@
       }
 
     function selectCameraItem(event) {
-
       stopUpdates()
+        
       const spinner = document.getElementById("spinner-get-cameras");
       if (spinner.classList.contains("spinner")) {
           console.log("Cameras loading shut down.")

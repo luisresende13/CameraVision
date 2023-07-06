@@ -244,8 +244,9 @@ def tracking_reid(
             # ANNOTATE FRAME WITH DETECTION OUTPUTS
             if frame_annotator is not None:
                 annotator_input_frame = frame if resize_shape is None else original_frame
-                frame = frame_annotator(annotator_input_frame, inference, time_info, resize_shape)
-
+                result = model.result if not is_yolo_tracker else tracker.result
+                frame = frame_annotator(annotator_input_frame, inference, time_info, resize_shape, ultralytics_result=result)
+                    
             # # Resize the image using the specified width and height
             # if resize_shape is not None:
             #     frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)

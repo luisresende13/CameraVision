@@ -12,13 +12,14 @@ class YoloWrap:
         # initialize set for track ids 
         self.unique_track_ids = set()
         self.device = 0  # gpu device
+        self.result = None
         # is_cuda = cv2.cuda.getCudaEnabledDeviceCount()  > 0
         # self.device = 0 if is_cuda else 'cpu'
         # print(f'YOLO Ultralytics model initializing · IS-DEVICE-CUDA: {is_cuda}')
 
     def detect(self, frame):
         # run the YOLO model on the frame
-        detections = self.model.predict(
+        results = self.model.predict(
             frame, save=False, show=False,
             imgsz=640,
             conf=0.3, iou=0.7,
@@ -26,8 +27,11 @@ class YoloWrap:
             stream=False, device=self.device, verbose=False,
         )
 
+        result = results[0]
+        self.result = result
+        
         # formatted yolo detections
-        detections = self.formatted_detections(detections[0])
+        detections = self.formatted_detections(result)
 
         # return standard format detections
         return detections
@@ -52,6 +56,7 @@ class YoloWrap:
         )  # , tracker="bytetrack.yaml")
 
         result = results[0]
+        self.result = result
 
         # formatted yolo detections
         # detections = self.formatted_detections(result)

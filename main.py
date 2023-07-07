@@ -24,9 +24,9 @@ logging.basicConfig(
 # logging.warning('This is a warning message')
 # logging.error('This is an error message')
 
-# Adjustments:
+# Deployment fixes:
 # 1. lap module in requirements
-# 2. camera.html inference request parameter to ultralytics
+# 2. camera.html detector as `ultralytics` and parameters
 # 3. yolo_util device set to gpu
 
 
@@ -351,7 +351,7 @@ def post_camera(data):
     rows = query_job.result()
 
     for row in rows:
-        return jsonify({'error': 'Camera URL already exists'}), 409
+        return jsonify({'error': 'A Câmera já existe.'}), 409
 
     # Create a new user in the BigQuery database
     objects = ', '.join(objects)
@@ -784,7 +784,7 @@ class TrackTriggerIn(Schema):
     detector = String(load_default='yolo')
     tracker = String(load_default='botsort.yaml')
     seconds = Integer(load_default=None)
-    exec_secs = Integer(load_default=None)
+    exec_seconds = Integer(load_default=None)
     max_frames = Integer(allow_none=True, load_default=None)
     process_each = Integer(load_default=1)
     run_detection_each = Integer(load_default=1)
@@ -800,46 +800,52 @@ def post_track_trigger(data):
     
     """
     
-    allowed_objects = data['objects']
-    if allowed_objects is not None:
-        allowed_objects = None if len(allowed_objects) == 0 else [class_name.strip() for class_name in data['objects']]
+    try:
+
+        allowed_objects = data['objects']
+        if allowed_objects is not None:
+            allowed_objects = None if len(allowed_objects) == 0 else [class_name.strip() for class_name in data['objects']]
+
+        if data['detector'] == 'ultralytics':
+            model = 'models/yolo/yolov8l.pt'
+            tracker = 'yolo'
+        else:
+            model = data['detector']
+            tracker = 'deepsort'
+
+        results = list(tracking_reid(  # returns generator object
+            data['url'],
+            model=model,
+            tracker=tracker,
+            tracker_type=data['tracker'],
+            confidence_threshold=data['confidence'],
+            iou=data['iou'],
+            allowed_objects=allowed_objects,
+            secs=data['seconds'],
+            exec_secs=data['exec_seconds'],
+            max_frames=data['max_frames'],
+            post_processing_function=bigquery_post_and_trigger_new_objects, # posts new identified objects to database
+            post_processing_args={'url': data['url'], 'post_url': data['post_url'], 'post_scheme': data['post_scheme']},
+            process_each=data['process_each'],
+            run_detection_each=data['run_detection_each'],
+            frame_annotator=None, # annotates frames using detection output
+            to_url=None,
+            generator=False, # yields annotated frames if true
+            fps=data['fps'],
+            resize_shape=None,
+        ))
+
+         # requires `list` function to iterate over the generator object
+        # results = list(post_trigger_new_objects_records)
+
+        return {'MESSAGE': 'Track post/trigger successfull', 'RESULTS': results}
     
-    if data['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8l.pt'
-        tracker = 'yolo'
-    else:
-        model = data['detector']
-        tracker = 'deepsort'
-
-    results = list(tracking_reid(  # returns generator object
-        data['url'],
-        model=model,
-        tracker=tracker,
-        tracker_type=query['tracker'],
-        confidence_threshold=data['confidence'],
-        iou=data['iou'],
-        allowed_objects=allowed_objects,
-        secs=data['seconds'],
-        exec_secs=query['exec_seconds'],
-        max_frames=data['max_frames'],
-        post_processing_function=bigquery_post_and_trigger_new_objects, # posts new identified objects to database
-        post_processing_args={'url': data['url'], 'post_url': data['post_url'], 'post_scheme': data['post_scheme']},
-        process_each=data['process_each'],
-        run_detection_each=data['run_detection_each'],
-        frame_annotator=None, # annotates frames using detection output
-        to_url=None,
-        generator=False, # yields annotated frames if true
-        fps=data['fps'],
-        resize_shape=None,
-    ))
-
-     # requires `list` function to iterate over the generator object
-    # results = list(post_trigger_new_objects_records)
-    
-    return {'MESSAGE': 'Track post/trigger successfull', 'RESULTS': results}
-
-class TrackTriggerTestIn(Schema):
-    pass
+    except Exception as e:
+        print(f'ERROR IN TRACK-TRIGGER · ERROR: {e}')
+        return {'MESSAGE': 'Track post/trigger failed', 'ERROR': str(e)}
+        
+# class TrackTriggerTestIn(Schema):
+    # pass
 
 @app.route("/track/trigger/test", methods=["POST"])
 # @app.input(TrackTriggerTestIn)

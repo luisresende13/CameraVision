@@ -44,6 +44,7 @@ def tracking_reid(
     url,
     model='yolo',
     tracker='deepsort',
+    tracker_type="botsort.yaml", # "bytetrack.yaml"
     confidence_threshold=0.3,
     iou=0.7,
     allowed_objects=None,
@@ -54,13 +55,13 @@ def tracking_reid(
     frame_annotator=None,
     generator=False,
     to_url=None, #  file path to save optionally annotaded video
-    max_frames=None,
-    secs=10,
+    max_frames=30,
+    secs=None,
     exec_secs=None,
     log_secs=30,
     fps=3,
     max_retries=5,
-    resize_shape=(640, 640), # (300, 300)
+    resize_shape=None, # (640, 640),
 ):
 
     # initialize detection model instance
@@ -171,8 +172,6 @@ def tracking_reid(
                 
             # read video frame
             success, frame = cap.read()
-            # if not success:
-            #     break
 
             # retry if read capture not successful
             retries = 0
@@ -215,6 +214,7 @@ def tracking_reid(
                         conf=confidence_threshold,
                         iou=iou,
                         classes=allowed_objects,
+                        tracker_type=tracker_type,
                     )
                     
                 else:
@@ -246,10 +246,6 @@ def tracking_reid(
                 result = model.result if not is_yolo_tracker else tracker.result
                 frame = frame_annotator(annotator_input_frame, inference, time_info, resize_shape, ultralytics_result=result)
                     
-            # # Resize the image using the specified width and height
-            # if resize_shape is not None:
-            #     frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
-
             # WRITE FRAME TO VIDEO FILE
             if to_url is not None:
                 WRITER.write(frame)

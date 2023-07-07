@@ -548,6 +548,7 @@ def camera_control():
     return render_template('camera.html')    
 
 @app.get("/tracker")
+@app.get("/playground")
 @app.doc(tags=['Web Apps'])
 def camera_tracker():
     """
@@ -630,7 +631,9 @@ class TrackIn(Schema):
     confidence = Float(load_default=0.3)
     iou = Float(load_default=0.7)
     detector = String(load_default='yolo')
+    tracker = String(load_default='botsort.yaml')
     seconds = Integer(load_default=10)
+    exec_seconds = Integer(load_default=None)
     max_frames = Integer(allow_none=True, load_default=None)
     process_each = Integer(load_default=1)
     run_detection_each = Integer(load_default=1)
@@ -662,11 +665,13 @@ def view_and_post_track(query):
         url=query['url'],
         model=model,
         tracker=tracker,
+        tracker_type=query['tracker'],
         confidence_threshold=query['confidence'],
         iou=query['iou'],
         allowed_objects=allowed_objects,
         secs=query['seconds'],
         max_frames=query['max_frames'],
+        exec_secs=query['exec_seconds'],
         fps=query['fps'],
         process_each=query['process_each'],
         run_detection_each=query['run_detection_each'],
@@ -703,6 +708,7 @@ def view_track(query):
         query['url'],
         model=model,
         tracker=tracker,
+        tracker_type=query['tracker'],
         confidence_threshold=query['confidence'],
         iou=query['iou'],
         allowed_objects=allowed_objects,
@@ -714,6 +720,7 @@ def view_track(query):
         to_url=None,
         generator=True, # yields annotated frames
         secs=query['seconds'],
+        exec_secs=query['exec_seconds'],
         max_frames=query['max_frames'],
         fps=query['fps'],
         resize_shape=None,
@@ -744,10 +751,12 @@ def post_track(query):
         query['url'],
         model=model,
         tracker=tracker,
+        tracker_type=query['tracker'],
         confidence_threshold=query['confidence'],
         iou=query['iou'],
         allowed_objects=allowed_objects,
         secs=query['seconds'],
+        exec_secs=query['exec_seconds'],
         max_frames=query['max_frames'],
         post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
         post_processing_args={'url': query['url']},
@@ -773,7 +782,9 @@ class TrackTriggerIn(Schema):
     confidence = Float(load_default=0.3)
     iou = Float(load_default=0.7)
     detector = String(load_default='yolo')
+    tracker = String(load_default='botsort.yaml')
     seconds = Integer(load_default=10)
+    exec_secs = Integer(load_default=None)
     max_frames = Integer(allow_none=True, load_default=None)
     process_each = Integer(load_default=1)
     run_detection_each = Integer(load_default=1)
@@ -804,10 +815,12 @@ def post_track_trigger(data):
         data['url'],
         model=model,
         tracker=tracker,
+        tracker_type=query['tracker'],
         confidence_threshold=data['confidence'],
         iou=data['iou'],
         allowed_objects=allowed_objects,
         secs=data['seconds'],
+        exec_secs=query['exec_seconds'],
         max_frames=data['max_frames'],
         post_processing_function=bigquery_post_and_trigger_new_objects, # posts new identified objects to database
         post_processing_args={'url': data['url'], 'post_url': data['post_url'], 'post_scheme': data['post_scheme']},
@@ -826,7 +839,7 @@ def post_track_trigger(data):
     return {'MESSAGE': 'Track post/trigger successfull', 'RESULTS': results}
 
 class TrackTriggerTestIn(Schema):
-    test = String(load_default=None)
+    pass
 
 @app.route("/track/trigger/test", methods=["POST"])
 # @app.input(TrackTriggerTestIn)

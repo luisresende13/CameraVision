@@ -348,26 +348,27 @@
     // Get the protocol and host from the current window location
     const protocol = window.location.protocol;
     const host = window.location.host;
+      
     let baseURL;
-
-    // Check if the host a server 
-    if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev') | host.includes('http://15.229.21.220')) {
-      baseURL = `.`;
+    let baseStreamURL;
+    const AWSServerIP = "http://15.228.206.128";
+    const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
+      
+    // Check if the host is a server 
+    if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev') | host.includes(AWSServerIP)) {
+      baseURL = ".";
+      baseStreamURL = ".";
     }
-    // Check if the host the file system 
-    else if (host == '') {
-      // baseURL = `https://2e1e-35-197-70-223.ngrok-free.app/`;
-      baseURL = `http://127.0.0.1:5000`;
+    // Check if the host is hostgator or the local file system
+    else if (host.includes("octacity.org") | host == "") {
+        baseURL = AWSServerIP;
+        baseStreamURL = AWSServerIP;
     }
-    // If none of the conditions match, set the base URL to 'api.' followed by the host
+    // If is custom hosting
     else {
-      // baseURL = `${protocol}//${host}`; 
-      baseURL = 'http://15.229.21.220'; // default base url for hosted html document
+      baseURL = `${protocol}//${host}`;         
     }
-
-    baseURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app' // cloud run server
-    baseStreamURL = '15.228.206.128'
-
+          
     // Log the final base URL and host
     console.log('Host:', host);
     console.log('Base URL:', baseURL);

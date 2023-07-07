@@ -36,7 +36,7 @@ class YoloWrap:
         # return standard format detections
         return detections
     
-    def update_tracks(self, frame, detections, start, conf=0.3, iou=0.7, classes=None):
+    def update_tracks(self, frame, detections, start, conf=0.3, iou=0.7, classes=None, tracker_type="botsort.yaml"):
         
         ######################################
         # RUN TRACKING
@@ -51,9 +51,10 @@ class YoloWrap:
             vid_stride=0,
             stream=False,
             device=self.device,
-            persist=True,
+            persist=False,
             verbose=False,
-        )  # , tracker="bytetrack.yaml")
+            tracker=tracker_type,
+        )
 
         result = results[0]
         self.result = result

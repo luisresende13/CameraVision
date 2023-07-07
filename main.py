@@ -286,7 +286,7 @@ app.config['TAGS'] = [{
 
 # REQUEST AND RESPONSE SCHEMAS
 
-version = '0.1'
+version = '0.2'
 
 @app.get("/init")
 def initialize():

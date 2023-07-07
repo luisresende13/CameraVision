@@ -51,7 +51,7 @@ class YoloWrap:
             vid_stride=0,
             stream=False,
             device=self.device,
-            persist=False,
+            persist=True,
             verbose=False,
             tracker=tracker_type,
         )

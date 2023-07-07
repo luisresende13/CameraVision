@@ -116,6 +116,7 @@ def bigquery_post_new_objects(frame, inference, time_info, **kwargs):
                 - track_id
                 - bbox
             '''
+            obj['confidence'] = round(obj['confidence'], 2)
             del obj['track_id']
             del obj['bbox']
             for key, value in kwargs.items():
@@ -132,7 +133,15 @@ def bigquery_post_new_objects(frame, inference, time_info, **kwargs):
     return {'n_new_objects': len(new_objects), 'n_errors': len(errors), 'errors': errors}
 
 import requests, json
-    
+
+post_keys_to_english = {
+    'objeto': 'class_name',
+    'confianca': 'confidence',
+    'hora': 'timestamp',
+    'id_rastreio': 'track_id',
+    'caixa': 'bbox',    
+}
+
 def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs):
     
     # get list of objects identified on the frame
@@ -156,21 +165,22 @@ def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, pos
             '''
             
             # build post request body based on previous configuration
-            trigger_post_body = {key: obj[value] for key, value in post_scheme.items()}
-            if 'timestamp' in post_scheme.values():
-                for key, value in post_scheme.items():
-                    if value == 'timestamp':
-                        trigger_post_body[key] = trigger_post_body[key].strftime('%Y-%m-%d %H:%M:%S')
+            trigger_post_body = {}
+            for key, value in post_scheme.items():
+                trigger_post_body[key] = value if value not in post_keys_to_english else obj[post_keys_to_english[value]]
+                if value == 'hora':
+                    trigger_post_body[key] = trigger_post_body[key].strftime('%Y-%m-%d %H:%M:%S')
             
             # post request to `post_url`
             requests.post(post_url, json=trigger_post_body)
 
+    return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': len(new_objects)}
 
 def bigquery_post_and_trigger_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs):
 
     post_status = bigquery_post_new_objects(frame, inference, time_info, **kwargs)
-    trigger_post_url_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs)
-    return {'message': 'success', 'url': url, 'post_url': post_url}
+    trigger_result = trigger_post_url_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs)
+    return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': trigger_result['n_objects']}
     
 # set up color scheme
 GREEN = (0, 255, 0)
@@ -276,10 +286,12 @@ app.config['TAGS'] = [{
 
 # REQUEST AND RESPONSE SCHEMAS
 
+version = '0.1'
+
 @app.get("/init")
 def initialize():
     name = os.environ.get("NAME", "unamed")
-    return f'Server `{name}` is running!'
+    return f'Server `{name}` version `v{version}` is running!'
 
 
 # User login and signup
@@ -403,12 +415,17 @@ def edit_camera(data):
 
     # Prepare the update query
     update_fields = []
+    update_dict = {}
     if objects is not None:
-        update_fields.append(f"objects='{', '.join(objects)}'")
+        objects_string = ', '.join(objects)
+        update_fields.append(f"objects='{objects_string}'")
+        update_dict['objects'] = objects_string
     if post_url is not None:
         update_fields.append(f"post_url='{post_url}'")
+        update_dict['post_url'] = post_url
     if post_scheme is not None:
         update_fields.append(f"post_scheme='{post_scheme}'")
+        update_dict['post_scheme'] = post_scheme
 
     # Check if any fields were provided for update
     if not update_fields:
@@ -419,9 +436,16 @@ def edit_camera(data):
         update_query = f"UPDATE `octacity.video_analytics.cameras` SET {', '.join(update_fields)} WHERE url='{url}'"
         query_job = bqclient.query(update_query)
         query_job.result()
-
-        # Update successful
-        return jsonify({'message': 'Camera record updated successfully', 'record': dict(row)}), 200
+        
+        # Update successful ---
+        
+        # Build updated record
+        record = dict(row)
+        for key, value in update_dict.items():
+            record[key] = value
+            
+        # Success message
+        return jsonify({'message': 'Camera record updated successfully', 'record': record}), 200
     
     # Return if the camera does not exist in the BigQuery database
     return jsonify({'error': 'Camera URL does not exist'}), 404
@@ -716,7 +740,7 @@ def post_track(query):
         model = query['detector']
         tracker = 'deepsort'
 
-    post_new_objects_records = tracking_reid(  # returns generator object
+    results = list(tracking_reid(  # returns generator object
         query['url'],
         model=model,
         tracker=tracker,
@@ -734,11 +758,12 @@ def post_track(query):
         generator=False, # yields annotated frames if true
         fps=query['fps'],
         resize_shape=None,
-    )
+    ))
 
-    list(post_new_objects_records) # requires `list` function to iterate over the generator object
+     # requires `list` function to iterate over the generator object
+    # results = list(post_new_objects_records)
     
-    return {'MESSAGE': 'Track post successfull'}
+    return {'MESSAGE': 'Track post successfull', 'RESULTS': results}
 
 class TrackTriggerIn(Schema):
     url = String(required=True)
@@ -775,7 +800,7 @@ def post_track_trigger(data):
         model = data['detector']
         tracker = 'deepsort'
 
-    post_new_objects_records = tracking_reid(  # returns generator object
+    results = list(tracking_reid(  # returns generator object
         data['url'],
         model=model,
         tracker=tracker,
@@ -793,11 +818,12 @@ def post_track_trigger(data):
         generator=False, # yields annotated frames if true
         fps=data['fps'],
         resize_shape=None,
-    )
+    ))
 
-    list(post_new_objects_records) # requires `list` function to iterate over the generator object
+     # requires `list` function to iterate over the generator object
+    # results = list(post_trigger_new_objects_records)
     
-    return {'MESSAGE': 'Track post trigger successfull'}
+    return {'MESSAGE': 'Track post/trigger successfull', 'RESULTS': results}
 
 class TrackTriggerTestIn(Schema):
     test = String(load_default=None)

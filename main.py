@@ -252,6 +252,8 @@ def apply_caching(response):
     response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
+app.config['TIMEOUT'] = None  # Set timeout to None (no timeout)
+
 app.config['SERVERS'] = [{'name': 'Google Cloud Run Server', 'url': f'{baseurl}/'}]
 
 app.config['EXTERNAL_DOCS'] = {
@@ -396,6 +398,7 @@ class EditCameraIn(Schema):
     post_scheme = String(load_default=None, allow_none=True)
     
 @app.put('/camera')
+@app.post('/camera/put')
 @app.input(EditCameraIn)
 @app.doc(tags=['Web Apps'])
 def edit_camera(data):

@@ -241,8 +241,9 @@
     .camera-section {
       background-color: #fff;
       padding: 20px;
-/*       border-radius: 8px; */
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/*       height: 100vh; */
+/*       overflow-y: auto; */
     }
 
     .camera-section h2 {
@@ -425,6 +426,18 @@
         flex-direction: column;
         justify-content: center;
       }
+
+/*     .textarea-container p { */
+/*     } */
+
+    #availableObjects {
+      float: right;
+/*       max-height: 120px; */
+      overflow-y: auto;
+      font-size: 12px;
+      color: #777777;
+      margin: 0;
+    }
       
   </style>
 </head>
@@ -448,17 +461,24 @@
         <h2 style="margin-bottom: 15px;">Cadastro de Câmera</h2>
         <div id="spinner-post-camera" style="display: inline;"></div>
         <label for="camera-url">URL Camera:</label>
-        <input type="text" id="camera-url" name="camera-url" required>
+        <input type="text" id="camera-url" name="camera-url" required placeholder="https://">
         <label for="objectsInput">Objetos permitidos:</label>
-        <textarea id="objectsInput" name="objects" rows="3" placeholder="Insira os objetos (ou deixe vazio para selectionar todos)">person, car, bus</textarea>
+        <textarea id="objectsInput" name="objects" rows="3" placeholder="person, car, motorcycle (ou vazio para selectionar todos)">person, car, bus, motorcycle, bike</textarea>
         <label for="api-destino">API Destino:</label>
-        <input type="text" id="api-destino" name="api-destino" required>
+        <input type="text" id="api-destino" name="api-destino" required  placeholder="https://api.exemplo.com/endpoint">
         <label for="variaveis">Variáveis (JSON):</label>
-        <textarea id="variaveis" name="variaveis" rows="3" placeholder="# Exemplo:
-{teste: 1, teste: 2}"></textarea>
+        <textarea id="variaveis" name="variaveis" rows="3" placeholder='# Exemplo:
+{
+  "Nome": "objeto",
+  "Horário": "hora",
+  "Confianca": "confianca",
+  "Chave1": "Valor1",
+  "Chave2": "Valor2"
+}
+'></textarea>
         <div id="form-btn-container">
           <button id="btn-post-camera" type="submit">Cadastrar</button>
-          <button id="btn-put-camera" type="submit">Editar</button>
+          <button id="btn-put-camera" type="submit">Atualizar</button>
         </div>
       </form>
     </div>
@@ -469,13 +489,14 @@
         
       </div>
       <div>
-        <h2 style="color: #333; padding-bottom: 10px;">Configuração</h2>
-        <div class="mark-all">
+        <h3 style="color: #333; padding-bottom: 10px;">Configuração</h2>
+      <p id='availableObjects'><strong>Objetos disponíveis:</strong> person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, fire hydrant, stop sign, parking meter, bench, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe, backpack, umbrella, handbag, tie, suitcase, frisbee, skis, snowboard, sports ball, kite, baseball bat, baseball glove, skateboard, surfboard, tennis racket, bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake, chair, couch, potted plant, bed, dining table, toilet, tv, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair dryer, toothbrush</p>
+<!--         <div class="mark-all">
           <input type="checkbox" id="mark-all-checkbox">
           <label for="mark-all-checkbox">Selecionar todos</label>
         </div>
         <ul class="checkbox-list scrollable-list-objects" id="checkbox-list">
-        </ul>
+        </ul> -->
       </div>
     </div>
     <div>
@@ -509,7 +530,8 @@
 
     let baseURL;
     let baseStreamURL;
-    const AWSServerIP = "http://15.228.53.157";
+    const AWSServerIP = "15.228.53.157";
+    const AWSServerURL = `http://${AWSServerIP}`;
     const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
 
     // Check if the host is a server 
@@ -519,8 +541,8 @@
     }
     // Check if the host is hostgator or the local file system
     else if (host.includes("octacity.org") | host == "") {
-        baseURL = AWSServerIP;
-        baseStreamURL = AWSServerIP;
+        baseURL = AWSServerURL;
+        baseStreamURL = AWSServerURL;
     }
     // If is custom hosting
     else {
@@ -558,17 +580,17 @@
       'Pose-mãos-pro-alto'
     ];
 
-    const checkboxList = document.getElementById('checkbox-list');
+//     const checkboxList = document.getElementById('checkbox-list');
 
-    checkboxes.forEach((value, index) => {
-      const listItem = document.createElement('li');
-      listItem.classList.add("checkbox-item");
-      listItem.innerHTML = `
-        <input type="checkbox" id="checkbox${index + 1}" name="checkbox${index + 1}" value="${value}">
-        <label for="checkbox${index + 1}" style="color: #333;">${value}</label>
-      `;
-      checkboxList.appendChild(listItem);
-    });
+//     checkboxes.forEach((value, index) => {
+//       const listItem = document.createElement('li');
+//       listItem.classList.add("checkbox-item");
+//       listItem.innerHTML = `
+//         <input type="checkbox" id="checkbox${index + 1}" name="checkbox${index + 1}" value="${value}">
+//         <label for="checkbox${index + 1}" style="color: #333;">${value}</label>
+//       `;
+//       checkboxList.appendChild(listItem);
+//     });
       
       
     // Handlie selection of camera item ----------------------------
@@ -634,9 +656,9 @@
       // Select the clicked item
       selectedItem.classList.add('selected');
 
-      let selectedCam = currentCameras.filter(cameraInfo => cameraInfo.url == selectedItem.id)[0]
-      selectedCamObjects = selectedCam.objects
-      
+      let selectedCam = currentCameras.filter(cameraInfo => cameraInfo.url == selectedItem.id)[0]  // Camera fetched data
+      selectedCamObjects = selectedCam.objects      
+        
       // Get the request query values
       let url = selectedItem.id
       currentURL = url
@@ -648,6 +670,12 @@
       let post_url = selectedCam.post_url;
       let post_scheme = selectedCam.post_scheme;
         
+      // Fill the form with the selectd camera data
+        document.getElementById('camera-url').value = url;
+        document.getElementById('objectsInput').value = objects;
+        document.getElementById('api-destino').value = post_url;
+        document.getElementById('variaveis').value = post_scheme;
+
       // Construct the track view URL
       const trackViewURL = `${baseStreamURL}/track/view?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
@@ -772,7 +800,11 @@
     }
       
     // Function to populate registered cameras
-      
+        var url = document.getElementById('camera-url').value;
+        var objects = document.getElementById('objectsInput').value;
+        var post_url = document.getElementById('api-destino').value;
+        var post_scheme = document.getElementById('variaveis').value;
+
     var currentCameras;
       
     function fetchAndPopulateCameras() {
@@ -1064,7 +1096,7 @@
           
         // Make API request to handle sign-up logic
         // Replace this with your actual API endpoint
-        const apiUrl = `${baseURL}/camera`;
+        const putCameraUrl = `${baseURL}/camera/put`;
         // Replace 'your_token' with the actual token or remove the header if not needed
         var headers = {
           // 'Authorization': 'Bearer your_token',
@@ -1083,9 +1115,9 @@
         //   objects: objects
         // };
         
-        console.log(`Fetch PUT Camera · URL: ${apiUrl} · BODY: ${JSON.stringify(data)}`)
-        fetch(apiUrl, {
-          method: 'PUT',
+        console.log(`Fetch PUT Camera · URL: ${putCameraUrl} · BODY: ${JSON.stringify(data)}`)
+        fetch(putCameraUrl, {
+          method: 'POST',
           headers: headers,
           body: JSON.stringify(data)
         })
@@ -1150,7 +1182,7 @@
       }
       
       function onDOMContentLoaded() {
-          markAllCheckBoxes()
+          // markAllCheckBoxes()
       
           // Post Camera Registration Functionality ---------------------------
 

@@ -66,7 +66,7 @@ def tracking_reid(
 
     # initialize detection model instance
     if model == 'yolo':
-        model = object_detection_models[model]
+        model = YoloWrap("models/yolo/yolov8l.pt")
         class_names = model.class_names
     elif model == 'mediapipe':
         t = time()

@@ -11,7 +11,7 @@ class YoloWrap:
         self.names_ids = {name: _id for _id, name in self.model.names.items()}
         # initialize set for track ids 
         self.unique_track_ids = set()
-        self.device = 'cpu'  # gpu device
+        self.device = 0  # gpu device
         self.result = None
         # is_cuda = cv2.cuda.getCudaEnabledDeviceCount()  > 0
         # self.device = 0 if is_cuda else 'cpu'

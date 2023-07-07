@@ -80,8 +80,8 @@ def tracking_reid(
         logging.info(f'MEDIAPIPE DETECTOR LOADED · {time() - t} s')
         class_names = mediapipe_class_names
     else:
-        model = object_detection_models['yolo']
-        # model = YoloWrap(model)
+        # model = object_detection_models['yolo']
+        model = YoloWrap("models/yolo/yolov8l.pt")
 
     # initialize DeepSORT real-time tracker
     max_age = 3

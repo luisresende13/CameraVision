@@ -18,6 +18,7 @@
       flex-direction: column;
       justify-content: space-between;
       background-color: #f3f3f3;
+      max-width: 100vw;
     }
     
     header {
@@ -51,18 +52,28 @@
       flex-wrap: wrap;
       flex: 1;
       margin: 0 auto;
-      min-width: 100%;
+/*       min-width: 100%; */
       overflow-y: auto;
-/*       min-height: 100%; */
       background-color: #fff;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       overflow: hidden;
     }
     
+/*     .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin: 0 auto;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+       */
     .container > div {
       flex: 1;
-      min-width: 300px;
       padding: 20px;
       text-align: center;
       background-color: #f9f9f9;
@@ -73,7 +84,20 @@
       justify-content: flex-start;
       transition: background-color 0.3s ease;
     }
-    
+      
+/*     .container > div {
+      flex-basis: calc(33.33% - 20px);
+      padding: 20px;
+      text-align: center;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      transition: background-color 0.3s ease;
+    }
+     */
     .container > div:not(:last-child) {
       border-right: none;
     }
@@ -85,6 +109,7 @@
     .scrollable-list-cams {
 /*       max-height: 100%; */
       max-height: 40vh;
+/*       max-width: 80%; */
       overflow-y: auto;
       padding: 0;
 /*       padding-right: 20px; */
@@ -177,19 +202,20 @@
 
     @media (max-width: 1100px) {
       .container > div {
+        flex-basis: 100%;
         flex: 1 1 100%;
-        min-width: 100%;
         border-right: none;
         margin-bottom: 10px;
         padding: 20px;
+        box-sizing: border-box; /* Add this property to include padding in the element's width */
       }
       
       video {
-        max-height: 300px;
+        max-height:  none;
       }
 
       #video-player {
-        max-height: 300px;
+        max-height: none; 300
       }
     }
     
@@ -197,7 +223,11 @@
       .container > div:nth-child(2) {
         flex: 2; /* Adjust the flex value for the middle section */
       }
-      
+
+      .container > div:nth-child(1) {
+        flex: 1.2; /* Adjust the flex value for the middle section */
+      }
+
       video {
         max-height: 600px;
       }
@@ -217,16 +247,11 @@
         
     }
     
-    #camera-url {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-    
-    #api-destino {
-      width: 100%;
+    #camera-url,
+    #api-destino,
+    #variaveis {
+      /* Adjust the width property to a smaller value to prevent overflowing */
+      width: 100%; /* or any other suitable value */
       padding: 8px;
       margin-top: 5px;
       margin-bottom: 10px;
@@ -239,6 +264,7 @@
 
     /* Changes for Cameras Cadastradas section */
     .camera-section {
+        
       background-color: #fff;
       padding: 20px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -298,11 +324,19 @@
     }
 
     .camera-list {
+      /* Adjust the flex-basis property to control the width of list items */
+      flex-basis: 100%;
       font-size: 16px;
       margin-top: 20px;
 /*       padding-right: 20px; */
     }
 
+    @media (min-width: 1100px) {
+      #camera-list {
+        /* Reset the flex-basis property for larger screens */
+        flex-basis: auto;
+      }
+    }
     /* Additional styles for selectable camera list */
     .camera-list li {
       display: flex;
@@ -362,6 +396,7 @@
 
     /* Changes for Event List */
     .event-list {
+/*       min-height: 40vh; */
       list-style: none;
       padding: 0;
       margin: 0;
@@ -434,7 +469,7 @@
       float: right;
 /*       max-height: 120px; */
       overflow-y: auto;
-      font-size: 12px;
+      font-size: 14px;
       color: #777777;
       margin: 0;
     }
@@ -448,7 +483,7 @@
   </header>
   
   <div class="container">
-    <div class="camera-section">
+    <div>
       <div id="camera-list-container" class="camera-section">
         <h2>Câmeras</h2>
         <div id="spinner-get-cameras"></div>
@@ -463,17 +498,16 @@
         <label for="camera-url">URL Camera:</label>
         <input type="text" id="camera-url" name="camera-url" required placeholder="https://">
         <label for="objectsInput">Objetos permitidos:</label>
-        <textarea id="objectsInput" name="objects" rows="3" placeholder="person, car, motorcycle (ou vazio para selectionar todos)">person, car, bus, motorcycle, bike</textarea>
+        <textarea id="objectsInput" name="objects" rows="3" placeholder="person, car, motorcycle (ou vazio para selectionar todos)">person, car, bus</textarea>
         <label for="api-destino">API Destino:</label>
         <input type="text" id="api-destino" name="api-destino" required  placeholder="https://api.exemplo.com/endpoint">
         <label for="variaveis">Variáveis (JSON):</label>
-        <textarea id="variaveis" name="variaveis" rows="3" placeholder='# Exemplo:
-{
-  "Nome": "objeto",
-  "Horário": "hora",
-  "Confianca": "confianca",
-  "Chave1": "Valor1",
-  "Chave2": "Valor2"
+        <textarea id="variaveis" name="variaveis" rows="7" placeholder='{
+    "Nome": "objeto",
+    "Horário": "hora",
+    "Confianca": "confianca",
+    "Chave1": "Valor1",
+    "Chave2": "Valor2"
 }
 '></textarea>
         <div id="form-btn-container">
@@ -530,7 +564,7 @@
 
     let baseURL;
     let baseStreamURL;
-    const AWSServerIP = "15.228.53.157";
+    const AWSServerIP = "54.207.113.6";
     const AWSServerURL = `http://${AWSServerIP}`;
     const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
 
@@ -601,6 +635,8 @@
     let updateTime = 15000;
     let isActive = false;
     let currentURL;
+    let currentCameras;
+    let currentCamerasItems;
       
     // Function to stop updates
     function stopUpdates() {
@@ -634,7 +670,7 @@
           setTimeout(stopUpdates, inactiveTime);
         }
       }
-
+      
     function selectCameraItem(event) {
       stopUpdates()
         
@@ -664,12 +700,16 @@
       currentURL = url
       let confidence = 0.3;
       // let objects = yoloObjects;
-      let objects = selectedCamObjects;
-      let seconds = 120;
-      let detector = "ultralytics";
+      let objects = selectedCamObjects.replace(/,\s+/g, ', '); // Replace multiple spaces after comma with a single space
+      let seconds = 70;
+      let detector = host.includes('127.0.0.1:5000') ? "yolo" : "ultralytics";
       let post_url = selectedCam.post_url;
       let post_scheme = selectedCam.post_scheme;
         
+       // Formatted json string
+      if (post_scheme != "")
+          post_scheme = JSON.stringify(JSON.parse(post_scheme), null, 4)
+                                     
       // Fill the form with the selectd camera data
         document.getElementById('camera-url').value = url;
         document.getElementById('objectsInput').value = objects;
@@ -710,12 +750,14 @@
          }
        }
         
-      // Request object identification posting asyncronously
-      // console.log('Fetch Track-Post start for URL:', url);
-      fetchData(trackPostURL, {method: "GET", headers:{'Content-Type': 'application/json' }}, "Track-Post");
-
         
-      if (post_url != '' & post_scheme != '') {
+      if (post_url == '' | post_scheme == '') {
+          // Request object identification posting asyncronously
+          // console.log('Fetch Track-Post start for URL:', url);
+          fetchData(trackPostURL, {method: "GET", headers:{'Content-Type': 'application/json' }}, "Track-Post");          
+      }
+        
+      else {
           // Request object identification posting and triggering asyncronously
           const trackTriggerBody = {
               url,
@@ -727,16 +769,13 @@
               detector,
           }
 
-          fetchData(
-              trackTriggerURL, {
+          fetchData(trackTriggerURL, {
                   method: "POST",
                   headers: {'Content-Type': 'application/json' },
                   body: JSON.stringify(trackTriggerBody),              
               },
               "Track-Trigger",
-          );
-          
-      }
+          )};
 
       window.addEventListener('scroll', onUserActive);
       document.addEventListener('mousemove', onUserActive);
@@ -799,15 +838,14 @@
       
     }
       
-    // Function to populate registered cameras
-        var url = document.getElementById('camera-url').value;
-        var objects = document.getElementById('objectsInput').value;
-        var post_url = document.getElementById('api-destino').value;
-        var post_scheme = document.getElementById('variaveis').value;
+    // // Function to populate registered cameras
+    //     var url = document.getElementById('camera-url').value;
+    //     var objects = document.getElementById('objectsInput').value;
+    //     var post_url = document.getElementById('api-destino').value;
+    //     var post_scheme = document.getElementById('variaveis').value;
 
-    var currentCameras;
       
-    function fetchAndPopulateCameras() {
+    async function fetchAndPopulateCameras() {
       const spinner = document.getElementById("spinner-get-cameras");
       if (spinner.classList.contains("spinner")) {
           console.log("Fetching cameras is still running. Skipped.")
@@ -817,12 +855,13 @@
         
       const camerasURL = `${baseURL}/cameras?dt=${new Date().getTime()}`;      
       console.log("Fetching cameras from:", camerasURL);
-      fetch(camerasURL)
+        
+      await fetch(camerasURL)
         .then((response) => response.json())
         .then((data) => {
           console.log("Received data:", data);
           
-          // Update collection of current cameras variable
+          // Update cameras data list variable
           currentCameras = data
           
           const cameraList = document.getElementById("camera-list");
@@ -867,16 +906,20 @@
 
           });
 
-          // Remove spinner class
-          spinner.classList.remove("spinner");
+          // Update cameras' elements list variable
+          currentCamerasItems = cameraList
+          
         })
         .catch((error) => {
           console.error("Error fetching identified objects:", error);
 
+        })
+        .finally(() => {
           // Remove spinner class
           spinner.classList.remove("spinner");
         });
         
+        console.log("Fetching Cameras returning...")
         return currentCameras
     }
 
@@ -981,33 +1024,41 @@
             return
         }
         spinner.classList.add("spinner");
-  
+          // Show the spinner
+        // spinner.style.display = 'block';
+
         var url = document.getElementById('camera-url').value;
         var objects = document.getElementById('objectsInput').value;
         var post_url = document.getElementById('api-destino').value;
         var post_scheme = document.getElementById('variaveis').value;
         
+        // update global url
+        const currURL = url
+        
         // Perform basic form validation
         if (url.trim() === '') {
+          // Remove spinner class
+          spinner.classList.remove("spinner");
           alert('Forneça a URL da câmera que deseja cadastrar.');
           return;
         }
 
         try { // Parse the unformatted JSON string
               // Convert the parsed object back to a formatted JSON string
-            if (post_scheme == '')
-                post_scheme = '{}'
-            const jsonObject = JSON.parse(post_scheme);
-            post_scheme = JSON.stringify(jsonObject);            
+            if (post_scheme != '') {
+                document.getElementById('variaveis').value = JSON.stringify(JSON.parse(post_scheme), null, 4);
+                post_scheme = JSON.stringify(JSON.parse(post_scheme));
+            }
+            
         }
         
         catch {
+            // Remove spinner class
+            spinner.classList.remove("spinner");
             alert('Cadastro falhou. Campo "Variáveis (JSON)" com formatação inválida.');
             return
         }
 
-        // Show the spinner
-        spinner.style.display = 'block';
           
         // Make API request to handle sign-up logic
         // Replace this with your actual API endpoint
@@ -1017,22 +1068,30 @@
           // 'Authorization': 'Bearer your_token',
           'Content-Type': 'application/json'
         };
-
-        var data = {
-          url: url,
-          objects: objects,
-          post_url: post_url,
-          post_scheme: post_scheme,
+        var body = {
+          url,
+          objects,
+          post_url,
+          post_scheme,
         };
         
-        fetch(apiUrl, {
+        var options = {
           method: 'POST',
           headers: headers,
-          body: JSON.stringify(data)
-        })
-        .then(function(response) {
+          body: JSON.stringify(body)
+        }
+        
+        console.log('POST Camera fetch start')
+        fetch(apiUrl, options)
+        .then(async function(response) {
           if (response.ok) {
-            fetchAndPopulateCameras()
+            await fetchAndPopulateCameras()
+
+            var newCam = document.getElementById(url)
+            if (newCam)
+                newCam.click()
+                
+            console.log('POST Camera success')
             alert(`Câmera cadastrada com sucesso!\n\n- URL da câmera: ${url}\n- Objetos permitidos: ${objects}\n- API Destino: ${post_url}\n- Variáveis (JSON): ${post_scheme}`);
             // Redirect the user or perform additional actions
           } else {
@@ -1047,7 +1106,7 @@
         })
         .finally(function() {
           // Remove spinner class
-          spinner.classList.remove("spinner");          
+          spinner.classList.remove("spinner");
         });
       }
 
@@ -1062,7 +1121,9 @@
             return
         }
         spinner.classList.add("spinner");
-  
+          // Show the spinner
+        // spinner.style.display = 'block';
+
         var url = document.getElementById('camera-url').value;
         var objects = document.getElementById('objectsInput').value;
         var post_url = document.getElementById('api-destino').value;
@@ -1070,31 +1131,33 @@
         
         // Perform basic form validation
         if (url.trim() === '') {
+          // Remove spinner class
+          spinner.classList.remove("spinner");
           alert('Forneça a URL da câmera que deseja editar o cadastro.');
           return;
         }
-        if (objects == "" & post_url == "" & post_scheme == "") {
-          alert('Forneça pelo menos um de "Objetos permitidos", "API Destino", Variáveis" para alterar o cadastro da câmera.');
-          return;
-        }
+        // if (objects == "" & post_url == "" & post_scheme == "") {
+        //   alert('Forneça pelo menos um de "Objetos permitidos", "API Destino", Variáveis" para alterar o cadastro da câmera.');
+        //   return;
+        // }
 
         try { // Parse the unformatted JSON string
               // Convert the parsed object back to a formatted JSON string
-            if (post_scheme == '')
-                post_scheme = '{}'
-            const jsonObject = JSON.parse(post_scheme);
-            post_scheme = JSON.stringify(jsonObject);            
+            if (post_scheme != "") {
+                document.getElementById('variaveis').value = JSON.stringify(JSON.parse(post_scheme), null, 4)
+                post_scheme = JSON.stringify(JSON.parse(post_scheme))                
+            }
         }
         
         catch {
+            // Remove spinner class
+            spinner.classList.remove("spinner");
+            console.log("Invalid JSON provided:", post_scheme)
             alert('Cadastro falhou. Campo "Variáveis (JSON)" com formatação inválida.');
             return
         }
 
-        // Show the spinner
-        spinner.style.display = 'block';
-          
-        // Make API request to handle sign-up logic
+
         // Replace this with your actual API endpoint
         const putCameraUrl = `${baseURL}/camera/put`;
         // Replace 'your_token' with the actual token or remove the header if not needed
@@ -1102,35 +1165,33 @@
           // 'Authorization': 'Bearer your_token',
           'Content-Type': 'application/json',
         };
-
-        var data = {}
-        const fields = {url, objects, post_url, post_scheme}
-        for (let key of Object.keys(fields)) {
-            if (fields[key])
-                data = {...data, [key]: fields[key]}
-        }
+        var body = JSON.stringify({url, objects, post_url, post_scheme})
         
-        // var data = {
-        //   url: url,
-        //   objects: objects
-        // };
-        
-        console.log(`Fetch PUT Camera · URL: ${putCameraUrl} · BODY: ${JSON.stringify(data)}`)
-        fetch(putCameraUrl, {
+        const options = {
           method: 'POST',
           headers: headers,
-          body: JSON.stringify(data)
-        })
-        .then(function(response) {
+          body: body
+        }
+        console.log(`PUT Camera · URL: ${putCameraUrl} · BODY: ${body}`)
+        
+        fetch(putCameraUrl, options)
+        .then(async function(response) {
           if (response.ok) {
-            fetchAndPopulateCameras()
-            var alertMsg = `Cadastro de câmera alterado com sucesso!\n\n* URL da câmera: ${url}\n\n* Campos alterados:\n\n`
-            if (objects != '')
-              alertMsg += `    - Objetos permitidos: ${objects}\n`
-            if (post_url != '')
-              alertMsg += `    - API Destino: ${post_url}\n`
-            if (post_scheme != '')
-              alertMsg += `    - Variáveis (JSON): ${post_scheme}\n`
+            const newCameras = await fetchAndPopulateCameras()
+              
+            var newCam = document.getElementById(url)
+            if (newCam) {
+                console.log("Updated Camera Click")
+                newCam.click()                
+            }
+
+            var alertMsg = `Cadastro de câmera alterado com sucesso!\n\n* URL da câmera: ${url}\n\n* Novos valores:\n\n`
+            // if (objects != '')
+            alertMsg += `    - Objetos permitidos: ${objects}\n`
+            // if (post_url != '')
+            alertMsg += `    - API Destino: ${post_url}\n`
+            // if (post_scheme != '')
+            alertMsg += `    - Variáveis (JSON): ${post_scheme}\n`
             alert(alertMsg);
             // Redirect the user or perform additional actions
           } else {
@@ -1175,35 +1236,33 @@
         })
       }
       
-      function onLoad() {
-          const data = fetchAndPopulateCameras()
+      async function onLoad() {
+          // Fetch and populate the list of cameras
+          const newCameras = await fetchAndPopulateCameras()
+          console.log("Cameras loaded")
           
-          // selectCameraItem({currentTarget: document.getElementById(currentCameras[0].url)})
+          // Select the first camera item
+          var firstCam = document.getElementById(currentCameras[0].url)
+          if (firstCam)
+              firstCam.click(); // Trigger the click event
       }
       
       function onDOMContentLoaded() {
-          // markAllCheckBoxes()
-      
+          
           // Post Camera Registration Functionality ---------------------------
-
           var postCameraButton = document.getElementById('btn-post-camera');
           postCameraButton.addEventListener('click', postNewCamera);
 
-
           // Put/Edit Camera Registration Functionality ---------------------------
-
           var putCameraButton = document.getElementById('btn-put-camera');
           putCameraButton.addEventListener('click', putCamera);
 
       }        
       
-      // Call the initializeServer function when the page loads
-      window.addEventListener("load", onLoad);
-      // window.addEventListener("load", fetchAndPopulateCameras);
-      
+      // Call the initializeServer function when the page loads ----------
+      window.addEventListener("load", onLoad);      
                                 
       // DOM Content Load event ---------------------------  
-    
       window.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 
   </script>

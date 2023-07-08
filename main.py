@@ -264,7 +264,7 @@ app.config['EXTERNAL_DOCS'] = {
 app.config['INFO'] = {
     'title': 'Video Analytics',
     'version': '1.0',
-    'description': open('README.md').read(),
+    'description': open('README.MD').read(),
     'contact': {
         'name': 'OCTA CITY SOLUTIONS',
         'url': 'http://octacity.org',
@@ -362,7 +362,7 @@ def post_camera(data):
     query_job.result()
 
     # Sign-up successful
-    return jsonify({'message': 'Camera registration successful'})
+    return jsonify({'message': 'Camera registration successful', 'data': data})
 
 class DeleteCameraIn(Schema):
     url = String(required=True)

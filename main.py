@@ -180,8 +180,10 @@ def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, pos
 def bigquery_post_and_trigger_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs):
     post_status = bigquery_post_new_objects(frame, inference, time_info, **kwargs)
     trigger_result = trigger_post_url_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs)
-    return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': trigger_result['n_objects'], **post_status}
-    
+    result = {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': trigger_result['n_objects'], **post_status}
+    print(f'POST-TRIGGER: {result}')
+    return result
+
 # set up color scheme
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
@@ -234,7 +236,6 @@ def write_demo(frame, inference, time_info, resize_shape=None, **kwargs):
 
     # return annotated frame
     return frame
-
 
 
 # ---

@@ -277,5 +277,5 @@ def tracking_reid(
         print(f'STREAMING FINISHED · STREAM-TIME: {round(n_frames / fps, 1)} s · EXEC-TIME: {round(time() - start_time, 1)} s · URL {url}')
         logging.info(f'STREAMING FINISHED · STREAM-TIME: {round(n_frames / fps, 1)} s · EXEC-TIME: {round(time() - start_time, 1)} s · URL {url}')
     
-    # return post processing results
-    return post_processing_output
+        # return post processing results
+        return post_processing_output

@@ -701,7 +701,7 @@
       let confidence = 0.3;
       // let objects = yoloObjects;
       let objects = selectedCamObjects.replace(/,\s+/g, ', '); // Replace multiple spaces after comma with a single space
-      let seconds = 70;
+      let seconds = host.includes('127.0.0.1:5000') ? 3 : 70;
       let detector = host.includes('127.0.0.1:5000') ? "yolo" : "ultralytics";
       let post_url = selectedCam.post_url;
       let post_scheme = selectedCam.post_scheme;

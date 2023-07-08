@@ -127,6 +127,7 @@ def bigquery_post_new_objects(frame, inference, time_info, **kwargs):
 
         # log errors if any
         if errors:
+            # print('Error inserting record into BigQuery:', str(errors))
             logging.error('Error inserting record into BigQuery:', errors)
 
     # return list with errors
@@ -177,10 +178,9 @@ def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, pos
     return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': len(new_objects)}
 
 def bigquery_post_and_trigger_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs):
-
     post_status = bigquery_post_new_objects(frame, inference, time_info, **kwargs)
     trigger_result = trigger_post_url_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs)
-    return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': trigger_result['n_objects']}
+    return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': trigger_result['n_objects'], **post_status}
     
 # set up color scheme
 GREEN = (0, 255, 0)
@@ -286,9 +286,11 @@ app.config['TAGS'] = [{
     'description': ''
 }]
 
+
+
 # REQUEST AND RESPONSE SCHEMAS
 
-version = '0.3'
+version = '0.4'
 
 @app.get("/init")
 def initialize():
@@ -851,11 +853,13 @@ def post_track_trigger(data):
     # pass
 
 @app.route("/track/trigger/test", methods=["POST"])
+@app.route("/teste", methods=["POST"])
+@app.route("/imprimi", methods=["POST"])
 # @app.input(TrackTriggerTestIn)
 @app.doc(tags=['Inference'])
 def post_track_trigger_test():
     data = request.json
-    print(f'TRACKER TRIGGER TEST · REQUEST BODY: {data}')
+    print(f'NOVO OBJETO: {data}')
     return data
 
 # VIDEO UPLOAD AND PROCESSING

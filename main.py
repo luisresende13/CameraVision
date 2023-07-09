@@ -145,7 +145,8 @@ post_keys_to_english = {
     'confianca': 'confidence',
     'hora': 'timestamp',
     'id_rastreio': 'track_id',
-    'caixa': 'bbox',    
+    'caixa': 'bbox',
+    'url': 'url'
 }
 
 def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs):
@@ -160,6 +161,7 @@ def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, pos
         post_scheme = json.loads(post_scheme)
 
         # drop unwanted fields
+        responses = []
         for obj in sorted(new_objects, key=lambda obj: obj['class_name']):
             '''
             obj keys:
@@ -169,18 +171,22 @@ def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, pos
                 - track_id
                 - bbox
             '''
+            # add `url` field to `obj` dict so its available to `trigger_post_body` dict
+            obj['url'] = url
             
             # build post request body based on previous configuration
             trigger_post_body = {}
+            del
             for key, value in post_scheme.items():
                 trigger_post_body[key] = value if value not in post_keys_to_english else obj[post_keys_to_english[value]]
                 if value == 'hora':
                     trigger_post_body[key] = trigger_post_body[key].strftime('%Y-%m-%d %H:%M:%S')
             
-            # post request to `post_url`
-            requests.post(post_url, json=trigger_post_body)
+            # post request to `post_url`s
+            res = requests.post(post_url, json=trigger_post_body)
+            responses.append({'status_code': res.status_code, 'message': res.reason})
 
-    return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': len(new_objects)}
+    return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': len(new_objects), 'responses': responses}
 
 def bigquery_post_and_trigger_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs):
     post_status = bigquery_post_new_objects(frame, inference, time_info, url, **kwargs)

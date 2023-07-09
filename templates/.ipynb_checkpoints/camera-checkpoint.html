@@ -305,24 +305,38 @@
 
     #btn-post-camera {
       display: inline;
-        background-color: #333;
-        color: #fff;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
+/*       background-color: #333; */
+/*       color: #fff; */
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+/*       cursor: pointer; */
     }
 
     #btn-put-camera {
       display: inline;
-        background-color: #333;
-        color: #fff;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
+/*       background-color: #333; */
+/*       color: #fff; */
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+/*       cursor: pointer; */
     }
 
+    /* Style for the enabled button */
+    button:enabled {
+      background-color: #333;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* Style for the disabled button */
+    button:disabled {
+      background-color: #999;
+      color: #ccc;
+      cursor: not-allowed;
+    }
+      
     .camera-list {
       /* Adjust the flex-basis property to control the width of list items */
       flex-basis: 100%;
@@ -512,7 +526,7 @@
 '></textarea>
         <div id="form-btn-container">
           <button id="btn-post-camera" type="submit">Cadastrar</button>
-          <button id="btn-put-camera" type="submit">Atualizar</button>
+          <button id="btn-put-camera" type="submit" disabled>Atualizar</button>
         </div>
       </form>
     </div>
@@ -715,6 +729,9 @@
         document.getElementById('objectsInput').value = objects;
         document.getElementById('api-destino').value = post_url;
         document.getElementById('variaveis').value = post_scheme;
+        
+        // Enable/disable `Update` and `Create` Camera modes
+        handleUrlChange();
 
       // Construct the track view URL
       const trackViewURL = `${baseStreamURL}/track/view?url=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&confidence=${encodeURIComponent(confidence)}&detector=${encodeURIComponent(detector)}&dt=${encodeURIComponent(new Date().getTime())}`;
@@ -1210,32 +1227,45 @@
         });
       }
 
+    // Enable/disable form buttons if camaera url is already registered -------------------------------------
       
-      // "Mark all" checkbox functionality --------------------------
-      
-      function markAllCheckBoxes() {
-          const markAllCheckbox = document.getElementById('mark-all-checkbox');
-          const checkboxes = document.querySelectorAll('#checkbox-list input[type="checkbox"]');
-
-          markAllCheckbox.addEventListener('change', () => {
-            checkboxes.forEach(checkbox => {
-              checkbox.checked = markAllCheckbox.checked;
-            });
-          });
-
-          checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-              if (!checkbox.checked) {
-                markAllCheckbox.checked = false;
-              } else {
-                // Check if all checkboxes are checked
-                const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
-                markAllCheckbox.checked = allChecked;
-              }
-            });          
-        })
+    // Function to check if the entered URL already exists in the camera list
+    function checkUrlExists(enteredUrl) {
+      let urlExists = false;
+      const cameraList = document.getElementById('camera-list');
+      const cameraItems = cameraList.getElementsByTagName('li');
+      for (let i = 0; i < cameraItems.length; i++) {
+        const cameraUrl = cameraItems[i].id;
+        if (cameraUrl === enteredUrl) {
+          urlExists = true;
+          break;
+        }
       }
-      
+      return urlExists;
+    }
+
+    // Function to handle the URL field value change
+    function handleUrlChange() {
+      const cameraUrlField = document.getElementById('camera-url');
+      const cadastrarButton = document.getElementById('btn-post-camera');
+      const atualizarButton = document.getElementById('btn-put-camera');
+
+      // Check if the entered URL already exists in the camera list
+      const enteredUrl = cameraUrlField.value;
+      const urlExists = checkUrlExists(enteredUrl);
+
+      // Disable the appropriate button based on the URL existence
+      if (urlExists) {
+          console.log("Camera URL already exists. `Update` mode active")
+        cadastrarButton.disabled = true;
+        atualizarButton.disabled = false;
+      } else {
+          console.log("Camera URL does not exist. `Create` mode active")
+        cadastrarButton.disabled = false;
+        atualizarButton.disabled = true;
+      }
+    }
+
       async function onLoad() {
           // Fetch and populate the list of cameras
           const newCameras = await fetchAndPopulateCameras()
@@ -1257,6 +1287,12 @@
           var putCameraButton = document.getElementById('btn-put-camera');
           putCameraButton.addEventListener('click', putCamera);
 
+          // Enable/disable form buttons if camaera url is already registered -------------------------------------
+          // Add event listeners to the URL Camera field
+          const cameraUrlField = document.getElementById('camera-url');
+          cameraUrlField.addEventListener('input', handleUrlChange);
+          cameraUrlField.addEventListener('change', handleUrlChange);
+
       }        
       
       // Call the initializeServer function when the page loads ----------
@@ -1264,6 +1300,7 @@
                                 
       // DOM Content Load event ---------------------------  
       window.addEventListener('DOMContentLoaded', onDOMContentLoaded);
+
 
   </script>
 </body>

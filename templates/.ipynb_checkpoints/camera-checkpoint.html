@@ -564,25 +564,25 @@
 
     let baseURL;
     let baseStreamURL;
-    const AWSServerIP = "54.207.113.6";
+    const AWSServerIP = "54.94.175.223";
     const AWSServerURL = `http://${AWSServerIP}`;
     const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
 
     // Check if the host is a server 
-    if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev') | host.includes(AWSServerIP)) {
-      baseURL = ".";
-      baseStreamURL = ".";
-    }
     // Check if the host is hostgator or the local file system
-    else if (host.includes("octacity.org") | host == "") {
+    if (host.includes("octacity.org") | host == "") {
         baseURL = AWSServerURL;
         baseStreamURL = AWSServerURL;
     }
-    // If is custom hosting
-    else {
-      baseURL = `${protocol}//${host}`;
-      baseStreamURL = `${protocol}//${host}`;
+    else {  // if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev') | host.includes(AWSServerIP)) {
+      baseURL = ".";
+      baseStreamURL = ".";
     }
+    // // If is custom hosting
+    // else {
+    //   baseURL = `${protocol}//${host}`;
+    //   baseStreamURL = `${protocol}//${host}`;
+    // }
     
     // baseURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app' // cloud run server
     // baseStreamURL = 'http://15.228.206.128'

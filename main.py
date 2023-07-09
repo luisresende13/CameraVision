@@ -95,7 +95,7 @@ def now(fmt="%Y-%m-%d %H:%M:%S"):
 
 # INSERT RECORDS OF NEW OBJECTS INTO BIGQUERY DATABASE
 
-def bigquery_post_new_objects(frame, inference, time_info, **kwargs):
+def bigquery_post_new_objects(frame, inference, time_info, url, **kwargs):
     
     # get list of objects identified on the frame
     new_objects = inference[2]
@@ -116,11 +116,16 @@ def bigquery_post_new_objects(frame, inference, time_info, **kwargs):
                 - track_id
                 - bbox
             '''
-            obj['confidence'] = round(obj['confidence'], 2)
+            
+            # Delete object fields
             del obj['track_id']
             del obj['bbox']
-            for key, value in kwargs.items():
-                obj[key] = value
+            
+            # Crate or update object fields
+            obj['confidence'] = round(obj['confidence'], 2)
+            obj['url'] = url # associate current caamera url
+            # for key, value in kwargs.items():
+                # obj[key] = value
         
         # insert records of new objects into BigQuery table
         errors = bqclient.insert_rows(table, new_objects)
@@ -178,7 +183,7 @@ def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, pos
     return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': len(new_objects)}
 
 def bigquery_post_and_trigger_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs):
-    post_status = bigquery_post_new_objects(frame, inference, time_info, **kwargs)
+    post_status = bigquery_post_new_objects(frame, inference, time_info, url, **kwargs)
     trigger_result = trigger_post_url_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs)
     result = {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': trigger_result['n_objects'], **post_status}
     print(f'POST-TRIGGER: {result}')
@@ -291,7 +296,7 @@ app.config['TAGS'] = [{
 
 # REQUEST AND RESPONSE SCHEMAS
 
-version = '0.4'
+version = '0.5'
 
 @app.get("/init")
 def initialize():
@@ -765,7 +770,7 @@ def post_track(query):
         exec_secs=query['exec_seconds'],
         max_frames=query['max_frames'],
         post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
-        post_processing_args={'url': query['url']},
+        post_processing_args={'url': query['url']}, # pass camera url which is expected by the bigquery table
         process_each=query['process_each'],
         run_detection_each=query['run_detection_each'],
         frame_annotator=None, # annotates frames using detection output

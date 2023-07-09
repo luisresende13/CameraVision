@@ -176,7 +176,6 @@ def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, pos
             
             # build post request body based on previous configuration
             trigger_post_body = {}
-            del
             for key, value in post_scheme.items():
                 trigger_post_body[key] = value if value not in post_keys_to_english else obj[post_keys_to_english[value]]
                 if value == 'hora':
@@ -302,7 +301,7 @@ app.config['TAGS'] = [{
 
 # REQUEST AND RESPONSE SCHEMAS
 
-version = '0.5'
+version = '0.6'
 
 @app.get("/init")
 def initialize():

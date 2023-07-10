@@ -192,7 +192,6 @@ def bigquery_post_and_trigger_new_objects(frame, inference, time_info, url, post
     post_status = bigquery_post_new_objects(frame, inference, time_info, url, **kwargs)
     trigger_result = trigger_post_url_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs)
     result = {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': trigger_result['n_objects'], **post_status}
-    print(f'POST-TRIGGER: {result}')
     return result
 
 # set up color scheme

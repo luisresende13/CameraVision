@@ -578,7 +578,7 @@
 
     let baseURL;
     let baseStreamURL;
-    const AWSServerIP = "54.94.175.223";
+    const AWSServerIP = "18.231.128.145";
     const AWSServerURL = `http://${AWSServerIP}`;
     const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
 
@@ -588,7 +588,7 @@
         baseURL = AWSServerURL;
         baseStreamURL = AWSServerURL;
     }
-    else {  // if (host.includes('127.0.0.1:5000') | host.includes('analytics.octacity.dev') | host.includes(AWSServerIP)) {
+    else {
       baseURL = ".";
       baseStreamURL = ".";
     }

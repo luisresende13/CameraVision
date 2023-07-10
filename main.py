@@ -154,14 +154,15 @@ def trigger_post_url_new_objects(frame, inference, time_info, url, post_url, pos
     # get list of objects identified on the frame
     new_objects = inference[2]
 
+    # drop unwanted fields
+    responses = []
+
     # if there's any new object
     if len(new_objects):
         
         # get dictionary from json string
         post_scheme = json.loads(post_scheme)
 
-        # drop unwanted fields
-        responses = []
         for obj in sorted(new_objects, key=lambda obj: obj['class_name']):
             '''
             obj keys:

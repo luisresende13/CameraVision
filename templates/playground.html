@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YOLO Playground</title>
+<!--   <link rel="stylesheet" type="text/css" href="playground.css"> -->
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .input-row label {
+      flex: 1;
+      font-weight: bold;
+    }
+
+    .input-row input,
+    .input-row textarea {
+      flex: 2;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+    }
+
+    .button-row button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #video-player {
+      width: 100%;
+    }
+
+    #results-container {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+      min-height: 200px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>YOLO Playground</h1>
+    <div id="input-container" class="section">
+      <h2>Input Parameters</h2>
+      <div class="input-row">
+        <label for="source-input">Video Source:</label>
+        <input type="text" id="source-input" placeholder="e.g., http://example.com/video.mp4"
+          value="http://example.com/video.mp4" />
+      </div>
+      <div class="input-row">
+        <label for="post-url-input">POST URL:</label>
+        <input type="text" id="post-url-input" placeholder="e.g., http://api.example.com/test"
+          title="Leave empty if not required" />
+      </div>
+      <div class="input-row">
+        <label for="post-scheme-input">POST JSON Schema:</label>
+        <textarea id="post-scheme-input" placeholder='e.g., {"TIPO": "objeto", "HORA": "hora", "URL": "url", "CONFIANCA": "confianca", "Chave1": "Valor1"}'></textarea>
+      </div>
+      <div class="input-row">
+        <label for="model-input">Model Name:</label>
+        <select id="model-input">
+          <option value="yolov8n.pt">yolo v8 nano</option>
+          <option value="yolov8s.pt">yolo v8 small</option>
+          <option value="yolov8m.pt">yolo v8 medium</option>
+          <option value="yolov8l.pt">yolo v8 large</option>
+          <option value="yolov8x.pt" selected>yolo v8 extra-large</option>
+          <option value="yolov8n-seg.pt">yolo v8 segmentação nano</option>
+          <option value="yolov8s-seg.pt">yolo v8 segmentação small</option>
+          <option value="yolov8m-seg.pt">yolo v8 segmentação medium</option>
+          <option value="yolov8l-seg.pt">yolo v8 segmentação large</option>
+          <option value="yolov8x-seg.pt">yolo v8 segmentação extra-large</option>
+          <option value="yolov8n-pose.pt">yolo v8 pose nano</option>
+          <option value="yolov8s-pose.pt">yolo v8 pose small</option>
+          <option value="yolov8m-pose.pt">yolo v8 pose medium</option>
+          <option value="yolov8l-pose.pt">yolo v8 pose large</option>
+          <option value="yolov8x-pose.pt">yolo v8 pose extra-large</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label for="task-input">Task:</label>
+        <select id="task-input">
+          <option value="predict" selected>Predict</option>
+          <option value="track">Track</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label for="max-frames-input">Max Frames:</label>
+        <input type="number" id="max-frames-input" placeholder="e.g., 10" title="Leave empty for default behavior" />
+      </div>
+      <div class="input-row">
+        <label for="seconds-input">Seconds:</label>
+        <input type="number" id="seconds-input" placeholder="e.g., 60" value="5"
+          title="Default value is 3 seconds" />
+      </div>
+      <div class="input-row">
+        <label for="execution-seconds-input">Execution Seconds:</label>
+        <input type="number" id="execution-seconds-input" placeholder="e.g., 300"
+          title="Leave empty for default behavior" />
+      </div>
+      <div class="input-row">
+        <label for="log-seconds-input">Log Seconds:</label>
+        <input type="number" id="log-seconds-input" placeholder="e.g., 5" value="10"
+          title="Default value is 10 seconds" />
+      </div>
+      <div class="input-row">
+        <label for="fps-input">FPS:</label>
+        <input type="number" id="fps-input" placeholder="e.g., 30" value="3" title="Default value is 3 frames per second" />
+      </div>
+      <div class="input-row">
+        <label for="process-input">Process:</label>
+        <select id="process-input">
+          <option value="none">None</option>
+          <option value="console-log" selected>Log to console</option>
+          <option value="bigquery">BigQuery</option>
+          <option value="trigger">Trigger</option>
+          <option value="bigquery-trigger">BigQuery & Trigger</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label for="annotator-input">Annotator:</label>
+        <select id="annotator-input">
+          <option value="none" selected>None</option>
+          <option value="fps">FPS</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label for="stream-input">Stream:</label>
+        <input type="checkbox" id="stream-input" checked />
+      </div>
+      <div class="input-row">
+        <label for="objects-input">Objects:</label>
+        <input type="text" id="objects-input" placeholder="e.g., car, person, dog"
+          title="Leave empty if not required" />
+      </div>
+      <div class="input-row">
+        <label for="classes-input">Classes:</label>
+        <input type="text" id="classes-input" placeholder="e.g., 0, 1, 2"
+          title="Leave empty for default behavior" />
+      </div>
+      <div class="input-row">
+        <label for="conf-input">Confidence:</label>
+        <input type="number" step="0.01" id="conf-input" placeholder="e.g., 0.5" value="0.3"
+          title="Default value is 0.3" />
+      </div>
+      <div class="input-row">
+        <label for="iou-input">IOU:</label>
+        <input type="number" step="0.01" id="iou-input" placeholder="e.g., 0.5" value="0.7"
+          title="Default value is 0.7" />
+      </div>
+      <div class="input-row">
+        <label for="max-det-input">Max Detections:</label>
+        <input type="number" id="max-det-input" placeholder="e.g., 100" title="Leave empty for default behavior" />
+      </div>
+      <div class="input-row">
+        <label for="vid-stride-input">Video Stride:</label>
+        <input type="number" id="vid-stride-input" placeholder="e.g., 2" value="1"
+          title="Default value is 1" />
+      </div>
+      <div class="input-row">
+        <label for="imgsz-input">Image Size:</label>
+        <input type="number" id="imgsz-input" placeholder="e.g., 512" value="640"
+          title="Default value is 640" />
+      </div>
+      <div class="input-row">
+        <label for="device-input">Device:</label>
+        <select id="device-input">
+          <option value="cpu" selected>CPU</option>
+          <option value="gpu">GPU</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label for="tracker-input">Tracker:</label>
+        <input type="text" id="tracker-input" placeholder="e.g., botsort.yaml" value="botsort.yaml"
+          title="Default value is botsort.yaml" />
+      </div>
+      <div class="input-row">
+        <label for="persist-input">Persist:</label>
+        <input type="checkbox" id="persist-input" checked />
+      </div>
+      <div class="input-row">
+        <label for="augment-input">Augment:</label>
+        <input type="checkbox" id="augment-input" />
+      </div>
+      <div class="input-row">
+        <label for="save-input">Save:</label>
+        <input type="checkbox" id="save-input" />
+      </div>
+      <div class="input-row">
+        <label for="show-input">Show:</label>
+        <input type="checkbox" id="show-input" />
+      </div>
+      <div class="input-row">
+        <label for="verbose-input">Verbose:</label>
+        <input type="checkbox" id="verbose-input" />
+      </div>
+    </div>
+    <div id="video-container" class="section">
+      <h2>Video Player</h2>
+      <img id="video-player" controls />
+    </div>
+    <div id="results-container" class="section">
+      <h2>Results</h2>
+      <!-- Display the results here -->
+    </div>
+    <div class="button-row">
+      <button id="run-button">Run</button>
+    </div>
+  </div>
+  <script>
+
+    // Protocol and Host information ----------------------------
+
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+
+    let baseURL;
+    // let baseStreamURL;
+    const AWSServerIP = "15.229.156.138";
+    const AWSServerURL = `http://${AWSServerIP}`;
+    const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
+
+    // Check if the host is a server 
+    // Check if the host is hostgator or the local file system
+    if (host.includes("octacity.org") | host == "") {
+        baseURL = AWSServerURL;
+        // baseStreamURL = AWSServerURL;
+    }
+    else {
+      baseURL = ".";
+      // baseStreamURL = ".";
+    }
+
+    // Log the final base URL and host
+    console.log('Host:', host);
+    console.log('Base URL:', baseURL);
+    // console.log('Base Streaming URL:', baseStreamURL);
+
+    // Retrieve the DOM elements
+    const sourceInput = document.getElementById('source-input');
+    const modelInput = document.getElementById('model-input');
+    // Add more variables for other input fields
+
+    const runButton = document.getElementById('run-button');
+    const videoPlayer = document.getElementById('video-player');
+    const resultsContainer = document.getElementById('results-container');
+
+    // Function to update the video source
+    async function updateVideoSource(sourceUrl) {
+      if (!sourceUrl.includes("stream=true")) {
+        const res = await fetch(sourceUrl).then(res => res.json())
+        return res
+      }
+      else {
+        videoPlayer.src = sourceUrl;
+        return null
+      }
+
+      // videoPlayer.load();
+    }
+
+    // Function to display the inference results
+    function displayResults(results) {
+      // Log results
+      console.log("Results: ", results);
+
+      // Clear previous results
+      resultsContainer.innerHTML = '';
+
+      // Iterate through the results and create HTML elements to display them
+      for (const result of results) {
+        const resultElement = document.createElement('div');
+        resultElement.textContent = JSON.stringify(result, null, 4);
+        resultsContainer.appendChild(resultElement);
+      }
+    }
+
+    // Convert an object into a URL query string
+    function objectToQueryString(obj) {
+      const keyValuePairs = [];
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          const value = obj[key];
+          if (value !== '' && !Number.isNaN(value)) {
+            const encodedKey = encodeURIComponent(key);
+            const encodedValue = encodeURIComponent(value);
+            keyValuePairs.push(`${encodedKey}=${encodedValue}`);
+          }
+        }
+      }
+      return keyValuePairs.join('&');
+    }
+
+    // Example usage:
+    // const params = {
+    //   source: 'http://example.com/video.mp4',
+    //   model: 'yolov8s.pt',
+    //   max_frames: 10,
+    //   seconds: 60,
+    //   process: 'bigquery',
+    //   annotator: 'fps',
+    //   conf: NaN,
+    //   iou: 0.5,
+    //   max_det: NaN,
+    //   post_url: null,
+    //   post_scheme: undefined
+    // };
+
+    // const queryString = objectToQueryString(params);
+    // console.log(queryString);
+
+    // Retrieve the DOM elements for additional parameters
+    const postUrlInput = document.getElementById('post-url-input');
+    const postSchemeInput = document.getElementById('post-scheme-input');
+    const taskSelect = document.getElementById('task-input');
+    const maxFramesInput = document.getElementById('max-frames-input');
+    const secondsInput = document.getElementById('seconds-input');
+    const executionSecondsInput = document.getElementById('execution-seconds-input');
+    const logSecondsInput = document.getElementById('log-seconds-input');
+    const fpsInput = document.getElementById('fps-input');
+    const processSelect = document.getElementById('process-input');
+    const annotatorSelect = document.getElementById('annotator-input');
+    const streamCheckbox = document.getElementById('stream-input');
+    const objectsInput = document.getElementById('objects-input');
+    const classesInput = document.getElementById('classes-input');
+    const confInput = document.getElementById('conf-input');
+    const iouInput = document.getElementById('iou-input');
+    const maxDetInput = document.getElementById('max-det-input');
+    const vidStrideInput = document.getElementById('vid-stride-input');
+    const imgszInput = document.getElementById('imgsz-input');
+    const deviceSelect = document.getElementById('device-input');
+    const trackerSelect = document.getElementById('tracker-input');
+    const persistCheckbox = document.getElementById('persist-input');
+    const augmentCheckbox = document.getElementById('augment-input');
+    const saveCheckbox = document.getElementById('save-input');
+    const showCheckbox = document.getElementById('show-input');
+    const verboseCheckbox = document.getElementById('verbose-input');
+
+
+    // Update the function to prepare the request parameters based on user input
+    async function makeAPIRequest() {
+      // Prepare the request parameters based on user input
+      const query = {
+        source: sourceInput.value,
+        post_url: postUrlInput.value,
+        post_scheme: postSchemeInput.value,
+        model: modelInput.value,
+        task: taskSelect.value,
+        max_frames: parseInt(maxFramesInput.value),
+        seconds: parseInt(secondsInput.value),
+        execution_seconds: parseInt(executionSecondsInput.value),
+        log_seconds: parseInt(logSecondsInput.value),
+        fps: parseInt(fpsInput.value),
+        process: processSelect.value,
+        annotator: annotatorSelect.value,
+        stream: streamCheckbox.checked,
+        objects: objectsInput.value,// .split(',').map(obj => obj.trim()),
+        classes: classesInput.value, // .split(',').map(cls => parseInt(cls.trim())),
+        conf: parseFloat(confInput.value),
+        iou: parseFloat(iouInput.value),
+        max_det: parseInt(maxDetInput.value),
+        vid_stride: parseInt(vidStrideInput.value),
+        imgsz: parseInt(imgszInput.value),
+        device: deviceSelect.value,
+        tracker: trackerSelect.value,
+        persist: persistCheckbox.checked,
+        augment: augmentCheckbox.checked,
+        save: saveCheckbox.checked,
+        show: showCheckbox.checked,
+        verbose: verboseCheckbox.checked
+      };
+
+      const queryString = objectToQueryString(query);
+      const queryURL = `${baseURL}/track?${queryString}`;
+
+      console.log("QUERY PARAMETERS:", query);
+      console.log("QUERY URL:", queryString);
+
+      const results = await updateVideoSource(queryURL)
+      if (results)
+          displayResults(results)
+
+      // Make the API request and handle the response
+    //   fetch('/track', {
+    //     method: 'POST',
+    //     body: JSON.stringify(query)
+    //   })
+    //     .then(response => response.json())
+    //     .then(results => displayResults(results))
+    //     .catch(error => console.error(error));
+    }
+
+    // Event listener for the run button click
+    runButton.addEventListener('click', () => {
+      makeAPIRequest();
+    });
+
+    // Call the function to update the video source with the provided URL
+    // updateVideoSource('http://example.com/video.mp4');
+
+  </script>
+</body>
+</html>

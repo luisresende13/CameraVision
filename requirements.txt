@@ -21,3 +21,6 @@ mediapipe==0.10.0
 motrackers==0.0.1
 Flask-Mail==0.9.1
 lap
+boto3
+# pyngrok==4.1.1
+# flask_ngrok

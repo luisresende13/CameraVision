@@ -1,9 +1,6 @@
 import os
 import boto3
 
-os.environ['AWS_ACCESS_KEY_ID'] = 'AKIAQDINISPVG5SQOWXG'
-os.environ['AWS_SECRET_ACCESS_KEY'] = 'KH0+EnndZnmOLpTPwhJAkrEqAw3YDlmlnakS34R5'
-
 def get_public_ipv4(instance_id):
     ec2_client = boto3.client('ec2', region_name='sa-east-1')  # Replace 'us-west-1' with your desired region
     response = ec2_client.describe_instances(InstanceIds=[instance_id])

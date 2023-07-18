@@ -16,11 +16,11 @@ lap
 # ----
 # This modules should already be installed by default by installing the packages above
 
-# Flask
-# itsdangerous
-# Jinja2
-# MarkupSafe
-# Werkzeug
+Flask
+itsdangerous
+Jinja2
+MarkupSafe
+Werkzeug
 
 # ---
 # Gunicorn module

@@ -688,95 +688,97 @@ def get_objects_from_bigquery(query):
     return jsonify(result)
 
 
-# IMAGE TRANSMISSION ENDPOINTS -------------------
-class TrackGlobalIn(Schema):
-    url = String(required=True)
-    post_url = String(load_default=None)
-    post_scheme = String(load_default=None)
-    objects = DelimitedList(String(), sep=[',', ', '], allow_none=True, load_default=None)
-    confidence = Float(load_default=0.3)
-    iou = Float(load_default=0.7)
-    detector = String(load_default='yolo')
-    tracker = String(load_default='botsort.yaml')
-    seconds = Integer(load_default=None)
-    exec_seconds = Integer(load_default=None)
-    max_frames = Integer(allow_none=True, load_default=None)
-    process_each = Integer(load_default=1)
-    run_detection_each = Integer(load_default=1)
-    fps = Integer(load_default=3)
-    process = String(load_default='none')
-    annotator = String(load_default='yolo')
-    stream = Boolean(load_default=True)
-    
-processing_functions = {
-    'bigquery': bigquery_post_new_objects,
-    'bigquery-url': bigquery_post_and_trigger_new_objects,
-    'none': None,
-}
+# # IMAGE TRANSMISSION ENDPOINTS -------------------
 
-annotators = {
-    'yolo': ultralytics_plot,
-    'demo': write_demo,
-}
 
-@app.get("/track/test")
-@app.input(TrackGlobalIn, 'query')
-@app.doc(tags=['Streaming'])
-def track_global_get(query):
-    """
-    Object Identification Live Stream
-    Runs object detection, tracking and identification for camera image live streaming. Streams the annotated images.
+# class TrackGlobalIn(Schema):
+#     url = String(required=True)
+#     post_url = String(load_default=None)
+#     post_scheme = String(load_default=None)
+#     objects = DelimitedList(String(), sep=[',', ', '], allow_none=True, load_default=None)
+#     confidence = Float(load_default=0.3)
+#     iou = Float(load_default=0.7)
+#     detector = String(load_default='yolo')
+#     tracker = String(load_default='botsort.yaml')
+#     seconds = Integer(load_default=None)
+#     exec_seconds = Integer(load_default=None)
+#     max_frames = Integer(allow_none=True, load_default=None)
+#     process_each = Integer(load_default=1)
+#     run_detection_each = Integer(load_default=1)
+#     fps = Integer(load_default=3)
+#     process = String(load_default='none')
+#     annotator = String(load_default='yolo')
+#     stream = Boolean(load_default=True)
     
-    """
-    
-    allowed_objects = query['objects']
-    if query['objects'] is not None:
-        allowed_objects = None if len(query['objects']) == 0 else [class_name.strip() for class_name in query['objects']]
+# processing_functions = {
+#     'bigquery': bigquery_post_new_objects,
+#     'bigquery-url': bigquery_post_and_trigger_new_objects,
+#     'none': None,
+# }
 
-    if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8l.pt'
-        tracker = 'yolo'
-    else:
-        model = query['detector']
-        tracker = 'deepsort'
-    
-    post_processing_args_dict = {
-        'bigquery': {
-            'url': query['url']
-        },
-        'bigquery-url': {
-            'url': query['url'],
-            'post_url': query['post_url'],
-            'post_scheme': query['post_scheme']
-        },
-    }
+# annotators = {
+#     'yolo': ultralytics_plot,
+#     'demo': write_demo,
+# }
 
-    post_processing_function = processing_functions[query['process']]
-    post_processing_args = post_processing_args_dict[query['process']]
-    frame_annotator = annotators[query['annotator']]
+# @app.get("/track/test")
+# @app.input(TrackGlobalIn, 'query')
+# @app.doc(tags=['Streaming'])
+# def track_global_get(query):
+#     """
+#     Object Identification Live Stream
+#     Runs object detection, tracking and identification for camera image live streaming. Streams the annotated images.
     
-    # TRY USING stream_with_contect IF `generator` is `True` 
-    return Response(stream_with_context(tracking_reid(
-        url=query['url'],
-        model=model,
-        tracker=tracker,
-        post_processing_function=post_processing_function, # posts new identified objects to database
-        post_processing_args=post_processing_args,
-        frame_annotator=frame_annotator, # annotates frames using detection output
-        allowed_objects=allowed_objects,
-        tracker_type=query['tracker'],
-        confidence_threshold=query['confidence'],
-        iou=query['iou'],
-        secs=query['seconds'],
-        max_frames=query['max_frames'],
-        exec_secs=query['exec_seconds'],
-        fps=query['fps'],
-        process_each=query['process_each'],
-        run_detection_each=query['run_detection_each'],
-        to_url=None,
-        generator=query['stream'], # yields annotated frames
-        resize_shape=None,
-    )), mimetype='multipart/x-mixed-replace; boundary=frame')
+#     """
+    
+#     allowed_objects = query['objects']
+#     if query['objects'] is not None:
+#         allowed_objects = None if len(query['objects']) == 0 else [class_name.strip() for class_name in query['objects']]
+
+#     if query['detector'] == 'ultralytics':
+#         model = 'models/yolo/yolov8l.pt'
+#         tracker = 'yolo'
+#     else:
+#         model = query['detector']
+#         tracker = 'deepsort'
+    
+#     post_processing_args_dict = {
+#         'bigquery': {
+#             'url': query['url']
+#         },
+#         'bigquery-url': {
+#             'url': query['url'],
+#             'post_url': query['post_url'],
+#             'post_scheme': query['post_scheme']
+#         },
+#     }
+
+#     post_processing_function = processing_functions[query['process']]
+#     post_processing_args = post_processing_args_dict[query['process']]
+#     frame_annotator = annotators[query['annotator']]
+    
+#     # TRY USING stream_with_contect IF `generator` is `True` 
+#     return Response(stream_with_context(tracking_reid(
+#         url=query['url'],
+#         model=model,
+#         tracker=tracker,
+#         post_processing_function=post_processing_function, # posts new identified objects to database
+#         post_processing_args=post_processing_args,
+#         frame_annotator=frame_annotator, # annotates frames using detection output
+#         allowed_objects=allowed_objects,
+#         tracker_type=query['tracker'],
+#         confidence_threshold=query['confidence'],
+#         iou=query['iou'],
+#         secs=query['seconds'],
+#         max_frames=query['max_frames'],
+#         exec_secs=query['exec_seconds'],
+#         fps=query['fps'],
+#         process_each=query['process_each'],
+#         run_detection_each=query['run_detection_each'],
+#         to_url=None,
+#         generator=query['stream'], # yields annotated frames
+#         resize_shape=None,
+#     )), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 class TrackIn(Schema):

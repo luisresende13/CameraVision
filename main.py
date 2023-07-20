@@ -1,64 +1,25 @@
-from time import time; runtime = time()
-import os
-from tempfile import NamedTemporaryFile
-import pandas as pd, numpy as np
-import cv2
-from urllib.parse import quote
-import warnings
-warnings.filterwarnings("ignore"); # Suppress warnings
-import datetime
-import pytz
-import logging
+# APIFlask Python modules
 
-# Configure logging
-logging.basicConfig(
-    filename='app.log',
-    level=logging.DEBUG,
-    format='%(asctime)s %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-
-# Usage example
-# logging.debug('This is a debug message')
-# logging.info('This is an info message')
-# logging.warning('This is a warning message')
-# logging.error('This is an error message')
-
-# Deployment fixes:
-# 1. lap module in requirements
-# 2. camera.html detector as `ultralytics` and parameters
-# 3. yolo_util device set to gpu
-
-
-# Get the Brazil time zone
-brazil_tz = pytz.timezone('America/Sao_Paulo')
-
-# Flask
-
-from flask import Flask, render_template, request, Response, stream_with_context, jsonify
-from flask_cors import CORS
-from werkzeug.utils import secure_filename
-
-# Flask API
-
-from apiflask import APIFlask, Schema, abort
-from apiflask.fields import Integer, String, Float, Boolean, Dict, List, DelimitedList, DateTime
+from apiflask import APIFlask, APIBlueprint, Schema, HTTPError, abort
+from apiflask.fields import Integer, Float, String, Boolean, DelimitedList
 from apiflask.validators import Length, OneOf
 
-# Custom modules
+# Flask Python modules
 
-from modules.object_identification import tracking_reid
-from modules.video_processing import Video, get_video_metadata
+from flask import request, Response, render_template, stream_with_context
+from flask_cors import CORS
 
-# ---
-# Base API url
+# Standard Python modules
 
-baseurl = 'https://analytics.octacity.dev' # us-central1
-# baseurl = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'
-# baseurl = 'http://127.0.0.1:5000' # development environment
+import os, datetime
 
-# ---
-# Google Cloud BigQuery set up
+# Custom Python modules
+
+from modules.aws import get_public_ipv4
+from modules.yolo_util import yolo_watch
+from modules.post_processing import default_post_processing, bigquery_post_new_objects, trigger_post_url_new_objects, bigquery_post_and_trigger_new_objects, fps_annotator
+
+# BIGQUERY SET UP ----------------
 
 from google.cloud import bigquery
 
@@ -73,256 +34,63 @@ table_id = 'objetos_identificados'      # Replace with your table ID
 bqclient = bigquery.Client.from_service_account_json(credentials_path)
 
 # get the BigQuery client and table instances
-table_ref = bqclient.dataset(dataset_id).table(table_id)
-table = bqclient.get_table(table_ref)
+# table_ref = bqclient.dataset(dataset_id).table(table_id)
+# table = bqclient.get_table(table_ref)
 
-# ---
-# Google Cloud Storage
+# FLASK APP DEFINITION -----------------
 
-from google.cloud import storage
-from google.oauth2 import service_account
+# Set current API version
+version = '0.1'
 
-# Set up the Google Cloud Storage client using JSON credentials
-credentials_path = 'auth/octacity-iduff.json'  # Replace with the path to your JSON credentials file
-credentials = service_account.Credentials.from_service_account_file(credentials_path)
+# set openapi.info.title and openapi.info.version
+app = APIFlask(__name__, title='Octa Vision API', version=version, docs_ui='elements')
+CORS(app)
 
+# APP BLUEPRINTS -------------
 
-# Util
-
-def now(fmt="%Y-%m-%d %H:%M:%S"):
-    return dt.now().strftime(fmt)
+object_bp = APIBlueprint('object', __name__, tag={'name': 'Objects', 'description': 'Objects detected or identified from camera image streams'})
+camera_bp = APIBlueprint('camera', __name__, tag={'name': 'Cameras', 'description': 'Camera information'})
 
 
-# INSERT RECORDS OF NEW OBJECTS INTO BIGQUERY DATABASE
+# OPENAPI SPECIFICATION OPTIONS --------------
 
-def bigquery_post_new_objects(frame, inference, time_info, url, **kwargs):
-    
-    # get list of objects identified on the frame
-    new_objects = inference[2]
-    
-    # initialize list for errors
-    errors = []
-    
-    # if there's any new object
-    if len(new_objects):
-        
-        # drop unwanted fields
-        for obj in new_objects:
-            '''
-            obj keys:
-                - class_name
-                - confidence
-                - timestamp
-                - track_id
-                - bbox
-            '''
-            
-            # Delete object fields
-            del obj['track_id']
-            del obj['bbox']
-            
-            # Crate or update object fields
-            obj['confidence'] = round(obj['confidence'], 2)
-            obj['url'] = url # associate current caamera url
-            # for key, value in kwargs.items():
-                # obj[key] = value
-        
-        # insert records of new objects into BigQuery table
-        errors = bqclient.insert_rows(table, new_objects)
+# openapi.info.description
+app.config['DESCRIPTION'] = open('README.MD').read()
 
-        # log errors if any
-        if errors:
-            # print('Error inserting record into BigQuery:', str(errors))
-            logging.error('Error inserting record into BigQuery:', errors)
-
-    # return list with errors
-    return {'n_new_objects': len(new_objects), 'n_errors': len(errors), 'errors': errors}
-
-import requests, json
-
-post_keys_to_english = {
-    'objeto': 'class_name',
-    'confianca': 'confidence',
-    'hora': 'timestamp',
-    'id_rastreio': 'track_id',
-    'caixa': 'bbox',
-    'url': 'url'
+# openapi.info.contact
+app.config['CONTACT'] = {
+    'name': 'OCTA CITY SOLUTIONS',
+    'url': 'http://octacity.org',
+    'email': 'luisresende@id.uff.br'
 }
 
-def trigger_post_url_new_objects(frame, inference,  time_info, url, post_url, post_scheme, **kwargs):
-    
-    # get list of objects identified on the frame
-    new_objects = inference[2]
+# openapi.info.license
+# app.config['LICENSE'] = {
+#     'name': 'MIT',
+#     'url': 'https://opensource.org/licenses/MIT'
+# }
 
-    # drop unwanted fields
-    responses = []
+# openapi.info.termsOfService
+# app.config['TERMS_OF_SERVICE'] = 'http://example.com'
 
-    # if there's any new object
-    if len(new_objects):
-        
-        # get dictionary from json string
-        post_scheme = json.loads(post_scheme)
-
-        for obj in sorted(new_objects, key=lambda obj: obj['class_name']):
-            '''
-            obj keys:
-                - class_name
-                - confidence
-                - timestamp
-                - track_id
-                - bbox
-            '''
-            # add `url` field to `obj` dict so its available to `trigger_post_body` dict
-            obj['url'] = url
-            
-            # build post request body based on previous configuration
-            trigger_post_body = {}
-            for key, value in post_scheme.items():
-                trigger_post_body[key] = value if value not in post_keys_to_english else obj[post_keys_to_english[value]]
-                if value == 'hora':
-                    trigger_post_body[key] = trigger_post_body[key].strftime('%Y-%m-%d %H:%M:%S')
-            
-            # post request to `post_url`s
-            res = requests.post(post_url, json=trigger_post_body)
-            responses.append({'status_code': res.status_code, 'message': res.reason})
-
-    return {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': len(new_objects), 'responses': responses}
-
-def bigquery_post_and_trigger_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs):
-    post_status = bigquery_post_new_objects(frame, inference, time_info, url, **kwargs)
-    trigger_result = trigger_post_url_new_objects(frame, inference, time_info, url, post_url, post_scheme, **kwargs)
-    result = {'message': 'success', 'url': url, 'post_url': post_url, 'n_objects': trigger_result['n_objects'], **post_status}
-    return result
-
-# set up color scheme
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-WHITE = (255, 255, 255)
-
-def ultralytics_plot(frame, inference, time_info, resize_shape, ultralytics_result):
-    
-    return ultralytics_result.plot()
-    
-    
-def write_demo(frame, inference, time_info, resize_shape=None, **kwargs):
-
-    tracking = inference[1]
-    n_frames, process_start, process_end, start_time, end_time = time_info
-
-    # loop over the formatted tracks and get newly identified objects
-    for track in tracking:
-
-        # get track attributes
-        track_id, class_name, confidence, bbox = track
-
-        # get pixel values from track bounding box
-        xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
-
-        # resize bounding boxes if image has been resized for preprocessing
-        if resize_shape is not None:
-            height, width = frame.shape[:2]
-            new_width, new_height = resize_shape
-            resize_factor_x = new_width / width
-            resize_factor_y = new_height / height
-            xmin = int(xmin / resize_factor_x)
-            xmax = int(xmax / resize_factor_x)
-            ymin = int(ymin / resize_factor_y)
-            ymax = int(ymax / resize_factor_y)
-            
-        # draw the bounding box and the track id
-        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), GREEN, 2)
-        cv2.rectangle(frame, (xmin, ymin - 30), (xmin + 10 + 11 * (len(str(track_id)) + len(class_name)), ymin), GREEN, -1)
-        cv2.putText(frame, str(track_id), (xmin + 5, ymin - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2)
-        cv2.putText(frame, class_name, (xmin + 12 + 10 * len(str(track_id)), ymin - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2)
-
-    # calculate the average frames per second
-    total_time = end_time - start_time
-    avg_fps = n_frames / total_time
-
-    # draw the average fps on the frame
-    width = frame.shape[1]
-    fps = f"FPS: {avg_fps:.2f}"
-    cv2.putText(frame, fps, (width - 125, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, BLUE, 4)
-
-    # return annotated frame
-    return frame
-
-# AWS Instance methods
-
-import os
-import boto3
-
-os.environ['AWS_ACCESS_KEY_ID'] = 'AKIAQDINISPVG5SQOWXG'
-os.environ['AWS_SECRET_ACCESS_KEY'] = 'KH0+EnndZnmOLpTPwhJAkrEqAw3YDlmlnakS34R5'
-
-def get_public_ipv4(instance_id):
-    ec2_client = boto3.client('ec2', region_name='sa-east-1')  # Replace 'us-west-1' with your desired region
-    response = ec2_client.describe_instances(InstanceIds=[instance_id])
-    try:
-        reservations = response['Reservations']
-        if reservations:
-            instances = reservations[0]['Instances']
-            if instances:
-                instance = instances[0]
-                public_ip = instance.get('PublicIpAddress')
-                return public_ip
-    except Exception as e:
-        print(f'Request failed. Error: {str(e)}')
-        return None
-
-## Usage
-# instance_id = 'i-01796a60ab18b8bd5'
-# public_ipv4 = get_public_ipv4(instance_id)
-# if public_ipv4:
-#     print("Public IPv4:", public_ipv4)
-# else:
-#     print("Failed to retrieve the public IPv4 address.")
-
-
-# ---
-# FLASK APP CONFIG
-
-app = APIFlask(__name__);
-
-# Enalble cors policy
-CORS(app);
-
-# Flask ngrok
-# from flask_ngrok import run_with_ngrok
-# run_with_ngrok(app)
-
-@app.after_request
-def apply_caching(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
-
-app.config['TIMEOUT'] = None  # Set timeout to None (no timeout)
-# OBS: try out other timeout configs *********
-
-app.config['SERVERS'] = [{'name': 'Google Cloud Run Server', 'url': f'{baseurl}/'}]
-
-app.config['EXTERNAL_DOCS'] = {
-    'description': 'Find more info here',
-    'url': 'http://octacity.org'
-}
-
-app.config['INFO'] = {
-    'title': 'Video Analytics',
-    'version': '1.0',
-    'description': open('README.MD').read(),
-    'contact': {
-        'name': 'OCTA CITY SOLUTIONS',
-        'url': 'http://octacity.org',
-        'email': 'luisresende@id.uff.br'
-    },
-}
-
+# openapi.tags
 app.config['TAGS'] = [{
+    'name': "Server",
+    "description": "Server information"
+}, {
+    'name': "YOLO",
+    "description": "Run Ultralytics YOLO inference"
+},{
+    'name': "Cameras",
+    "description": "Registered cameras database"
+},{
+    'name': "Objects",
+    "description": "Camera identified objects"
+},{
     'name': 'Web Apps',
     'description': ''
 },{
-    'name': 'Big Query',
+    'name': 'BigQuery',
     'description': ''
 },{
     'name': 'Streaming',
@@ -332,748 +100,691 @@ app.config['TAGS'] = [{
     'description': ''
 }]
 
+# openapi.servers
+app.config['SERVERS'] = [{
+    'name': 'Development Server',
+    'url': 'http://localhost:5000'
+},
+{
+    'name': 'Production Server',
+    'url': 'http://api.example.com'
+},
+{
+    'name': 'Testing Server',
+    'url': 'http://test.example.com'
+}]
+
+# openapi.externalDocs
+app.config['EXTERNAL_DOCS'] = {
+    'description': 'Find more info here',
+    'url': 'https://octacity.org'
+}
+
+# FLASK CONFIGURATION OPTIONS ----------------
+
+# Flask timeout
+app.config['TIMEOUT'] = None  # Set timeout to None (no timeout)
 
 
-# REQUEST AND RESPONSE SCHEMAS
-
-version = '0.6'
+# SERVER INFO ENDPOINTS -----------
 
 @app.get("/init")
+@app.doc(tags=['Server'])
 def initialize():
-    name = os.environ.get("NAME", "unamed")
+    name = os.environ.get("NAME", "Octa Vision API")
     return f'Server `{name}` version `v{version}` is running!'
 
-
-@app.get("/ip")
-def get_server_ip():
-    instance_id = 'i-01796a60ab18b8bd5'
-    public_ipv4 = get_public_ipv4(instance_id)
-    if public_ipv4:
-        print("Public IPv4 GET request successful:", public_ipv4)
-    else:
-        print("Failed to retrieve the public IPv4 address.")
-    return {'ip': public_ipv4, 'status': public_ipv4 is None}
-
-
-class CameraIn(Schema):
-    url = String(required=True)
-    objects = DelimitedList(String(), load_default=None, sep=[',', ', '])
-    post_url = String(load_default='')
-    post_scheme = String(load_default='')
-
-@app.post('/camera')
-@app.input(CameraIn)
-@app.doc(tags=['Web Apps'])
-def post_camera(data):
-    url = data['url']
-    objects = data['objects']
-    post_url = data['post_url']
-    post_scheme = data['post_scheme']
-    timestamp = datetime.datetime.now(brazil_tz)  # get the current time and date for Brazil time zone
-
-    # Check if the camera exists in the BigQuery database
-    query = f"SELECT * FROM `octacity.video_analytics.cameras` WHERE url='{url}'"
-    query_job = bqclient.query(query)
-    rows = query_job.result()
-
-    for row in rows:
-        return jsonify({'error': 'A Câmera já existe.'}), 409
-
-    # Create a new user in the BigQuery database
-    objects = ', '.join(objects)
-    query = f"INSERT INTO `octacity.video_analytics.cameras` (url, objects, post_url, post_scheme, timestamp) VALUES ('{url}', '{objects}', '{post_url}', '{post_scheme}', '{timestamp}')"
-    query_job = bqclient.query(query)
-    query_job.result()
-
-    # Sign-up successful
-    return jsonify({'message': 'Camera registration successful', 'data': data})
-
-class DeleteCameraIn(Schema):
-    url = String(required=True)
-
-@app.delete('/camera')
-@app.post('/camera/delete')
-@app.input(DeleteCameraIn)
-@app.doc(tags=['Web Apps'])
-def delete_camera(data):
-    url = data['url']
-
-    # Check if the camera exists in the BigQuery database
-    query = f"DELETE FROM `octacity.video_analytics.cameras` WHERE url='{url}'"
-    try:
-        # Submit the query
-        job = bqclient.query(query)
-
-        # Wait for the query to complete
-        job.result()
-
-        # Check if the query was successful
-        if job.state == "DONE":
-            return jsonify({'message': 'Record deleted successfully.'}), 200
-        else:
-            return jsonify({'error': 'Error occurred while deleting record.'}), 500
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-class EditCameraIn(Schema):
-    url = String(required=True)
-    objects = DelimitedList(String(), load_default=None, sep=[',', ', '], allow_none=True)
-    post_url = String(load_default=None, allow_none=True)
-    post_scheme = String(load_default=None, allow_none=True)
-    
-@app.put('/camera')
-@app.post('/camera/put')
-@app.input(EditCameraIn)
-@app.doc(tags=['Web Apps'])
-def edit_camera(data):
-    url = data['url']
-    objects = data['objects']
-    post_url = data['post_url']
-    post_scheme = data['post_scheme']
-
-    # Check if the camera exists in the BigQuery database
-    print('REQUEST URL:', url)
-    query = f"SELECT * FROM `octacity.video_analytics.cameras` WHERE url='{url}'"
-    query_job = bqclient.query(query)
-    rows = query_job.result()
-
-    # if rows.total_rows == 0:
-        # return jsonify({'error': 'Camera URL does not exist'}), 404
-
-    # Prepare the update query
-    update_fields = []
-    update_dict = {}
-    if objects is not None:
-        objects_string = ', '.join(objects)
-        update_fields.append(f"objects='{objects_string}'")
-        update_dict['objects'] = objects_string
-    if post_url is not None:
-        update_fields.append(f"post_url='{post_url}'")
-        update_dict['post_url'] = post_url
-    if post_scheme is not None:
-        update_fields.append(f"post_scheme='{post_scheme}'")
-        update_dict['post_scheme'] = post_scheme
-
-    # Check if any fields were provided for update
-    if not update_fields:
-        return jsonify({'message': 'No fields provided for update'}), 200
-    
-    for row in rows:
-        # Update the camera record in the BigQuery database if record exists
-        update_query = f"UPDATE `octacity.video_analytics.cameras` SET {', '.join(update_fields)} WHERE url='{url}'"
-        query_job = bqclient.query(update_query)
-        query_job.result()
-        
-        # Update successful ---
-        
-        # Build updated record
-        record = dict(row)
-        for key, value in update_dict.items():
-            record[key] = value
-            
-        # Success message
-        return jsonify({'message': 'Camera record updated successfully', 'record': record}), 200
-    
-    # Return if the camera does not exist in the BigQuery database
-    return jsonify({'error': 'Camera URL does not exist'}), 404
-    
-
-@app.get('/cameras')
-@app.doc(tags=['Web Apps'])
-def get_cameras():
-    query = f"SELECT ROW_NUMBER() OVER () AS id, * FROM (SELECT * FROM `octacity.video_analytics.cameras` ORDER BY timestamp ASC) ORDER BY timestamp DESC"
-    query_job = bqclient.query(query)
-    rows = query_job.result()
-    result = [dict(row) for row in rows]
-    return jsonify(result)
-
-
-# USER SIGNIN / SIGNUP ENDPOINTS -------------
-
-# User login and signup
-
-class LoginIn(Schema):
-    email = String(required=True)
-    password = String(required=True)
-    
-@app.post('/login')
-@app.input(LoginIn)
-@app.doc(tags=['Web Apps'])
-def login(data):
-    email = data['email']
-    password = data['password']
-
-    if not email or not password:
-        return jsonify({'error': 'Invalid email or password'}), 400
-
-    # Check if the user exists in the BigQuery database
-    query = f"SELECT * FROM `octacity.video_analytics.users` WHERE email='{email}'"
-    query_job = bqclient.query(query)
-    rows = query_job.result()
-    
-    # Validate the password
-    is_empty = True
-    for row in rows:
-        is_empty = False
-        if row['password'] != password:
-            return jsonify({'error': 'Invalid password'}), 401
-        
-    # Validate the username
-    if is_empty:
-        return jsonify({'error': 'User not found'}), 404
-
-    # Login successful
-    return jsonify({'message': 'Login successful'})
-
-class SignUpIn(Schema):
-    email = String(required=True)
-    password = String(required=True)
-
-@app.post('/signup')
-@app.input(SignUpIn)
-@app.doc(tags=['Web Apps'])
-def signup(data):
-    email = data['email']
-    password = data['password']
-
-    if not email or not password:
-        return jsonify({'error': 'Invalid email or password'}), 400
-
-    # Check if the user exists in the BigQuery database
-    query = f"SELECT * FROM `octacity.video_analytics.users` WHERE email='{email}'"
-    query_job = bqclient.query(query)
-    rows = query_job.result()
-
-    for row in rows:
-        return jsonify({'error': 'User already exists'}), 409
-
-    # Create a new user in the BigQuery database
-    query = f"INSERT INTO `octacity.video_analytics.users` (email, password) VALUES ('{email}', '{password}')"
-    query_job = bqclient.query(query)
-    query_job.result()
-
-    # Sign-up successful
-    return jsonify({'message': 'Sign up successful'})
-
-
-# Define the forgot-password endpoint
-@app.route('/forgot-password', methods=['POST'])
-def forgot_password():
-    email = request.json.get('email')
-
-    # Perform additional validation if needed
-
-    # Query the BigQuery database to check if the email exists
-    query = f"SELECT COUNT(*) as count FROM `octacity.video_analytics.users` WHERE email = '{email}'"
-    query_job = bqclient.query(query)
-    result = query_job.result()
-
-    # Get the count value from the result
-    count = next(result).get('count')
-
-    if count == 0:
-        return jsonify(message='Email does not exist'), 404
-
-    # If the email exists, send a password reset link to the user's email
-    send_password_reset_email(email)
-
-    # Return a success message
-    return jsonify(message='Password reset link sent to your email'), 200
-
-from flask_mail import Mail, Message
-
-app.config['MAIL_SERVER'] = 'your_mail_server'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'your_username'
-app.config['MAIL_PASSWORD'] = 'your_password'
-
-mail = Mail(app)
-
-# Helper function to send the password reset email
-def send_password_reset_email(email):
-    # Replace this with your email sending code
-    # Example: send an email with a password reset link to the provided email address
-    # You can use libraries like Flask-Mail or third-party email services
-    msg = Message('Password Reset', sender='luisresende@id.uff.br', recipients=[email])
-    msg.body = "Please click on the following link to reset your password: <reset_link>"
-    mail.send(msg)
-
-    
-    
-# WEB APPS ENDPOINTS ----------------------
-
-@app.get("/camera_app")
-@app.doc(tags=['Web Apps'])
-def camera_control():
-    """
-    Object Identification WebApp 2.0
-    Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
-    """
-    return render_template('camera.html')    
-
-@app.get("/tracker")
-@app.get("/playground")
-@app.doc(tags=['Web Apps'])
-def camera_tracker():
-    """
-    Object Identification WebApp 2.0
-    Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
-    """
-    return render_template('tracker.html')    
-
-@app.get("/tracker/v2")
-@app.doc(tags=['Web Apps'])
-def camera_tracker_v2():
-    """
-    Object Identification WebApp 2.0
-    Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
-    """
-    return render_template('tracker-v2.html')    
-
-@app.get("/tracker/v1")
-@app.doc(tags=['Web Apps'])
-def camera_tracker_v1():
-    """
-    Object Identification WebApp 1.0
-    Cloud based responsive web app that runs object detection, tracking and identification for live cameras image streaming. 
-    """
-    return render_template('tracker-v1.html')    
-
-
-@app.get("/upload_video")
-@app.doc(tags=['Web Apps'])
-def home():
-    """
-    Video File Web App
-    Uploads a video file, runs object detection, tracking and identification and download processed video file. 
-    """
-    return render_template('video_upload_demo.html')    
-
-
-# BigQuery Database
-
-class ObjectsIn(Schema):
-    url = String(load_default=None, allow_none=True)
-
-@app.get("/objects")
-@app.input(ObjectsIn, "query")
-@app.doc(tags=['Big Query'])
-def get_objects_from_bigquery(query):
-    """
-    Identified Objects
-    Returns a JSON list of identified objects from the BigQuery table. Optionally filter by camera URL.
-    """
-
-    # Replace 'YOUR_PROJECT_ID' with your actual project ID
-    project_id = 'octacity'
-
-    # Replace 'YOUR_DATASET_ID' and 'YOUR_TABLE_ID' with your actual dataset and table IDs
-    dataset_id = 'video_analytics'
-    table_id = 'objetos_identificados'
-
-    client = bigquery.Client(project=project_id, credentials=credentials)
-
-    # Execute BigQuery query
-    bq_query = f'SELECT ROW_NUMBER() OVER () AS id, * FROM `{project_id}.{dataset_id}.{table_id}`'
-    if query['url'] is not None:
-        bq_query += f' WHERE url = "{query["url"]}"'  # Add quotation marks around the URL value
-    bq_query += ' ORDER BY timestamp DESC LIMIT 10'
-    query_job = client.query(bq_query)
-    rows = query_job.result()
-
-    # Convert the BigQuery result rows to a list of dictionaries
-    result = [dict(row) for row in rows]
-
-    return jsonify(result)
-
-
-# # IMAGE TRANSMISSION ENDPOINTS -------------------
-
-
-# class TrackGlobalIn(Schema):
-#     url = String(required=True)
-#     post_url = String(load_default=None)
-#     post_scheme = String(load_default=None)
-#     objects = DelimitedList(String(), sep=[',', ', '], allow_none=True, load_default=None)
-#     confidence = Float(load_default=0.3)
-#     iou = Float(load_default=0.7)
-#     detector = String(load_default='yolo')
-#     tracker = String(load_default='botsort.yaml')
-#     seconds = Integer(load_default=None)
-#     exec_seconds = Integer(load_default=None)
-#     max_frames = Integer(allow_none=True, load_default=None)
-#     process_each = Integer(load_default=1)
-#     run_detection_each = Integer(load_default=1)
-#     fps = Integer(load_default=3)
-#     process = String(load_default='none')
-#     annotator = String(load_default='yolo')
-#     stream = Boolean(load_default=True)
-    
-# processing_functions = {
-#     'bigquery': bigquery_post_new_objects,
-#     'bigquery-url': bigquery_post_and_trigger_new_objects,
-#     'none': None,
-# }
-
-# annotators = {
-#     'yolo': ultralytics_plot,
-#     'demo': write_demo,
-# }
-
-# @app.get("/track/test")
-# @app.input(TrackGlobalIn, 'query')
-# @app.doc(tags=['Streaming'])
-# def track_global_get(query):
-#     """
-#     Object Identification Live Stream
-#     Runs object detection, tracking and identification for camera image live streaming. Streams the annotated images.
-    
-#     """
-    
-#     allowed_objects = query['objects']
-#     if query['objects'] is not None:
-#         allowed_objects = None if len(query['objects']) == 0 else [class_name.strip() for class_name in query['objects']]
-
-#     if query['detector'] == 'ultralytics':
-#         model = 'models/yolo/yolov8l.pt'
-#         tracker = 'yolo'
-#     else:
-#         model = query['detector']
-#         tracker = 'deepsort'
-    
-#     post_processing_args_dict = {
-#         'bigquery': {
-#             'url': query['url']
-#         },
-#         'bigquery-url': {
-#             'url': query['url'],
-#             'post_url': query['post_url'],
-#             'post_scheme': query['post_scheme']
-#         },
-#     }
-
-#     post_processing_function = processing_functions[query['process']]
-#     post_processing_args = post_processing_args_dict[query['process']]
-#     frame_annotator = annotators[query['annotator']]
-    
-#     # TRY USING stream_with_contect IF `generator` is `True` 
-#     return Response(stream_with_context(tracking_reid(
-#         url=query['url'],
-#         model=model,
-#         tracker=tracker,
-#         post_processing_function=post_processing_function, # posts new identified objects to database
-#         post_processing_args=post_processing_args,
-#         frame_annotator=frame_annotator, # annotates frames using detection output
-#         allowed_objects=allowed_objects,
-#         tracker_type=query['tracker'],
-#         confidence_threshold=query['confidence'],
-#         iou=query['iou'],
-#         secs=query['seconds'],
-#         max_frames=query['max_frames'],
-#         exec_secs=query['exec_seconds'],
-#         fps=query['fps'],
-#         process_each=query['process_each'],
-#         run_detection_each=query['run_detection_each'],
-#         to_url=None,
-#         generator=query['stream'], # yields annotated frames
-#         resize_shape=None,
-#     )), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
-class TrackIn(Schema):
-    url = String(required=True)
-    objects = DelimitedList(String(), sep=[',', ', '], allow_none=True, load_default=None)
-    confidence = Float(load_default=0.3)
-    iou = Float(load_default=0.7)
-    detector = String(load_default='yolo')
-    tracker = String(load_default='botsort.yaml')
-    seconds = Integer(load_default=None)
-    exec_seconds = Integer(load_default=None)
-    max_frames = Integer(allow_none=True, load_default=None)
-    process_each = Integer(load_default=1)
-    run_detection_each = Integer(load_default=1)
-    fps = Integer(load_default=3)
-    
-    
-@app.get("/track")
-@app.input(TrackIn, 'query')
-@app.doc(tags=['Streaming'])
-def view_and_post_track(query):
-    """
-    Object Identification Live Stream
-    Runs object detection, tracking and identification for live camera image streaming. Streams the annotated images.
-    
-    """
-    
-    allowed_objects = query['objects']
-    if allowed_objects is not None:
-        allowed_objects = None if len(allowed_objects) == 0 else [class_name.strip() for class_name in query['objects']]
-
-    if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8l.pt'
-        tracker = 'yolo'
-    else:
-        model = query['detector']
-        tracker = 'deepsort'
-    
-    return Response(stream_with_context(tracking_reid(
-        url=query['url'],
-        model=model,
-        tracker=tracker,
-        tracker_type=query['tracker'],
-        confidence_threshold=query['confidence'],
-        iou=query['iou'],
-        allowed_objects=allowed_objects,
-        secs=query['seconds'],
-        max_frames=query['max_frames'],
-        exec_secs=query['exec_seconds'],
-        fps=query['fps'],
-        process_each=query['process_each'],
-        run_detection_each=query['run_detection_each'],
-        post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
-        post_processing_args={'url': query['url']},
-        frame_annotator=ultralytics_plot, # annotates frames using detection output
-        to_url=None,
-        generator=True, # yields annotated frames
-        resize_shape=None,
-    )), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.get("/track/view")
-@app.input(TrackIn, 'query')
-@app.doc(tags=['Streaming'])
-def view_track(query):
-    """
-    Object Identification Live Stream
-    Runs object detection, tracking and identification for live camera image streaming. Streams the annotated images.
-    
-    """
-    
-    allowed_objects = query['objects']
-    if allowed_objects is not None:
-        allowed_objects = None if len(allowed_objects) == 0 else [class_name.strip() for class_name in query['objects']]
-
-    if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8l.pt'
-        tracker = 'yolo'
-    else:
-        model = query['detector']
-        tracker = 'deepsort'
-    
-    return Response(stream_with_context(tracking_reid(
-        query['url'],
-        model=model,
-        tracker=tracker,
-        tracker_type=query['tracker'],
-        confidence_threshold=query['confidence'],
-        iou=query['iou'],
-        allowed_objects=allowed_objects,
-        post_processing_function=None,
-        post_processing_args={},
-        process_each=query['process_each'],
-        run_detection_each=query['run_detection_each'],
-        frame_annotator=ultralytics_plot, # write_demo, # annotates frames using detection output
-        to_url=None,
-        generator=True, # yields annotated frames
-        secs=query['seconds'],
-        exec_secs=query['exec_seconds'],
-        max_frames=query['max_frames'],
-        fps=query['fps'],
-        resize_shape=None,
-    )), mimetype='multipart/x-mixed-replace; boundary=frame')
-    
-@app.get("/track/post")
-@app.input(TrackIn, 'query')
-@app.doc(tags=['Streaming'])
-def post_track(query):
-    """
-    Post Object Identification
-    Runs object detection, tracking and identification for live camera image streaming and posts identified objects to database in real time.
-    
-    """
-    
-    allowed_objects = query['objects']
-    if allowed_objects is not None:
-        allowed_objects = None if len(allowed_objects) == 0 else [class_name.strip() for class_name in query['objects']]
-    
-    if query['detector'] == 'ultralytics':
-        model = 'models/yolo/yolov8l.pt'
-        tracker = 'yolo'
-    else:
-        model = query['detector']
-        tracker = 'deepsort'
-
-    results = list(tracking_reid(  # returns generator object
-        query['url'],
-        model=model,
-        tracker=tracker,
-        tracker_type=query['tracker'],
-        confidence_threshold=query['confidence'],
-        iou=query['iou'],
-        allowed_objects=allowed_objects,
-        secs=query['seconds'],
-        exec_secs=query['exec_seconds'],
-        max_frames=query['max_frames'],
-        post_processing_function=bigquery_post_new_objects, # posts new identified objects to database
-        post_processing_args={'url': query['url']}, # pass camera url which is expected by the bigquery table
-        process_each=query['process_each'],
-        run_detection_each=query['run_detection_each'],
-        frame_annotator=None, # annotates frames using detection output
-        to_url=None,
-        generator=False, # yields annotated frames if true
-        fps=query['fps'],
-        resize_shape=None,
-    ))
-
-     # requires `list` function to iterate over the generator object
-    # results = list(post_new_objects_records)
-    
-    return {'MESSAGE': 'Track post successfull', 'RESULTS': results}
-
-class TrackTriggerIn(Schema):
-    url = String(required=True)
-    post_url = String(required=True)
-    post_scheme = String(required=True)
-    objects = DelimitedList(String(), sep=[',', ', '], allow_none=True, load_default=None)
-    confidence = Float(load_default=0.3)
-    iou = Float(load_default=0.7)
-    detector = String(load_default='yolo')
-    tracker = String(load_default='botsort.yaml')
-    seconds = Integer(load_default=None)
-    exec_seconds = Integer(load_default=None)
-    max_frames = Integer(allow_none=True, load_default=None)
-    process_each = Integer(load_default=1)
-    run_detection_each = Integer(load_default=1)
-    fps = Integer(load_default=3)
-
-@app.post("/track/trigger")
-@app.input(TrackTriggerIn)
-@app.doc(tags=['Streaming'])
-def post_track_trigger(data):
-    """
-    Post Object Identification
-    Runs object detection, tracking and identification for live camera image streaming and posts identified objects to database in real time.
-    
-    """
-    
-    try:
-
-        allowed_objects = data['objects']
-        if allowed_objects is not None:
-            allowed_objects = None if len(allowed_objects) == 0 else [class_name.strip() for class_name in data['objects']]
-
-        if data['detector'] == 'ultralytics':
-            model = 'models/yolo/yolov8l.pt'
-            tracker = 'yolo'
-        else:
-            model = data['detector']
-            tracker = 'deepsort'
-
-        results = list(tracking_reid(  # returns generator object
-            data['url'],
-            model=model,
-            tracker=tracker,
-            tracker_type=data['tracker'],
-            confidence_threshold=data['confidence'],
-            iou=data['iou'],
-            allowed_objects=allowed_objects,
-            secs=data['seconds'],
-            exec_secs=data['exec_seconds'],
-            max_frames=data['max_frames'],
-            post_processing_function=bigquery_post_and_trigger_new_objects, # posts new identified objects to database
-            post_processing_args={'url': data['url'], 'post_url': data['post_url'], 'post_scheme': data['post_scheme']},
-            process_each=data['process_each'],
-            run_detection_each=data['run_detection_each'],
-            frame_annotator=None, # annotates frames using detection output
-            to_url=None,
-            generator=False, # yields annotated frames if true
-            fps=data['fps'],
-            resize_shape=None,
-        ))
-
-         # requires `list` function to iterate over the generator object
-        # results = list(post_trigger_new_objects_records)
-
-        return {'MESSAGE': 'Track post/trigger successfull', 'RESULTS': results}
-    
-    except Exception as e:
-        print(f'ERROR IN TRACK-TRIGGER · ERROR: {e}')
-        return {'MESSAGE': 'Track post/trigger failed', 'ERROR': str(e)}
-        
-# class TrackTriggerTestIn(Schema):
-    # pass
-
-@app.route("/track/trigger/test", methods=["POST"])
 @app.route("/teste", methods=["POST"])
-@app.route("/imprimi", methods=["POST"])
-# @app.input(TrackTriggerTestIn)
-@app.doc(tags=['Inference'])
-def post_track_trigger_test():
+@app.doc(tags=['Server'])
+def test_server():
     data = request.json
     print(f'NOVO OBJETO: {data}')
     return data
 
-# VIDEO UPLOAD AND PROCESSING
+@app.get("/ip")
+@app.doc(tags=['Server'])
+def server_ip():
+    instance_id = 'i-01796a60ab18b8bd5'
+    public_ipv4 = get_public_ipv4(instance_id)
+    if 'ip' not in public_ipv4:
+        message = "Failed to retrieve the public IPv4 address."
+        print(message)
+        raise HTTPError(500, message, public_ipv4['error'])
+    print("Public IPv4 GET request successful:", public_ipv4['ip'])
+    return public_ipv4['ip']
 
-@app.post('/upload')
-@app.doc(tags=['Upload'])
-def upload_video():
-    """
-    Runs object detection, tracking and identification for uploaded video file and returns processed video.
-    """
-    if 'video' not in request.files:
-        return 'No video file found', 400
 
-    uploaded_video = request.files['video']
-    if uploaded_video.filename == '':
-        return 'No selected file', 400
+# ---
+# WEB APPS
 
-    # WRITE ANANOTATED VIDEO
+@app.get('/home')
+@app.doc(tags=['Web Apps'])
+def home():
+    """Home
     
-    uploaded_temp_file = NamedTemporaryFile(suffix='.mp4', delete=False)
-    annotated_temp_file = NamedTemporaryFile(suffix='.mp4', delete=False)
-    uploaded_temp_file_name = uploaded_temp_file.name
-    annotated_temp_file_name = annotated_temp_file.name
+    Main menu and basic navigation
+    """
+    return render_template("home.html")
+
+@app.get('/panel')
+@app.doc(tags=['Web Apps'])
+def cameras_app():
+    """Panel
     
-    # Create a named temporary file and save uploaded video
-    # uploaded_temp_file = tempfile.NamedTemporaryFile(delete=False)
-    uploaded_video.save(uploaded_temp_file_name)
+    Panel to registered cameras and visualize results in real time
+    """
+    return render_template("panel.html")
 
-    # Create a named temporary file for annotated video
-    # annotated_temp_file = tempfile.NamedTemporaryFile(delete=False)
+@app.get('/dashboard')
+@app.doc(tags=['Web Apps'])
+def cameras_list():
+    """Cameras
+    
+    List of registered cameras
+    """
+    return render_template("inicio.html")
 
-    # run tracking and identification
-    post_processing_output = tracking_reid(
-        uploaded_temp_file_name,
-        model='yolo',
-        confidence_threshold=0.4,
-        allowed_objects=None,
-        max_frames=None,
-        post_processing_function=None,
-        process_each=2,
-        run_detection_each=2,
-        frame_annotator=write_demo,
-        to_video_path=annotated_temp_file_name,
-    )
+@app.get('/playground')
+@app.doc(tags=['Web Apps'])
+def yolo_playground():
+    """Playground
+    
+    YOLO playground application to test and visualize inference results.
+    """
+    return render_template("playground.html")
 
-    # POST ANNOTATE VIDEO TO FILE SYSTEM CLOUD STORAGE
-    # Save the video file to Google Cloud Storage
-    storage_client = storage.Client(credentials=credentials)
-    bucket_name = 'video-analytics-octacity'  # Replace with your bucket name
-    bucket = storage_client.get_bucket(bucket_name)
 
-    filename = secure_filename(uploaded_video.filename)
-    blob_name = f'annotated/{filename}'
-    blob = bucket.blob(blob_name)
-    blob.upload_from_filename(annotated_temp_file_name)
+# ---
+# Ultralytics YOLO endpoints
 
-    # # Close the temporary file
-    uploaded_temp_file.close()
-    annotated_temp_file.close()
+# Metadata dictionary
+metadata = {
+    "source": {"title": "Video Source", "description": "The source of the video", "example": "http://example.com/video.mp4"},
+    "post_url": {"title": "POST URL", "description": "The URL to send POST requests with results", "example": "http://api.example.com/test"},
+    "post_scheme": {"title": "POST JSON", "description": "The schema of the JSON to send as the body of the POST request to `post_url` URL", "example": '{"TIPO": "objeto", "HORA": "hora", "URL": "url", "CONFIANCA": "confianca", "Chave1": "Valor1"}'},
+    "model": {"title": "Model Name", "description": "The name of the ultralytics yolov8 model", "example": "yolov8s.pt"},
+    "task": {"title": "Task", "description": "The ultralytics yolo task", "example": "track"},
+    "max_frames": {"title": "Max Frames", "description": "Number of frames to capture", "example": 10},
+    "seconds": {"title": "Seconds", "description": "Number of video seconds to capture", "example": 60},
+    "execution_seconds": {"title": "Execution Seconds", "description": "Maximum execution time in seconds", "example": 300},
+    "log_seconds": {"title": "Log Seconds", "description": "Time between logs in seconds. Set it to `None` to suppress logging", "example": 5},
+    "fps": {"title": "FPS", "description": "Video frames per second to calculate video stream time", "example": 30},
+    "process": {"title": "Process", "description": "Post-processing process", "example": "bigquery"},
+    "annotator": {"title": "Annotator", "description": "Annotator type", "example": "fps"},
+    "stream": {"title": "Stream", "description": "Whether to stream the results", "example": True},
+    "objects": {"title": "Objects", "description": "List of objects", "example": "car, person, dog"},
+    "classes": {"title": "Classes", "description": "List of classes", "example": "0, 1, 2"},
+    "conf": {"title": "Confidence", "description": "Confidence threshold", "example": 0.5},
+    "iou": {"title": "IOU", "description": "IOU threshold", "example": 0.5},
+    "max_det": {"title": "Max Detections", "description": "Maximum number of detections", "example": 100},
+    "vid_stride": {"title": "Video Stride", "description": "Video stride value", "example": 2},
+    "imgsz": {"title": "Image Size", "description": "Image size", "example": 512},
+    "device": {"title": "Device", "description": "Device type", "example": "cpu"},
+    "tracker": {"title": "Tracker", "description": "Tracker type", "example": "botsort.yaml"},
+    "persist": {"title": "Persist", "description": "Whether to persist the results", "example": True},
+    "augment": {"title": "Augment", "description": "Whether to apply augmentation", "example": False},
+    "save": {"title": "Save", "description": "Whether to save the results", "example": False},
+    "show": {"title": "Show", "description": "Whether to show the results", "example": False},
+    "verbose": {"title": "Verbose", "description": "Whether to display verbose output", "example": False}
+}
 
-    return blob.public_url
+
+class PredictIn(Schema):
+    # Generate fields with metadata using the dictionary values
+    source = String(required=True, metadata=metadata["source"])
+    post_url = String(load_default=None, metadata=metadata["post_url"])
+    post_scheme = String(load_default=None, metadata=metadata["post_scheme"])
+    model = String(load_default="yolov8l.pt", validate=OneOf(["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8l.pt", "yolov8x.pt", "yolov8n-seg.pt", "yolov8s-seg.pt", "yolov8m-seg.pt", "yolov8l-seg.pt", "yolov8x-seg.pt", "yolov8n-pose.pt", "yolov8s-pose.pt", "yolov8m-pose.pt", "yolov8l-pose.pt", "yolov8x-pose.pt", ]), metadata=metadata["model"])
+    task = String(load_default="predict", validate=OneOf(["predict", "track"]), metadata=metadata["task"])
+    max_frames = Integer(load_default=None, metadata=metadata["max_frames"])
+    seconds = Integer(load_default=None, metadata=metadata["seconds"])
+    execution_seconds = Integer(load_default=None, metadata=metadata["execution_seconds"])
+    log_seconds = Integer(load_default=10, metadata=metadata["log_seconds"])
+    fps = Integer(load_default=3, metadata=metadata["fps"])
+    process = String(load_default="none", validate=OneOf(["none", "console-log", "bigquery", "trigger", "bigquery-trigger"]), metadata=metadata["process"])
+    annotator = String(load_default="none", validate=OneOf(["none", "fps"]), metadata=metadata["annotator"])
+    stream = Boolean(load_default=False, metadata=metadata["stream"])
+    objects = DelimitedList(String(), load_default=[], sep=[',', ', '], metadata=metadata["objects"])
+    classes = DelimitedList(Integer(), load_default=[], sep=[',', ', '], metadata=metadata["classes"])
+    conf = Float(load_default=0.3, metadata=metadata["conf"])
+    iou = Float(load_default=0.7, metadata=metadata["iou"])
+    max_det = Integer(load_default=300, metadata=metadata["max_det"])
+    vid_stride = Integer(load_default=1, metadata=metadata["vid_stride"])
+    imgsz = Integer(load_default=640, metadata=metadata["imgsz"])
+    device = String(load_default="cpu", validate=OneOf(["cpu", "gpu"]), metadata=metadata["device"])
+    tracker = String(load_default="botsort.yaml", validate=OneOf(["botsort.yaml", "bytetracker.yaml"]), metadata=metadata["tracker"])
+    persist = Boolean(load_default=True, metadata=metadata["persist"])
+    augment = Boolean(load_default=False, metadata=metadata["augment"])
+    save = Boolean(load_default=False, metadata=metadata["save"])
+    show = Boolean(load_default=False, metadata=metadata["show"])
+    verbose = Boolean(load_default=False, metadata=metadata["verbose"])
+
+
+
+post_processing_functions_dict = {
+    'none': None,
+    'console-log': default_post_processing,
+    'bigquery': bigquery_post_new_objects,
+    'trigger': trigger_post_url_new_objects,
+    'bigquery-trigger': bigquery_post_and_trigger_new_objects,
+}
+
+annotators_dict = {
+    'none': None,
+    'fps': fps_annotator,
+}
+
+@app.get('/track')
+@app.input(PredictIn, 'query')
+@app.doc(tags=['YOLO'])
+def yolo_predict(query):
+    """YOLO inference
+
+    Run YOLO inference on URL source.
+    """
+
+    device = query["device"]
+    if device == "gpu":
+        device = 0
+    
+    objects = None if len(query["objects"]) == 0 else query["objects"]
+    classes = None if len(query["classes"]) == 0 else query["classes"]
+            
+    # Detection/tracking model parameters
+    model_params = {
+        "objects": objects,
+        "classes": classes,
+        "imgsz": query["imgsz"],
+        "conf": query["conf"],
+        "iou": query["iou"],
+        "max_det": query["max_det"],
+        "vid_stride": query["vid_stride"],
+        "device": device,
+        "tracker": query["tracker"],
+        "persist": query["persist"],
+        "augment": query["augment"],
+        "save": query["save"],
+        "show": query["show"],
+        "verbose": query["verbose"],
+    }
+    
+    post_processing_args_dict = {
+        'none': None,
+        'console-log': {},
+        'bigquery': {
+            'url': query['source']
+        },
+        'trigger': {
+            'url': query['source'],
+            'post_url': query['post_url'],
+            'post_scheme': query['post_scheme']
+        },
+        'bigquery-trigger': {
+            'url': query['source'],
+            'post_url': query['post_url'],
+            'post_scheme': query['post_scheme']
+        },
+    }
+
+    post_processing_function = post_processing_functions_dict[query['process']]
+    post_processing_args = post_processing_args_dict[query['process']]
+    annotator = annotators_dict[query['annotator']]
+
+    yolo_params_dict = {
+        "source": query["source"],
+        "model": query["model"],
+        "task": query["task"],
+        "model_params": model_params,
+        "max_frames": query["max_frames"],
+        "seconds": query["seconds"],
+        "execution_seconds": query["execution_seconds"],
+        "log_seconds": query["log_seconds"],
+        "fps": query["fps"],
+        "writer_params": None,
+        "post_processing_function": post_processing_function,
+        "post_processing_args": post_processing_args,
+        "annotator": annotator,
+        "generator": query["stream"]
+    }
+    
+    print("INFERENCE REQUEST · QUERY ARGS:", query)
+    print("YOLO PARAMETERS:", yolo_params_dict)
+    
+    results = yolo_watch(**yolo_params_dict)
+
+    if query["stream"]:
+        return Response(stream_with_context(results), mimetype='multipart/x-mixed-replace; boundary=frame')
+    
+    return list(results)
+
+
+@app.post('/track')
+@app.input(PredictIn)
+@app.doc(tags=['YOLO'])
+def post_yolo_predict(data):
+    """YOLO inference
+
+    Run YOLO inference on URL source.
+    """
+
+    device = data["device"]
+    if device == "gpu":
+        device = 0
+    
+    objects = None if len(data["objects"]) == 0 else data["objects"]
+    classes = None if len(data["classes"]) == 0 else data["classes"]
+            
+    # Detection/tracking model parameters
+    model_params = {
+        "objects": objects,
+        "classes": classes,
+        "imgsz": data["imgsz"],
+        "conf": data["conf"],
+        "iou": data["iou"],
+        "max_det": data["max_det"],
+        "vid_stride": data["vid_stride"],
+        "device": device,
+        "tracker": data["tracker"],
+        "persist": data["persist"],
+        "augment": data["augment"],
+        "save": data["save"],
+        "show": data["show"],
+        "verbose": data["verbose"],
+    }
+    
+    post_processing_args_dict = {
+        'none': None,
+        'console-log': {},
+        'bigquery': {
+            'url': data['source']
+        },
+        'trigger': {
+            'url': data['source'],
+            'post_url': data['post_url'],
+            'post_scheme': data['post_scheme']
+        },
+        'bigquery-trigger': {
+            'url': data['source'],
+            'post_url': data['post_url'],
+            'post_scheme': data['post_scheme']
+        },
+    }
+
+    post_processing_function = post_processing_functions_dict[data['process']]
+    post_processing_args = post_processing_args_dict[data['process']]
+    annotator = annotators_dict[data['annotator']]
+
+    yolo_params_dict = {
+        "source": data["source"],
+        "model": data["model"],
+        "task": data["task"],
+        "model_params": model_params,
+        "max_frames": data["max_frames"],
+        "seconds": data["seconds"],
+        "execution_seconds": data["execution_seconds"],
+        "log_seconds": data["log_seconds"],
+        "fps": data["fps"],
+        "writer_params": None,
+        "post_processing_function": post_processing_function,
+        "post_processing_args": post_processing_args,
+        "annotator": annotator,
+        "generator": data["stream"]
+    }
+    
+    print("INFERENCE REQUEST · QUERY ARGS:", data)
+    print("YOLO PARAMETERS:", yolo_params_dict)
+    
+    results = yolo_watch(**yolo_params_dict)
+    
+    if data["stream"]:
+        return Response(stream_with_context(results), mimetype='multipart/x-mixed-replace; boundary=frame')
+    
+    return  list(results)
+
+
+# ---
+# CAMERAS Bigquery DATABASE ENDPOINTS
+
+class CameraIn(Schema):
+    name = String(load_default='', metadata={'title': 'Camera Name', 'description': 'The unique camera name identifier.'})
+    url = String(required=True, metadata={'title': 'Camera URL', 'description': 'The camera public IP URL.'})
+    objects = DelimitedList(String(), sep=[',', ', '], load_default=[], metadata={'title': 'Objects', 'description': 'Comma delimited string list of objects.'})
+    post_url = String(load_default='', metadata={'title': 'Post URL', 'description': 'URL to send POST requests from inference results.'})
+    post_scheme = String(load_default='', metadata={'title': 'Post JSON Schema', 'description': 'JSON schema to send as the body of the POST request to `Post URL` from inference results.'})
+
+class CameraOut(Schema):
+    id = Integer(metadata={'title': 'Camera ID', 'description': 'The ID of the camera.'})
+    # name = String(metadata={'title': 'Camera Name', 'description': 'The name of the camera.'})
+    url = String(metadata={'title': 'Camera URL', 'description': 'The camera public IP URL.'})
+    objects = String( metadata={'title': 'Objects', 'description': 'List of objects.'})
+    post_url = String(metadata={'title': 'Post URL', 'description': 'URL to send POST requests from inference results.'})
+    post_scheme = String(metadata={'title': 'Post JSON Schema', 'description': 'JSON schema to send as the body of the POST request to `Post URL` from inference results.'})
+    timestamp = String(metadata={'title': 'Timestamp', 'description': 'The timestamp of when the camera was registered.'})
+
+
+
+@app.get('/cameras')
+@app.output(CameraOut(many=True), description='The list of registered cameras')
+@app.doc(tags=['Cameras'])
+def get_cameras():
+    """Get All Cameras
+
+    Get all cameras in the database.
+    """
+    try:
+        # Fetch the list of cameras from the BigQuery database
+        query = "SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`"
+        query_job = bqclient.query(query)
+        rows = query_job.result()
+        cameras = [dict(row) for row in rows]
+        return cameras
+
+    except Exception as e:
+        raise HTTPError(500, str(e))
+
+@app.get('/cameras/<int:camera_id>')
+@app.output(CameraOut, description='The camera with the given ID')
+@app.doc(tags=['Cameras'])
+def get_camera(camera_id):
+    """Get a Camera
+
+    Get a camera with a specific ID.
+    """
+    try:
+        # Fetch the camera from the BigQuery database based on the provided camera_id
+        query = f"SELECT * FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`) WHERE id = {camera_id}"
+        query_job = bqclient.query(query)
+        rows = query_job.result()
+
+        camera = None
+        for row in rows:
+            camera = dict(row)
+            
+        if camera:
+            return camera
+        else:
+            raise HTTPError(404, f'Camera with ID {camera_id} not found')
+
+    except Exception as e:
+        raise HTTPError(500, str(e))
+
+
+@app.post('/cameras')
+@app.input(CameraIn)
+@app.doc(tags=['Cameras'])
+@app.output(
+    CameraOut,
+    201,
+    description='The camera you just created',
+    links={'getCameraById': {
+        'operationId': 'getCamera',
+        'parameters': {
+            'camera_id': '$response.body#/id'
+        }
+    }}
+)
+@app.doc(tags=['Cameras'])
+def create_camera(data):
+    """Create a Camera
+
+    Create a camera with the given data. The created camera will be returned.
+    """
+    try:
+        # Insert the camera data into the BigQuery database
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        objects = ', '.join([name.strip() for name in data['objects']])
+        query = "INSERT INTO `octacity.video_analytics.cameras` (url, objects, post_url, post_scheme, timestamp) VALUES ('{}', '{}', '{}', '{}', '{}')".format(data['url'], objects, data['post_url'], data['post_scheme'], timestamp)
+        query_job = bqclient.query(query)
+        query_job.result()
+
+        # Get the inserted camera ID
+        query = 'SELECT ROW_NUMBER() OVER(ORDER BY timestamp) as id, * FROM `octacity.video_analytics.cameras` WHERE url = "{}"'.format(data['url'])
+        query_job = bqclient.query(query)
+        rows = query_job.result()
+
+        camera_id = None
+        for row in rows:
+            camera_id = row['id']
+
+        if camera_id is None:
+            raise HTTPError(500, 'Failed to retrieve the ID of the created camera')
+
+        # Create the response data
+        response_data = dict(row)
+
+        return response_data, 201
+
+    except Exception as e:
+        raise HTTPError(500, 'Failed to create camera', str(e))
+
+
+@app.patch('/cameras/<int:camera_id>')
+@app.input(CameraIn(partial=True))
+@app.output(CameraOut, description='The updated camera')
+@app.doc(tags=['Cameras'])
+def update_camera(camera_id, data):
+    """Update a Camera
+
+    Update a camera with the given data.
+    """
+    try:
+        # Check if the camera exists in the BigQuery database
+        query = f"SELECT * FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`) WHERE id = {camera_id}"
+        query_job = bqclient.query(query)
+        rows = query_job.result()
+
+        camera = None
+        for row in rows:
+            camera = dict(row)
+
+        if not camera:
+            raise HTTPError(404, f'Camera with ID {camera_id} not found')
+
+        # Update the camera fields
+        update_fields = []
+        for field, value in data.items():
+            if field in camera and value is not None:
+                if field == 'objects':
+                    value = ', '.join([name.strip() for name in value])
+                camera[field] = value
+                update_fields.append(f"{field} = '{value}'")
+
+        # If no fields to update, return the existing camera
+        if not update_fields:
+            return camera
+
+        # Perform the camera update in the BigQuery database
+        query = 'UPDATE `octacity.video_analytics.cameras` SET {} WHERE url = "{}"'.format(", ".join(update_fields), camera['url'])
+        query_job = bqclient.query(query)
+        query_job.result()
+
+        return camera
+
+    except Exception as e:
+        raise HTTPError(500, 'Failed to update the camera', str(e))
+
+
+@app.delete('/cameras/<int:camera_id>')
+@app.output({}, status_code=204, description='Empty')
+@app.doc(tags=['Cameras'])
+def delete_camera(camera_id):
+    """Delete a Camera
+
+    Delete a camera with specific ID.
+    """
+    try:
+        # Fetch the camera from the BigQuery database based on the provided camera_id
+        query = f"SELECT url FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`) WHERE id = {camera_id}"
+        query_job = bqclient.query(query)
+        rows = query_job.result()
+
+        camera_url = None
+        for row in rows:
+            camera_url = row['url']
+
+        if not camera_url:
+            raise HTTPError(404, f'Camera with ID {camera_id} not found')
+
+        # Delete the camera from the BigQuery database using its URL
+        delete_query = f"DELETE FROM `octacity.video_analytics.cameras` WHERE url = '{camera_url}'"
+        delete_job = bqclient.query(delete_query)
+        delete_job.result()
+
+        return ''
+
+    except Exception as e:
+        raise HTTPError(500, 'Failed to delete the camera', str(e))
+
+
+# ---
+# OBJECTS BigQuery DATABASE ENDPOINTS
+
+class ObjectsIn(Schema):
+    # id = String(load_default=None)
+    url = String(load_default=None)
+
+@app.get("/objects")
+@app.input(ObjectsIn, "query")
+@app.doc(tags=['Objects'])
+def get_objects_from_bigquery(query):
+    """
+    Identified Objects
+    Returns a JSON list of identified objects from the BigQuery table. Optionally filter by id or camera URL.
+    """
+    
+    try:
+        # Execute BigQuery query
+        bq_query = f'SELECT ROW_NUMBER() OVER () AS id, * FROM `octacity.video_analytics.objetos_identificados`'
+        if query['url'] is not None:
+            bq_query += f' WHERE url = "{query["url"]}"'  # Add quotation marks around the URL value
+        # if query['id'] is not None:
+        #     bq_query = 'SELECT * FROM ({}) WHERE id = {}'.format(bq_query, query["id"])  # Add quotation marks around the URL value
+        bq_query += ' ORDER BY timestamp DESC LIMIT 10'
+        query_job = bqclient.query(bq_query)
+        rows = query_job.result()
+
+        # Convert the BigQuery result rows to a list of dictionaries
+        result = [dict(row) for row in rows]
+
+        return result
+
+    except Exception as e:
+        raise HTTPError(500, 'Failed to get objects', str(e))
 
 
 if __name__ == "__main__":
+    print('main.py __main__ EXECUTING...')
     app.run()
     # app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+
+
+# class PetIn(Schema):
+#     name = String(
+#         required=True,
+#         validate=Length(0, 10),
+#         metadata={'title': 'Pet Name', 'description': 'The name of the pet.'}
+#     )
+#     category = String(
+#         required=True,
+#         validate=OneOf(['dog', 'cat']),
+#         metadata={'title': 'Pet Category', 'description': 'The category of the pet.'}
+#     )
+    
+# class PetOut(Schema):
+#     id = Integer(metadata={'title': 'Pet ID', 'description': 'The ID of the pet.'})
+#     name = String(metadata={'title': 'Pet Name', 'description': 'The name of the pet.'})
+#     category = String(metadata={'title': 'Pet Category', 'description': 'The category of the pet.'})
+
+
+
+# @app.get('/')
+# @app.doc(tags=['Hello'])
+# def say_hello():
+#     """Just Say Hello
+
+#     It will always return a greeting like this:
+#     ```
+#     {'message': 'Hello!'}
+#     ```
+#     """
+#     return {'message': 'Hello!'}
+
+
+# @app.get('/pets/<int:pet_id>')
+# @app.output(PetOut, description='The pet with given ID')
+# @app.doc(tags=['Pet'], operation_id='getPet')
+# def get_pet(pet_id):
+#     """Get a Pet
+
+#     Get a pet with specific ID.
+#     """
+#     if pet_id > len(pets) - 1 or pets[pet_id].get('deleted'):
+#         abort(404)
+#     return pets[pet_id]
+
+
+# @app.get('/pets')
+# @app.output(PetOut(many=True), description='A list of pets')
+# @app.doc(tags=['Pet'])
+# def get_pets():
+#     """Get All Pet
+
+#     Get all pets in the database.
+#     """
+#     return pets
+
+
+# @app.post('/pets')
+# @app.input(PetIn)
+# @app.output(
+#     PetOut,
+#     201,
+#     description='The pet you just created',
+#     links={'getPetById': {
+#         'operationId': 'getPet',
+#         'parameters': {
+#             'pet_id': '$response.body#/id'
+#         }
+#     }}
+# )
+# @app.doc(tags=['Pet'])
+# def create_pet(data):
+#     """Create a Pet
+
+#     Create a pet with given data. The created pet will be returned.
+#     """
+#     pet_id = len(pets)
+#     data['id'] = pet_id
+#     pets.append(data)
+#     return pets[pet_id]
+
+
+# @app.patch('/pets/<int:pet_id>')
+# @app.input(PetIn(partial=True))
+# @app.output(PetOut, description='The updated pet')
+# @app.doc(tags=['Pet'])
+# def update_pet(pet_id, data):
+#     """Update a Pet
+
+#     Update a pet with given data, the valid fields are `name` and `category`.
+#     """
+#     if pet_id > len(pets) - 1:
+#         abort(404)
+#     for attr, value in data.items():
+#         pets[pet_id][attr] = value
+#     return pets[pet_id]
+
+
+# @app.delete('/pets/<int:pet_id>')
+# @app.output({}, status_code=204, description='Empty')
+# @app.doc(tags=['Pet'])
+# def delete_pet(pet_id):
+#     """Delete a Pet
+
+#     Delete a pet with specific ID. The deleted pet will be renamed to `"Ghost"`.
+#     """
+#     if pet_id > len(pets) - 1:
+#         abort(404)
+#     pets[pet_id]['deleted'] = True
+#     pets[pet_id]['name'] = 'Ghost'
+#     return ''

@@ -1,26 +1,29 @@
+# ----
+# This modules should already be installed by default by installing the packages above
+
 Flask==2.1.0
+# itsdangerous
+# Jinja2
+# MarkupSafe
+# Werkzeug
+
+# ---
+# Gunicorn module
+
 gunicorn==20.1.0
-flask_cors==3.0.10
-apiflask==1.2.2
-itsdangerous==2.1.2
-Jinja2
-MarkupSafe
-Werkzeug==2.2.3
-google-cloud==0.34.0
-google-cloud-storage==2.7.0
-google-cloud-bigquery==3.9.0
-google-cloud-scheduler==2.11.0
-pandas==1.5.0
-numpy==1.22.4
-ipython==7.16.1
-asyncio
-opencv-python==4.7.0.68
-ultralytics
-deep-sort-realtime
-mediapipe==0.10.0
-motrackers==0.0.1
-Flask-Mail==0.9.1
-lap
+
+# ---
+# Base python packages
+
+apiflask
+flask-cors
 boto3
-# pyngrok==4.1.1
-# flask_ngrok
+google-cloud-bigquery
+
+# ---
+# Ultralytics packages (Not installed by default)
+
+ultralytics
+py-cpuinfo
+lap
+# pafy youtube_dl

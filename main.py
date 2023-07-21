@@ -112,17 +112,14 @@ except:
     
 # openapi.servers
 app.config['SERVERS'] = [{
-    'name': 'Development Server',
-    'url': 'http://localhost:5000'
-}, {
     'name': 'AWS NVIDIA Server',
     'url': f"http://{awsIP}"
 }, {
-    'name': 'Production Server',
-    'url': 'http://api.example.com'
+    'name': 'Google Cloud Run Server',
+    'url': cloudRunServerURL
 }, {
-    'name': 'Testing Server',
-    'url': 'http://test.example.com'
+    'name': 'Development Server',
+    'url': 'http://localhost:5000'
 }]
 
 # openapi.externalDocs
@@ -321,10 +318,24 @@ def yolo_predict(query):
     device = query["device"]
     if device == "gpu":
         device = 0
+
+    source = query["source"]
+    objects = query["objects"]
+    classes = query["classes"]
+
+    camera = None
+    if query['camera_id'] is not None:
+        camera_id = query['camera_id']
+        camera = get_camera_from_bq_table(camera_id)
+        # override parameters based on registered camera data
+        source = camera["url"]
+        objects = [name.strip() for name in camera["objects"].split(",") if name != ""]
+
+    if len(objects) == 0:
+        objects = None
+    if len(classes) == 0:
+        classes = None
     
-    objects = None if len(query["objects"]) == 0 else query["objects"]
-    classes = None if len(query["classes"]) == 0 else query["classes"]
-            
     # Detection/tracking model parameters
     model_params = {
         "objects": objects,
@@ -342,15 +353,7 @@ def yolo_predict(query):
         "show": query["show"],
         "verbose": query["verbose"],
     }
-    
-    camera = None
-    if query['camera_id'] is not None:
-        camera_id = query['camera_id']
-        camera = get_camera_from_bq_table(camera_id)
-        source = camera["url"]
-    else:
-        source = query["source"]
-    
+        
     post_processing_args_dict = {
         'none': None,
         'console-log': {},
@@ -414,8 +417,22 @@ def post_yolo_predict(data):
     if device == "gpu":
         device = 0
     
-    objects = None if len(data["objects"]) == 0 else data["objects"]
-    classes = None if len(data["classes"]) == 0 else data["classes"]
+    source = query["source"]
+    objects = query["objects"]
+    classes = query["classes"]
+
+    camera = None
+    if data['camera_id'] is not None:
+        camera_id = data['camera_id']
+        camera = get_camera_from_bq_table(camera_id)
+        # override parameters based on camera registered data
+        source = camera["url"]
+        objects = [name.strip() for name in camera["objects"].split(",") if name != ""]
+
+    if len(objects) == 0:
+        objects = None
+    if len(classes) == 0:
+        classes = None
             
     # Detection/tracking model parameters
     model_params = {
@@ -434,14 +451,6 @@ def post_yolo_predict(data):
         "show": data["show"],
         "verbose": data["verbose"],
     }
-    
-    camera = None
-    if data['camera_id'] is not None:
-        camera_id = data['camera_id']
-        camera = get_camera_from_bq_table(camera_id)        
-        source = camera["url"]
-    else:
-        source = data["source"]
 
     post_processing_args_dict = {
         'none': None,

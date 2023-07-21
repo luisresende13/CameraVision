@@ -286,6 +286,25 @@ annotators_dict = {
     'fps': fps_annotator,
 }
 
+def get_camera(camera_id):
+    try:
+        # Fetch the camera from the BigQuery database based on the provided camera_id
+        query = f"SELECT * FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`) WHERE id = {camera_id}"
+        query_job = bqclient.query(query)
+        rows = query_job.result()
+
+        camera = None
+        for row in rows:
+            camera = dict(row)
+            
+        if camera:
+            return camera
+        else:
+            raise HTTPError(404, f'Camera with ID {camera_id} not found')
+
+    except Exception as e:
+        raise HTTPError(500, str(e))
+
 @app.get('/track')
 @app.input(PredictIn, 'query')
 @app.doc(tags=['YOLO'])
@@ -327,10 +346,7 @@ def yolo_predict(query):
     camera = None
     if query['camera_id'] is not None:
         camera_id = query['camera_id']
-        base_url = request.url_root
-        camera_url = f"{base_url}cameras/{camera_id}"
-        print("BASE SERVER URL CAMERA REQUEST:", camera_url)
-        camera = requests.get(camera_url).json()
+        camera = get_camera(camera_id)
         source = camera["url"]
     else:
         source = query["source"]
@@ -422,10 +438,7 @@ def post_yolo_predict(data):
     camera = None
     if data['camera_id'] is not None:
         camera_id = data['camera_id']
-        base_url = request.url_root
-        camera_url = f"{base_url}cameras/{camera_id}"
-        print("BASE SERVER URL CAMERA REQUEST:", camera_url)
-        camera = requests.get(camera_url).json()
+        camera = get_camera(camera_id)        
         source = camera["url"]
     else:
         source = data["source"]
@@ -515,7 +528,8 @@ def get_cameras():
 
     except Exception as e:
         raise HTTPError(500, str(e))
-
+    
+        
 @app.get('/cameras/<int:camera_id>')
 @app.output(CameraOut, description='The camera with the given ID')
 @app.doc(tags=['Cameras'])
@@ -524,24 +538,7 @@ def get_camera(camera_id):
 
     Get a camera with a specific ID.
     """
-    try:
-        # Fetch the camera from the BigQuery database based on the provided camera_id
-        query = f"SELECT * FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`) WHERE id = {camera_id}"
-        query_job = bqclient.query(query)
-        rows = query_job.result()
-
-        camera = None
-        for row in rows:
-            camera = dict(row)
-            
-        if camera:
-            return camera
-        else:
-            raise HTTPError(404, f'Camera with ID {camera_id} not found')
-
-    except Exception as e:
-        raise HTTPError(500, str(e))
-
+    return get_camera(camera_id)
 
 @app.post('/cameras')
 @app.input(CameraIn)

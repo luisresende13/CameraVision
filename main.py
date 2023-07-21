@@ -104,18 +104,23 @@ app.config['TAGS'] = [{
     'description': ''
 }]
 
+cloudRunServerURL = 'https://octa-vision-oayt5ztuxq-ue.a.run.app'
+try:
+    awsIP = requests.get(f"{cloudRunServerURL}/ip").text
+except:
+    awsIP = ''
+    
 # openapi.servers
 app.config['SERVERS'] = [{
     'name': 'Development Server',
     'url': 'http://localhost:5000'
 }, {
     'name': 'AWS NVIDIA Server',
-    'url': request.url_root   
-},{
+    'url': f"http://{awsIP}"
+}, {
     'name': 'Production Server',
     'url': 'http://api.example.com'
-},
-{
+}, {
     'name': 'Testing Server',
     'url': 'http://test.example.com'
 }]
@@ -324,6 +329,7 @@ def yolo_predict(query):
         camera_id = query['camera_id']
         base_url = request.url_root
         camera_url = f"{base_url}cameras/{camera_id}"
+        print("BASE SERVER URL CAMERA REQUEST:", camera_url)
         camera = requests.get(camera_url).json()
         source = camera["url"]
     else:
@@ -418,6 +424,7 @@ def post_yolo_predict(data):
         camera_id = data['camera_id']
         base_url = request.url_root
         camera_url = f"{base_url}cameras/{camera_id}"
+        print("BASE SERVER URL CAMERA REQUEST:", camera_url)
         camera = requests.get(camera_url).json()
         source = camera["url"]
     else:

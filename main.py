@@ -11,7 +11,11 @@ from flask_cors import CORS
 
 # Standard Python modules
 
-import os, datetime
+import os, datetime, pytz
+
+# Get the Brazil time zone
+
+brazil_tz = pytz.timezone('America/Sao_Paulo')
 
 # Custom Python modules
 
@@ -448,13 +452,13 @@ def post_yolo_predict(data):
 class CameraIn(Schema):
     name = String(load_default='', metadata={'title': 'Camera Name', 'description': 'The unique camera name identifier.'})
     url = String(required=True, metadata={'title': 'Camera URL', 'description': 'The camera public IP URL.'})
-    objects = DelimitedList(String(), sep=[',', ', '], load_default=[], metadata={'title': 'Objects', 'description': 'Comma delimited string list of objects.'})
+    objects = DelimitedList(String(), load_default=[], sep=[',', ', '], metadata={'title': 'Objects', 'description': 'Comma delimited string list of objects.'})
     post_url = String(load_default='', metadata={'title': 'Post URL', 'description': 'URL to send POST requests from inference results.'})
     post_scheme = String(load_default='', metadata={'title': 'Post JSON Schema', 'description': 'JSON schema to send as the body of the POST request to `Post URL` from inference results.'})
 
 class CameraOut(Schema):
     id = Integer(metadata={'title': 'Camera ID', 'description': 'The ID of the camera.'})
-    # name = String(metadata={'title': 'Camera Name', 'description': 'The name of the camera.'})
+    name = String(metadata={'title': 'Camera Name', 'description': 'The name of the camera.'})
     url = String(metadata={'title': 'Camera URL', 'description': 'The camera public IP URL.'})
     objects = String( metadata={'title': 'Objects', 'description': 'List of objects.'})
     post_url = String(metadata={'title': 'Post URL', 'description': 'URL to send POST requests from inference results.'})
@@ -530,15 +534,23 @@ def create_camera(data):
     Create a camera with the given data. The created camera will be returned.
     """
     try:
+        # Check if the camera name already exists in the table
+        query = 'SELECT * FROM `octacity.video_analytics.cameras` WHERE name = "{}"'.format(data['name'])
+        query_job = bqclient.query(query)
+        rows = query_job.result()
+
+        for row in rows:
+            raise HTTPError(400, 'Camera with the same name already exists')
+
         # Insert the camera data into the BigQuery database
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.datetime.now(brazil_tz).strftime("%Y-%m-%d %H:%M:%S")
         objects = ', '.join([name.strip() for name in data['objects']])
-        query = "INSERT INTO `octacity.video_analytics.cameras` (url, objects, post_url, post_scheme, timestamp) VALUES ('{}', '{}', '{}', '{}', '{}')".format(data['url'], objects, data['post_url'], data['post_scheme'], timestamp)
+        query = "INSERT INTO `octacity.video_analytics.cameras` (name, url, objects, post_url, post_scheme, timestamp) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(data['name'], data['url'], objects, data['post_url'], data['post_scheme'], timestamp)
         query_job = bqclient.query(query)
         query_job.result()
 
         # Get the inserted camera ID
-        query = 'SELECT ROW_NUMBER() OVER(ORDER BY timestamp) as id, * FROM `octacity.video_analytics.cameras` WHERE url = "{}"'.format(data['url'])
+        query = 'SELECT * FROM (SELECT ROW_NUMBER() OVER(ORDER BY timestamp) as id, * FROM `octacity.video_analytics.cameras`) WHERE name = "{}"'.format(data['name'])
         query_job = bqclient.query(query)
         rows = query_job.result()
 
@@ -554,8 +566,11 @@ def create_camera(data):
 
         return response_data, 201
 
+    except HTTPError:
+        raise  # Re-raise HTTPError exceptions to pass them through
     except Exception as e:
         raise HTTPError(500, 'Failed to create camera', str(e))
+
 
 
 @app.patch('/cameras/<int:camera_id>')
@@ -583,7 +598,7 @@ def update_camera(camera_id, data):
         # Update the camera fields
         update_fields = []
         for field, value in data.items():
-            if field in camera and value is not None:
+            if field in camera and value is not None and field != "name":
                 if field == 'objects':
                     value = ', '.join([name.strip() for name in value])
                 camera[field] = value
@@ -594,7 +609,7 @@ def update_camera(camera_id, data):
             return camera
 
         # Perform the camera update in the BigQuery database
-        query = 'UPDATE `octacity.video_analytics.cameras` SET {} WHERE url = "{}"'.format(", ".join(update_fields), camera['url'])
+        query = 'UPDATE `octacity.video_analytics.cameras` SET {} WHERE name = "{}"'.format(", ".join(update_fields), camera['name'])
         query_job = bqclient.query(query)
         query_job.result()
 
@@ -614,19 +629,19 @@ def delete_camera(camera_id):
     """
     try:
         # Fetch the camera from the BigQuery database based on the provided camera_id
-        query = f"SELECT url FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`) WHERE id = {camera_id}"
+        query = f"SELECT name FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`) WHERE id = {camera_id}"
         query_job = bqclient.query(query)
         rows = query_job.result()
 
-        camera_url = None
+        camera_name = None
         for row in rows:
-            camera_url = row['url']
+            camera_name = row['name']
 
-        if not camera_url:
+        if not camera_name:
             raise HTTPError(404, f'Camera with ID {camera_id} not found')
 
         # Delete the camera from the BigQuery database using its URL
-        delete_query = f"DELETE FROM `octacity.video_analytics.cameras` WHERE url = '{camera_url}'"
+        delete_query = f"DELETE FROM `octacity.video_analytics.cameras` WHERE name = '{camera_name}'"
         delete_job = bqclient.query(delete_query)
         delete_job.result()
 
@@ -641,7 +656,10 @@ def delete_camera(camera_id):
 
 class ObjectsIn(Schema):
     # id = String(load_default=None)
+    camera_name = String(load_default=None)
+    camera_id = String(load_default=None)
     url = String(load_default=None)
+    limit = Integer(load_default=10, allow_none=True)
 
 @app.get("/objects")
 @app.input(ObjectsIn, "query")
@@ -654,12 +672,14 @@ def get_objects_from_bigquery(query):
     
     try:
         # Execute BigQuery query
-        bq_query = f'SELECT ROW_NUMBER() OVER () AS id, * FROM `octacity.video_analytics.objetos_identificados`'
-        if query['url'] is not None:
-            bq_query += f' WHERE url = "{query["url"]}"'  # Add quotation marks around the URL value
-        # if query['id'] is not None:
-        #     bq_query = 'SELECT * FROM ({}) WHERE id = {}'.format(bq_query, query["id"])  # Add quotation marks around the URL value
-        bq_query += ' ORDER BY timestamp DESC LIMIT 10'
+        bq_query = f'SELECT * FROM (SELECT ROW_NUMBER() OVER () AS id, * FROM `octacity.video_analytics.objetos_identificados`)'
+        keys = ['url', 'camera_name', 'camera_id']
+        if any([key in query for key in keys]):
+            bq_query += f' WHERE '  # Add quotation marks around the URL value
+            bq_query += ' AND '.join([f'{key} = "{query[key]}"' for key in keys if key in query and query[key] is not None])  # Add quotation marks around the URL value
+        bq_query += ' ORDER BY timestamp DESC'
+        if query['limit'] is not None:
+            bq_query += f' LIMIT {query["limit"]}'
         query_job = bqclient.query(bq_query)
         rows = query_job.result()
 
@@ -670,6 +690,7 @@ def get_objects_from_bigquery(query):
 
     except Exception as e:
         raise HTTPError(500, 'Failed to get objects', str(e))
+        
 
 
 if __name__ == "__main__":

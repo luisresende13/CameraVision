@@ -177,7 +177,7 @@ def cameras_app():
     
     Panel to registered cameras and visualize results in real time
     """
-    return render_template("panel.html")
+    return render_template("painel.html")
 
 @app.get('/dashboard')
 @app.doc(tags=['Web Apps'])

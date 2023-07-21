@@ -417,9 +417,9 @@ def post_yolo_predict(data):
     if device == "gpu":
         device = 0
     
-    source = query["source"]
-    objects = query["objects"]
-    classes = query["classes"]
+    source = data["source"]
+    objects = data["objects"]
+    classes = data["classes"]
 
     camera = None
     if data['camera_id'] is not None:

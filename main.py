@@ -286,7 +286,7 @@ annotators_dict = {
     'fps': fps_annotator,
 }
 
-def get_camera(camera_id):
+def get_camera_from_bq_table(camera_id):
     try:
         # Fetch the camera from the BigQuery database based on the provided camera_id
         query = f"SELECT * FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`) WHERE id = {camera_id}"
@@ -346,7 +346,7 @@ def yolo_predict(query):
     camera = None
     if query['camera_id'] is not None:
         camera_id = query['camera_id']
-        camera = get_camera(camera_id)
+        camera = get_camera_from_bq_table(camera_id)
         source = camera["url"]
     else:
         source = query["source"]
@@ -438,7 +438,7 @@ def post_yolo_predict(data):
     camera = None
     if data['camera_id'] is not None:
         camera_id = data['camera_id']
-        camera = get_camera(camera_id)        
+        camera = get_camera_from_bq_table(camera_id)        
         source = camera["url"]
     else:
         source = data["source"]
@@ -538,7 +538,7 @@ def get_camera(camera_id):
 
     Get a camera with a specific ID.
     """
-    return get_camera(camera_id)
+    return get_camera_from_bq_table(camera_id)
 
 @app.post('/cameras')
 @app.input(CameraIn)

@@ -94,7 +94,7 @@ def bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwar
             print('Error inserting records into BigQuery:', str(errors))
             # logging.error('Error inserting records into BigQuery:', errors)
 
-    return {"timestamp": timestamp, "unique_track_ids": unique_track_ids, 'url': kwargs["url"], 'new_objects': len(new_objects), "bigquery_errors": errors}
+    return {"timestamp": timestamp, "unique_track_ids": unique_track_ids, 'url': camera["url"], 'camera_id': camera['id'], 'new_objects': len(new_objects), "bigquery_errors": errors}
 
 post_keys_to_english = {
     'objeto': 'class_name',
@@ -162,7 +162,7 @@ def trigger_post_url_new_objects(result, timestamp, post_processing_outputs, **k
             res = requests.post(post_url, json=trigger_post_body)
             responses.append({'status_code': res.status_code, 'message': res.reason})
 
-    return {"timestamp": timestamp, "unique_track_ids": unique_track_ids, 'url': url, 'post_url': post_url, 'new_objects': len(new_objects), 'post_url_responses': responses}
+    return {"timestamp": timestamp, "unique_track_ids": unique_track_ids, 'url': url, 'camera_id': camera_id, 'post_url': post_url, 'new_objects': len(new_objects), 'post_url_responses': responses}
 
 def bigquery_post_and_trigger_new_objects(result, timestamp, post_processing_outputs, **kwargs):
     post_status = bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwargs)

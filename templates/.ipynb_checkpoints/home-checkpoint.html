@@ -154,24 +154,74 @@
     // ---
     // Protocol and Host information ----------------------------
 
+//     const protocol = window.location.protocol;
+//     const host = window.location.host;
+
+//     let baseURL;
+//     // let baseStreamURL;
+//     const AWSServerIP = "15.229.156.138";
+//     const AWSServerURL = `http://${AWSServerIP}`;
+//     const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
+//     const isHTMLHosted = host.includes("octacity.org") | host == ""
+//     // Check if the host is a server 
+//     // Check if the host is hostgator or the local file system
+//     if (isHTMLHosted) {
+//         baseURL = AWSServerURL;
+//         // baseStreamURL = AWSServerURL;
+//     }
+//     else {
+//       baseURL = ".";
+//       // baseStreamURL = ".";
+//     }
+
+    // Protocol and Host information ----------------------------
+      
     const protocol = window.location.protocol;
     const host = window.location.host;
 
     let baseURL;
-    // let baseStreamURL;
-    const AWSServerIP = "15.229.156.138";
-    const AWSServerURL = `http://${AWSServerIP}`;
-    const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
-    const isHTMLHosted = host.includes("octacity.org") | host == ""
-    // Check if the host is a server 
-    // Check if the host is hostgator or the local file system
-    if (isHTMLHosted) {
-        baseURL = AWSServerURL;
+    let baseStreamURL;
+    const cloudRunServerURL = 'https://octa-vision-oayt5ztuxq-ue.a.run.app'; // cloud run server
+    const isHTMLHosted = host.includes("octacity.org") | host == "";
+    const isLocalRequest = host.includes("127.0.0.1");
+      
+    // Define an async function to fetch the server IP
+    async function fetchServerIP() {
+      try {
+        const response = await fetch(`${cloudRunServerURL}/ip`);
+        const serverIP = await response.text();
+        baseURL = `http://${serverIP}`;
+        baseStreamURL = `http://${serverIP}`;
+      } catch (error) {
+        console.error('Error fetching server IP:', error);
+        // Use the AWS server URL as a fallback
+        // baseURL = AWSServerURL;
         // baseStreamURL = AWSServerURL;
+      }
     }
-    else {
-      baseURL = ".";
-      // baseStreamURL = ".";
+
+    async function onLoad() {
+
+        if (isHTMLHosted) {
+            // Call the async function to fetch the server IP
+            await fetchServerIP().then(() => {
+                // Log the fetched server IP
+                console.log("AWS server IP Fetched!")
+            }).catch((error) => {
+                console.error('Error:', error);
+            });
+
+        } else {
+            baseURL = ".";
+            baseStreamURL = ".";
+        }
+
+        // Log the final base URLs
+        console.log("AWS server IP Fetched!")
+        console.log('Host:', host);
+        console.log('Base URL:', baseURL);
+        console.log('Base Streaming URL:', baseStreamURL);
+
     }
 
       

@@ -44,7 +44,7 @@ bqclient = bigquery.Client.from_service_account_json(credentials_path)
 # FLASK APP DEFINITION -----------------
 
 # Set current API version
-version = '0.1'
+version = '0.2'
 
 # set openapi.info.title and openapi.info.version
 app = APIFlask(__name__, title='Octa Vision API', version=version, docs_ui='elements')
@@ -108,8 +108,10 @@ app.config['TAGS'] = [{
 app.config['SERVERS'] = [{
     'name': 'Development Server',
     'url': 'http://localhost:5000'
-},
-{
+}, {
+    'name': 'AWS NVIDIA Server',
+    'url': request.url_root   
+},{
     'name': 'Production Server',
     'url': 'http://api.example.com'
 },

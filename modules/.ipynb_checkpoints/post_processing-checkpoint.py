@@ -45,6 +45,14 @@ def default_post_processing(result, timestamp, post_processing_outputs, **kwargs
 # INSERT RECORDS OF NEW OBJECTS INTO BIGQUERY DATABASE
 
 def bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwargs):
+    # get camera object
+    camera = kwargs["camera"]
+
+    # get `camera` attributes
+    url = camera["url"]
+    camera_id = camera["id"]
+    camera_name = camera["name"]
+
     # Get unique tracking ids
     unique_track_ids = []
     if len(post_processing_outputs):
@@ -80,9 +88,9 @@ def bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwar
                 "timestamp": obj["timestamp"],
                 "class_name": obj["class_name"],
                 "confidence": round(obj['confidence'], 2),
-                "camera_id": camera["id"],
-                "camera_name": camera["name"],
-                "url": camera["url"],
+                "camera_id": camera_id,
+                "camera_name": camera_name,
+                "url": url,
             }
             rows.append(row)
         
@@ -94,7 +102,7 @@ def bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwar
             print('Error inserting records into BigQuery:', str(errors))
             # logging.error('Error inserting records into BigQuery:', errors)
 
-    return {"timestamp": timestamp, "unique_track_ids": unique_track_ids, 'url': camera["url"], 'camera_id': camera['id'], 'new_objects': len(new_objects), "bigquery_errors": errors}
+    return {"timestamp": timestamp, "unique_track_ids": unique_track_ids, 'url': url, 'camera_id': camera_id, 'new_objects': len(new_objects), "bigquery_errors": errors}
 
 post_keys_to_english = {
     'objeto': 'class_name',

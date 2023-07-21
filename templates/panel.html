@@ -726,10 +726,10 @@
         handleCameraNameChange();
 
       // Construct the track view URL
-      const trackViewURL = `${baseStreamURL}/track?stream=true&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&source=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackViewURL = `${baseStreamURL}/track?stream=true&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&camera_id=${encodeURIComponent(currentCameraId)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
       // Construct the track post URL
-      const trackPostURL = `${baseStreamURL}/track?process=bigquery&stream=false&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&source=${encodeURIComponent(url)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackPostURL = `${baseStreamURL}/track?process=bigquery&stream=false&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&camera_id=${encodeURIComponent(currentCameraId)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
       // Construct the track trigger URL
       const trackTriggerURL = `${baseStreamURL}/track?dt=${encodeURIComponent(new Date().getTime())}`;
@@ -770,7 +770,8 @@
       else {
           // Request object identification posting and triggering asyncronously
           const trackTriggerBody = {
-              source: url,
+              camera_id: currentCameraId,
+              // source: url,
               stream: false,
               process: "bigquery-trigger",
               post_url,

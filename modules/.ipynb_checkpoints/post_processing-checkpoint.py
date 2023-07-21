@@ -63,6 +63,9 @@ def bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwar
 
     # if there's any new object
     if len(new_objects):
+        # get camera object
+        camera = kwargs["camera"]
+        
         # drop unwanted fields
         for obj in new_objects:
             '''obj keys:
@@ -77,7 +80,9 @@ def bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwar
                 "timestamp": obj["timestamp"],
                 "class_name": obj["class_name"],
                 "confidence": round(obj['confidence'], 2),
-                "url": kwargs["url"],
+                "camera_id": camera["id"],
+                "camera_name": camera["name"],
+                "url": camera["url"],
             }
             rows.append(row)
         
@@ -97,13 +102,21 @@ post_keys_to_english = {
     'hora': 'timestamp',
     'id_rastreio': 'track_id',
     'caixa': 'bbox',
-    'url': 'url'
+    'url': 'url',
+    'id_camera': 'camera_id',
+    'nome_camera': 'camera_name',
 }
 
 def trigger_post_url_new_objects(result, timestamp, post_processing_outputs, **kwargs):
-    url = kwargs["url"]
-    post_url = kwargs["post_url"]
-    post_scheme = kwargs["post_scheme"]
+    # get camera object
+    camera = kwargs["camera"]
+    
+    # get `camera` attributes
+    url = camera["url"]
+    camera_id = camera["id"]
+    camera_name = camera["name"]
+    post_url = camera["post_url"]
+    post_scheme = camera["post_scheme"]
     
     # Get unique tracking ids
     unique_track_ids = []
@@ -133,8 +146,10 @@ def trigger_post_url_new_objects(result, timestamp, post_processing_outputs, **k
                 - track_id
                 - bbox
             '''
-            # add `url` field to `obj` dict so its available to `trigger_post_body` dict
+            # add `camera` fields to `obj` dict so its available to `trigger_post_body` dict
             obj['url'] = url
+            obj['camera_id'] = camera_id
+            obj['camera_name'] = camera_name
             
             # build post request body based on previous configuration
             trigger_post_body = {}
@@ -144,7 +159,7 @@ def trigger_post_url_new_objects(result, timestamp, post_processing_outputs, **k
                     trigger_post_body[key] = trigger_post_body[key].strftime('%Y-%m-%d %H:%M:%S')
             
             # post request to `post_url`s
-            res = requests.post(kwargs["post_url"], json=trigger_post_body)
+            res = requests.post(post_url, json=trigger_post_body)
             responses.append({'status_code': res.status_code, 'message': res.reason})
 
     return {"timestamp": timestamp, "unique_track_ids": unique_track_ids, 'url': url, 'post_url': post_url, 'new_objects': len(new_objects), 'post_url_responses': responses}

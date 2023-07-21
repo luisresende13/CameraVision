@@ -11,7 +11,7 @@ from flask_cors import CORS
 
 # Standard Python modules
 
-import os, datetime, pytz
+import os, datetime, pytz, requests
 
 # Get the Brazil time zone
 
@@ -204,6 +204,7 @@ def yolo_playground():
 # Metadata dictionary
 metadata = {
     "source": {"title": "Video Source", "description": "The source of the video", "example": "http://example.com/video.mp4"},
+    "camera_id": {"title": "Camera ID", "description": "The integer unique identifier of the camera configuration record", "example": 1},
     "post_url": {"title": "POST URL", "description": "The URL to send POST requests with results", "example": "http://api.example.com/test"},
     "post_scheme": {"title": "POST JSON", "description": "The schema of the JSON to send as the body of the POST request to `post_url` URL", "example": '{"TIPO": "objeto", "HORA": "hora", "URL": "url", "CONFIANCA": "confianca", "Chave1": "Valor1"}'},
     "model": {"title": "Model Name", "description": "The name of the ultralytics yolov8 model", "example": "yolov8s.pt"},
@@ -235,7 +236,8 @@ metadata = {
 
 class PredictIn(Schema):
     # Generate fields with metadata using the dictionary values
-    source = String(required=True, metadata=metadata["source"])
+    source = String(load_default=None, metadata=metadata["source"])
+    camera_id = Integer(load_default=None, metadata=metadata["camera_id"])
     post_url = String(load_default=None, metadata=metadata["post_url"])
     post_scheme = String(load_default=None, metadata=metadata["post_scheme"])
     model = String(load_default="yolov8l.pt", validate=OneOf(["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8l.pt", "yolov8x.pt", "yolov8n-seg.pt", "yolov8s-seg.pt", "yolov8m-seg.pt", "yolov8l-seg.pt", "yolov8x-seg.pt", "yolov8n-pose.pt", "yolov8s-pose.pt", "yolov8m-pose.pt", "yolov8l-pose.pt", "yolov8x-pose.pt", ]), metadata=metadata["model"])
@@ -264,7 +266,6 @@ class PredictIn(Schema):
     verbose = Boolean(load_default=False, metadata=metadata["verbose"])
 
 
-
 post_processing_functions_dict = {
     'none': None,
     'console-log': default_post_processing,
@@ -286,6 +287,10 @@ def yolo_predict(query):
 
     Run YOLO inference on URL source.
     """
+
+    # Handle the case where neither "source" nor "camera_id" is provided
+    if query["source"] is None and query["camera_id"] is None:
+        raise HTTPError(400, "Error: Either 'source' or 'camera_id' must be provided.")
 
     device = query["device"]
     if device == "gpu":
@@ -312,21 +317,27 @@ def yolo_predict(query):
         "verbose": query["verbose"],
     }
     
+    camera = None
+    if query['camera_id'] is not None:
+        camera_id = query['camera_id']
+        base_url = request.url_root
+        camera_url = f"{base_url}cameras/{camera_id}"
+        camera = requests.get(camera_url).json()
+        source = camera["url"]
+    else:
+        source = query["source"]
+    
     post_processing_args_dict = {
         'none': None,
         'console-log': {},
         'bigquery': {
-            'url': query['source']
+            'camera': camera,
         },
         'trigger': {
-            'url': query['source'],
-            'post_url': query['post_url'],
-            'post_scheme': query['post_scheme']
+            'camera': camera,
         },
         'bigquery-trigger': {
-            'url': query['source'],
-            'post_url': query['post_url'],
-            'post_scheme': query['post_scheme']
+            'camera': camera,
         },
     }
 
@@ -335,7 +346,7 @@ def yolo_predict(query):
     annotator = annotators_dict[query['annotator']]
 
     yolo_params_dict = {
-        "source": query["source"],
+        "source": source,
         "model": query["model"],
         "task": query["task"],
         "model_params": model_params,
@@ -371,6 +382,10 @@ def post_yolo_predict(data):
     Run YOLO inference on URL source.
     """
 
+    # Handle the case where neither "source" nor "camera_id" is provided
+    if data["source"] is None and data["camera_id"] is None:
+        raise HTTPError(400, "Error: Either 'source' or 'camera_id' must be provided.")
+
     device = data["device"]
     if device == "gpu":
         device = 0
@@ -396,21 +411,27 @@ def post_yolo_predict(data):
         "verbose": data["verbose"],
     }
     
+    camera = None
+    if data['camera_id'] is not None:
+        camera_id = data['camera_id']
+        base_url = request.url_root
+        camera_url = f"{base_url}cameras/{camera_id}"
+        camera = requests.get(camera_url).json()
+        source = camera["url"]
+    else:
+        source = data["source"]
+
     post_processing_args_dict = {
         'none': None,
         'console-log': {},
         'bigquery': {
-            'url': data['source']
+            'camera': camera,
         },
         'trigger': {
-            'url': data['source'],
-            'post_url': data['post_url'],
-            'post_scheme': data['post_scheme']
+            'camera': camera,
         },
         'bigquery-trigger': {
-            'url': data['source'],
-            'post_url': data['post_url'],
-            'post_scheme': data['post_scheme']
+            'camera': camera,
         },
     }
 
@@ -419,7 +440,7 @@ def post_yolo_predict(data):
     annotator = annotators_dict[data['annotator']]
 
     yolo_params_dict = {
-        "source": data["source"],
+        "source": source,
         "model": data["model"],
         "task": data["task"],
         "model_params": model_params,
@@ -443,7 +464,7 @@ def post_yolo_predict(data):
     if data["stream"]:
         return Response(stream_with_context(results), mimetype='multipart/x-mixed-replace; boundary=frame')
     
-    return  list(results)
+    return list(results)
 
 
 # ---

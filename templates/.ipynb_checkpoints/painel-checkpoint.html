@@ -709,6 +709,7 @@
       let task = "track";
       let device = "gpu";
       let seconds = 70;
+      let execution_seconds = 70;
       let conf = 0.30;
       let objects = selectedCameraData.objects.replace(/,\s+/g, ', '); // Replace multiple spaces after comma with a single space
 
@@ -728,10 +729,10 @@
         handleCameraNameChange();
 
       // Construct the track view URL
-      const trackViewURL = `${baseStreamURL}/track?stream=true&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&camera_id=${encodeURIComponent(currentCameraId)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackViewURL = `${baseStreamURL}/track?stream=true&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&camera_id=${encodeURIComponent(currentCameraId)}&objects=${encodeURIComponent(objects)}&execution_seconds=${encodeURIComponent(execution_seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
       // Construct the track post URL
-      const trackPostURL = `${baseStreamURL}/track?process=bigquery&stream=false&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&camera_id=${encodeURIComponent(currentCameraId)}&objects=${encodeURIComponent(objects)}&seconds=${encodeURIComponent(seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackPostURL = `${baseStreamURL}/track?process=bigquery&stream=false&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&camera_id=${encodeURIComponent(currentCameraId)}&objects=${encodeURIComponent(objects)}&execution_seconds=${encodeURIComponent(execution_seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
 
       // Construct the track trigger URL
       const trackTriggerURL = `${baseStreamURL}/track?dt=${encodeURIComponent(new Date().getTime())}`;
@@ -779,7 +780,8 @@
               post_url,
               post_scheme,
               objects,
-              seconds,
+              // seconds,
+              execution_seconds,
               conf,
               task,
               device,
@@ -1335,7 +1337,6 @@
         }
 
         // Log the final base URLs
-        console.log("AWS server IP Fetched!")
         console.log('Host:', host);
         console.log('Base URL:', baseURL);
         console.log('Base Streaming URL:', baseStreamURL);

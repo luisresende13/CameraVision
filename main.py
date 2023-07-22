@@ -142,12 +142,14 @@ def initialize():
     name = os.environ.get("NAME", "Octa Vision API")
     return f'Server `{name}` version `v{version}` is running!'
 
+
 @app.route("/teste", methods=["POST"])
 @app.doc(tags=['Server'])
 def test_server():
     data = request.json
     print(f'NOVO OBJETO: {data}')
     return data
+
 
 @app.get("/ip")
 @app.doc(tags=['Server'])
@@ -220,6 +222,7 @@ metadata = {
     "fps": {"title": "FPS", "description": "Video frames per second to calculate video stream time", "example": 30},
     "process": {"title": "Process", "description": "Post-processing process", "example": "bigquery"},
     "annotator": {"title": "Annotator", "description": "Annotator type", "example": "fps"},
+    "capture": {"title": "Capture Method", "description": "The python framework to use capture the video source", "example": "opencv"},
     "stream": {"title": "Stream", "description": "Whether to stream the results", "example": True},
     "objects": {"title": "Objects", "description": "List of objects", "example": "car, person, dog"},
     "classes": {"title": "Classes", "description": "List of classes", "example": "0, 1, 2"},
@@ -253,6 +256,7 @@ class PredictIn(Schema):
     fps = Integer(load_default=3, metadata=metadata["fps"])
     process = String(load_default="none", validate=OneOf(["none", "console-log", "bigquery", "trigger", "bigquery-trigger"]), metadata=metadata["process"])
     annotator = String(load_default="none", validate=OneOf(["none", "fps"]), metadata=metadata["annotator"])
+    capture = String(load_default="opencv", validate=OneOf(["opencv", "yolo"]), metadata=metadata["capture"])
     stream = Boolean(load_default=False, metadata=metadata["stream"])
     objects = DelimitedList(String(), load_default=[], sep=[',', ', '], metadata=metadata["objects"])
     classes = DelimitedList(Integer(), load_default=[], sep=[',', ', '], metadata=metadata["classes"])
@@ -386,7 +390,8 @@ def yolo_predict(query):
         "post_processing_function": post_processing_function,
         "post_processing_args": post_processing_args,
         "annotator": annotator,
-        "generator": query["stream"]
+        "generator": query["stream"],
+        "capture": query["capture"]
     }
     
     print("INFERENCE REQUEST · QUERY ARGS:", query)
@@ -484,7 +489,8 @@ def post_yolo_predict(data):
         "post_processing_function": post_processing_function,
         "post_processing_args": post_processing_args,
         "annotator": annotator,
-        "generator": data["stream"]
+        "generator": data["stream"],
+        "capture": data["capture"]
     }
     
     print("INFERENCE REQUEST · QUERY ARGS:", data)

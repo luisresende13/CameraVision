@@ -23,7 +23,7 @@ def default_post_processing(result, timestamp, post_processing_outputs, **kwargs
     tracking = identified_objects(result, timestamp)
     new_objects, unique_track_ids = new_objects_from(tracking, unique_track_ids)
 
-    return {"timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(unique_track_ids), "unique_track_ids": unique_track_ids, 'n_new': len(new_objects), 'new_objects': new_objects, 'kwargs': kwargs}
+    return {"timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(tracking), 'n_tracker_new': len(new_objects), "n_tracked_total": len(unique_track_ids), **kwargs}
 
 
 # INSERT RECORDS OF NEW OBJECTS INTO BIGQUERY DATABASE
@@ -44,6 +44,7 @@ def bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwar
         unique_track_ids = previous_output["unique_track_ids"].copy()
 
     # get list of objects identified on the frame
+    detections = detected_objects(result, timestamp)
     tracking = identified_objects(result, timestamp)
     new_objects, unique_track_ids = new_objects_from(tracking, unique_track_ids)
     
@@ -86,7 +87,7 @@ def bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwar
             print('Error inserting records into BigQuery:', str(errors))
             # logging.error('Error inserting records into BigQuery:', errors)
 
-    return {"timestamp": timestamp, "unique_track_ids": unique_track_ids, 'url': url, 'camera_id': camera_id, 'new_objects': len(new_objects), "bigquery_errors": errors}
+    return {"timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(tracking), 'n_tracker_new': len(new_objects), "n_tracked_total": len(unique_track_ids), "bigquery_errors": errors, **kwargs}
 
 post_keys_to_english = {
     'objeto': 'class_name',
@@ -117,6 +118,7 @@ def trigger_post_url_new_objects(result, timestamp, post_processing_outputs, **k
         unique_track_ids = previous_output["unique_track_ids"].copy()
 
     # get list of objects identified on the frame
+    detections = detected_objects(result, timestamp)
     tracking = identified_objects(result, timestamp)
     new_objects, unique_track_ids = new_objects_from(tracking, unique_track_ids)
     
@@ -154,7 +156,7 @@ def trigger_post_url_new_objects(result, timestamp, post_processing_outputs, **k
             res = requests.post(post_url, json=trigger_post_body)
             responses.append({'status_code': res.status_code, 'message': res.reason})
 
-    return {"timestamp": timestamp, "unique_track_ids": unique_track_ids, 'url': url, 'camera_id': camera_id, 'post_url': post_url, 'new_objects': len(new_objects), 'post_url_responses': responses}
+    return {"timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(tracking), 'n_tracker_new': len(new_objects), "n_tracked_total": len(unique_track_ids), 'post_url_responses': responses, **kwargs}
 
 def bigquery_post_and_trigger_new_objects(result, timestamp, post_processing_outputs, **kwargs):
     post_status = bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwargs)

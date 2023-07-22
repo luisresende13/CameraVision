@@ -203,7 +203,7 @@ def yolo_watch(
     except Exception as e:
         print(f'STREAMING (EXCEPTION) · ERROR: {str(e)}')
         traceback.print_exc()
-        raise HTTPError(500, "Internal Server Error", "An unexpected error occurred during video streaming. Please try again later or contact support for assistance.")
+        raise HTTPError(500, "Internal Server Error During Video Streaming", str(e))
 
     # finish video capture
     finally:
@@ -259,7 +259,7 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
     except Exception as e:
         print(f'OPENCV WRAP STREAMING (EXCEPTION) · ERROR: {str(e)}')
         traceback.print_exc()
-        raise HTTPError(500, "Internal Server Error", "An unexpected error occurred during OPEN-CV video streaming. Please try again later or contact support for assistance.")
+        raise HTTPError(500, "Internal Server Error", str(e))
         
     # finish video capture
     finally:

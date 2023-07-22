@@ -28,7 +28,7 @@ from modules.post_processing import default_post_processing, bigquery_post_new_o
 # FLASK APP DEFINITION -----------------
 
 # Set current API version
-version = '0.3'
+version = '0.4'
 
 # set openapi.info.title and openapi.info.version
 app = APIFlask(__name__, title='Octa Vision API', version=version, docs_ui='elements')
@@ -232,7 +232,7 @@ class PredictIn(Schema):
     post_url = String(load_default=None, metadata=metadata["post_url"])
     post_scheme = String(load_default=None, metadata=metadata["post_scheme"])
     model = String(load_default="yolov8l.pt", validate=OneOf(["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8l.pt", "yolov8x.pt", "yolov8n-seg.pt", "yolov8s-seg.pt", "yolov8m-seg.pt", "yolov8l-seg.pt", "yolov8x-seg.pt", "yolov8n-pose.pt", "yolov8s-pose.pt", "yolov8m-pose.pt", "yolov8l-pose.pt", "yolov8x-pose.pt"]), metadata=metadata["model"])
-    task = String(load_default="predict", validate=OneOf(["predict", "track"]), metadata=metadata["task"])
+    task = String(load_default="track", validate=OneOf(["predict", "track"]), metadata=metadata["task"])
     max_frames = Integer(load_default=None, metadata=metadata["max_frames"])
     seconds = Integer(load_default=None, metadata=metadata["seconds"])
     execution_seconds = Integer(load_default=None, metadata=metadata["execution_seconds"])
@@ -249,7 +249,7 @@ class PredictIn(Schema):
     max_det = Integer(load_default=300, metadata=metadata["max_det"])
     vid_stride = Integer(load_default=1, metadata=metadata["vid_stride"])
     imgsz = Integer(load_default=640, metadata=metadata["imgsz"])
-    device = String(load_default="cpu", validate=OneOf(["cpu", "gpu"]), metadata=metadata["device"])
+    device = String(load_default="gpu", validate=OneOf(["cpu", "gpu"]), metadata=metadata["device"])
     tracker = String(load_default="botsort.yaml", validate=OneOf(["botsort.yaml", "bytetracker.yaml"]), metadata=metadata["tracker"])
     persist = Boolean(load_default=True, metadata=metadata["persist"])
     augment = Boolean(load_default=False, metadata=metadata["augment"])

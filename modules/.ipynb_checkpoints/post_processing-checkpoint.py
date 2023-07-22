@@ -1,29 +1,13 @@
-# Python standard modules
+# Standard Python modules
 
 import requests, json, cv2
 
-# Custom modules
 
+# Custom Python modules
+
+from modules.bigquery_util import bqclient, objects_table
 from modules.yolo_util import detected_objects, identified_objects, new_objects_from
 
-# ---
-# Google Cloud BigQuery set up
-
-from google.cloud import bigquery
-
-# set up the BigQuery client using the service account key file
-credentials_path = 'auth/octacity-iduff.json'  # Replace with the path to your JSON with the path to your service account key file
-
-# set up the dataset and objects_table ids
-dataset_id = 'video_analytics'  # Replace with your dataset ID
-objects_table_id = 'objetos_identificados'      # Replace with your objects_table ID
-
-# BigQuery client
-bqclient = bigquery.Client.from_service_account_json(credentials_path)
-
-# get the BigQuery client and objects_table instances
-objects_table_ref = bqclient.dataset(dataset_id).table(objects_table_id)
-objects_table = bqclient.get_table(objects_table_ref)
 
 # DEFAULT POST PROCESSING FUNCTION
 

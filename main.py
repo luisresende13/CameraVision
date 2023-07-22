@@ -1,14 +1,3 @@
-# APIFlask Python modules
-
-from apiflask import APIFlask, APIBlueprint, Schema, HTTPError, abort
-from apiflask.fields import Integer, Float, String, Boolean, DelimitedList
-from apiflask.validators import Length, OneOf
-
-# Flask Python modules
-
-from flask import request, Response, render_template, stream_with_context
-from flask_cors import CORS
-
 # Standard Python modules
 
 import os, datetime, pytz, requests
@@ -17,34 +6,29 @@ import os, datetime, pytz, requests
 
 brazil_tz = pytz.timezone('America/Sao_Paulo')
 
+# Flask Python modules
+
+from flask import request, Response, render_template, stream_with_context
+from flask_cors import CORS
+
+# APIFlask Python modules
+
+from apiflask import APIFlask, APIBlueprint, Schema, HTTPError, abort
+from apiflask.fields import Integer, Float, String, Boolean, DelimitedList
+from apiflask.validators import Length, OneOf
+
 # Custom Python modules
 
 from modules.aws import get_public_ipv4
 from modules.yolo_util import yolo_watch
+from modules.bigquery_util import bqclient, get_camera_from_bq_table
 from modules.post_processing import default_post_processing, bigquery_post_new_objects, trigger_post_url_new_objects, bigquery_post_and_trigger_new_objects, fps_annotator
 
-# BIGQUERY SET UP ----------------
-
-from google.cloud import bigquery
-
-# set up the BigQuery client using the service account key file
-credentials_path = 'auth/octacity-iduff.json'  # Replace with the path to your JSON with the path to your service account key file
-
-# set up the dataset and table ids
-dataset_id = 'video_analytics'  # Replace with your dataset ID
-table_id = 'objetos_identificados'      # Replace with your table ID
-
-# BigQuery client
-bqclient = bigquery.Client.from_service_account_json(credentials_path)
-
-# get the BigQuery client and table instances
-# table_ref = bqclient.dataset(dataset_id).table(table_id)
-# table = bqclient.get_table(table_ref)
 
 # FLASK APP DEFINITION -----------------
 
 # Set current API version
-version = '0.2'
+version = '0.3'
 
 # set openapi.info.title and openapi.info.version
 app = APIFlask(__name__, title='Octa Vision API', version=version, docs_ui='elements')
@@ -247,7 +231,7 @@ class PredictIn(Schema):
     camera_id = Integer(load_default=None, metadata=metadata["camera_id"])
     post_url = String(load_default=None, metadata=metadata["post_url"])
     post_scheme = String(load_default=None, metadata=metadata["post_scheme"])
-    model = String(load_default="yolov8l.pt", validate=OneOf(["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8l.pt", "yolov8x.pt", "yolov8n-seg.pt", "yolov8s-seg.pt", "yolov8m-seg.pt", "yolov8l-seg.pt", "yolov8x-seg.pt", "yolov8n-pose.pt", "yolov8s-pose.pt", "yolov8m-pose.pt", "yolov8l-pose.pt", "yolov8x-pose.pt", ]), metadata=metadata["model"])
+    model = String(load_default="yolov8l.pt", validate=OneOf(["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8l.pt", "yolov8x.pt", "yolov8n-seg.pt", "yolov8s-seg.pt", "yolov8m-seg.pt", "yolov8l-seg.pt", "yolov8x-seg.pt", "yolov8n-pose.pt", "yolov8s-pose.pt", "yolov8m-pose.pt", "yolov8l-pose.pt", "yolov8x-pose.pt"]), metadata=metadata["model"])
     task = String(load_default="predict", validate=OneOf(["predict", "track"]), metadata=metadata["task"])
     max_frames = Integer(load_default=None, metadata=metadata["max_frames"])
     seconds = Integer(load_default=None, metadata=metadata["seconds"])
@@ -273,7 +257,6 @@ class PredictIn(Schema):
     show = Boolean(load_default=False, metadata=metadata["show"])
     verbose = Boolean(load_default=False, metadata=metadata["verbose"])
 
-
 post_processing_functions_dict = {
     'none': None,
     'console-log': default_post_processing,
@@ -286,25 +269,6 @@ annotators_dict = {
     'none': None,
     'fps': fps_annotator,
 }
-
-def get_camera_from_bq_table(camera_id):
-    try:
-        # Fetch the camera from the BigQuery database based on the provided camera_id
-        query = f"SELECT * FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY timestamp) as id FROM `octacity.video_analytics.cameras`) WHERE id = {camera_id}"
-        query_job = bqclient.query(query)
-        rows = query_job.result()
-
-        camera = None
-        for row in rows:
-            camera = dict(row)
-            
-        if camera:
-            return camera
-        else:
-            raise HTTPError(404, f'Camera with ID {camera_id} not found')
-
-    except Exception as e:
-        raise HTTPError(500, str(e))
 
 @app.get('/track')
 @app.input(PredictIn, 'query')
@@ -329,8 +293,10 @@ def yolo_predict(query):
 
     camera = None
     if query['camera_id'] is not None:
+        # Get camera object from bigquery table
         camera_id = query['camera_id']
         camera = get_camera_from_bq_table(camera_id)
+        
         # override parameters based on registered camera data
         source = camera["url"]
         objects = [name.strip() for name in camera["objects"].split(",") if name != ""]
@@ -416,7 +382,7 @@ def post_yolo_predict(data):
 
     # Handle the case where neither "source" nor "camera_id" is provided
     if data["source"] is None and data["camera_id"] is None:
-        raise HTTPError(400, "Error: Either 'source' or 'camera_id' must be provided.")
+        raise HTTPError(400, "Error: Must provide one of 'source' and 'camera_id'.")
 
     device = data["device"]
     if device == "gpu":
@@ -524,7 +490,6 @@ class CameraOut(Schema):
     timestamp = String(metadata={'title': 'Timestamp', 'description': 'The timestamp of when the camera was registered.'})
 
 
-
 @app.get('/cameras')
 @app.output(CameraOut(many=True), description='The list of registered cameras')
 @app.doc(tags=['Cameras'])
@@ -553,7 +518,8 @@ def get_camera(camera_id):
 
     Get a camera with a specific ID.
     """
-    return get_camera_from_bq_table(camera_id)
+    camera = get_camera_from_bq_table(camera_id)
+    return camera
 
 @app.post('/cameras')
 @app.input(CameraIn)
@@ -715,13 +681,17 @@ def get_objects_from_bigquery(query):
     try:
         # Execute BigQuery query
         bq_query = f'SELECT * FROM (SELECT ROW_NUMBER() OVER () AS id, * FROM `octacity.video_analytics.objetos_identificados`)'
+
         keys = ['url', 'camera_name', 'camera_id']
         if any([key in query for key in keys]):
             bq_query += f' WHERE '  # Add quotation marks around the URL value
             bq_query += ' AND '.join([f'{key} = "{query[key]}"' for key in keys if key in query and query[key] is not None])  # Add quotation marks around the URL value
+        
         bq_query += ' ORDER BY timestamp DESC'
+        
         if query['limit'] is not None:
             bq_query += f' LIMIT {query["limit"]}'
+        
         query_job = bqclient.query(bq_query)
         rows = query_job.result()
 
@@ -740,6 +710,8 @@ if __name__ == "__main__":
     app.run()
     # app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
+
+# EXAMPLE ENDPOINTS 
 
 # class PetIn(Schema):
 #     name = String(

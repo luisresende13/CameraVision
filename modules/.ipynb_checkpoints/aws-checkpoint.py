@@ -1,8 +1,8 @@
 import os
 import boto3
 
-def get_public_ipv4(instance_id):
-    ec2_client = boto3.client('ec2', region_name='sa-east-1')  # Replace 'us-west-1' with your desired region
+def get_public_ipv4(instance_id, region_name='sa-east-1'):
+    ec2_client = boto3.client('ec2', region_name=region_name)  # Replace 'us-west-1' with your desired region
     response = ec2_client.describe_instances(InstanceIds=[instance_id])
     try:
         reservations = response['Reservations']

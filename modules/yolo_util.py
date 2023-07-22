@@ -1,8 +1,9 @@
-import cv2, traceback
 from ultralytics import YOLO
-from time import time
+import cv2, traceback
+from time import time, sleep
 from datetime import datetime as dt
 import pytz
+from apiflask import HTTPError
 
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
@@ -195,14 +196,15 @@ def yolo_watch(
             if log_seconds is not None and video_seconds % log_seconds == 0:
                 print(f'STREAMING · N-FRAMES: {n_frames} · VIDEO-TIME: {round(video_seconds, 1)} s · EXECUTION-TIME: {round(exec_seconds, 1)} s · URL: {source}')
 
-        # Report end of stream 
+        # Report end of stream
         print(f'STREAMING FINISHED · N-FRAMES: {n_frames} · STREAM-TIME: {round(video_seconds, 1)} s · EXECUTION-TIME: {round(exec_seconds, 1)} s · URL {source}')
 
     # handle exception inside video capture loop
     except Exception as e:
         print(f'STREAMING (EXCEPTION) · ERROR: {str(e)}')
         traceback.print_exc()
-        
+        HTTPError(500, "Internal Server Error", "An unexpected error occurred during video streaming. Please try again later or contact support for assistance.")
+
     # finish video capture
     finally:
 
@@ -212,8 +214,60 @@ def yolo_watch(
         # Release the output video file writer
         if writer_params is not None:
             out.release()
-            
 
+
+def opencv_capture_predict(source, predict, model_params, max_retries=10):
+
+    # initialize the video capture object
+    cap = cv2.VideoCapture(source)
+
+    # error handler for stream loop
+    try:
+        
+        # stream loop
+        while True:
+
+            # read video frame
+            success, frame = cap.read()
+
+            # retry if read capture not successful
+            retries = 0
+            while not success and retries < max_retries:
+                sleep(0.2)
+                cap = cv2.VideoCapture(source)
+                success, frame = cap.read()
+                retries += 1
+                
+            # break loop if `max_retries` reached · valid frame is available after here
+            if retries == max_retries:
+                break
+
+            # update model parameters source and stream attributes
+            model_params["source"] = frame
+            model_params["stream"] = False
+            
+            # run inference on the current frame
+            results = predict(**model_params)
+            
+            # get the frame result
+            result = results[0]
+
+            # stream the result
+            yield result
+    
+    # handle exception inside video capture loop
+    except Exception as e:
+        print(f'OPENCV WRAP STREAMING (EXCEPTION) · ERROR: {str(e)}')
+        traceback.print_exc()
+        HTTPError(500, "Internal Server Error", "An unexpected error occurred during OPEN-CV video streaming. Please try again later or contact support for assistance.")
+        
+    # finish video capture
+    finally:
+        # release video capture
+        cap.release()
+        cv2.destroyAllWindows()
+
+            
 # ---
 # YOLO auxiliary functions to get detections, identifications and new identified objects
 
@@ -245,7 +299,7 @@ def detected_objects(result, timestamp):
             "class_name": class_name,
             "confidence": confidence,
             "bbox": bbox
-        }            
+        }
         # Append tracked object attributes
         detections.append(detection)
     
@@ -286,44 +340,3 @@ def new_objects_from(tracking, unique_track_ids):
             unique_track_ids.append(track["track_id"])
     
     return new_objects, unique_track_ids
-
-def opencv_capture_predict(source, predict, model_params, max_retries=10):
-
-    # error handler for stream loop
-    try:
-
-        # initialize the video capture object
-        cap = cv2.VideoCapture(source)
-
-        while True:
-
-            # read video frame
-            success, frame = cap.read()
-
-            # retry if read capture not successful
-            retries = 0
-            while not success and retries < max_retries:
-                cap = cv2.VideoCapture(source)
-                success, frame = cap.read()
-                retries += 1
-                
-            # break loop if `max_retries` reached · valid frame is available after here
-            if retries == max_retries:
-                break
-
-            results = predict(**{**model_params, "source": frame, "stream": False})
-
-            result = results[0]
-
-            yield result
-    
-    # handle exception inside video capture loop
-    except Exception as e:
-        print(f'OPENCV WRAP STREAMING (EXCEPTION) · ERROR: {str(e)}')
-        traceback.print_exc()
-        
-    # finish video capture
-    finally:
-        # release video capture
-        cap.release()
-        cv2.destroyAllWindows()

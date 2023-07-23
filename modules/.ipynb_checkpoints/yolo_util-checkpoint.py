@@ -202,15 +202,18 @@ def yolo_watch(
     # handle exception inside video capture loop
     except Exception as e:
         print(f'STREAMING (EXCEPTION) · ERROR: {str(e)}')
+        # Print the traceback to console
         traceback.print_exc()
-        raise HTTPError(500, "Internal Server Error During Video Streaming", str(e))
+        # Get the traceback as a string
+        traceback_str = traceback.format_exc()        
+        raise HTTPError(500, "Internal Server Error During YOLO ULTRALYTICS Video Streaming", traceback_str)
 
     # finish video capture
     finally:
 
         # Release ultralytics result generator
-        results = None
-
+        results, post_processing_outputs, annotated_image, yolo = None
+        
         # Release the output video file writer
         if writer_params is not None:
             out.release()
@@ -258,8 +261,11 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
     # handle exception inside video capture loop
     except Exception as e:
         print(f'OPENCV WRAP STREAMING (EXCEPTION) · ERROR: {str(e)}')
+        # Print the traceback to console
         traceback.print_exc()
-        raise HTTPError(500, "Internal Server Error", str(e))
+        # Get the traceback as a string
+        traceback_str = traceback.format_exc()        
+        raise HTTPError(500, "Internal Server Error During OPEN-CV Video Streaming", traceback_str)
         
     # finish video capture
     finally:

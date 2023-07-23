@@ -1,9 +1,11 @@
+import cv2
+import numpy as np
+import pytz
+import traceback
 from ultralytics import YOLO
-import cv2, traceback
+from apiflask import HTTPError
 from time import time, sleep
 from datetime import datetime as dt
-import pytz
-from apiflask import HTTPError
 
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
@@ -29,6 +31,14 @@ model_params = {
     "persist": True,
     "tracker": "botsort.yaml",
 }
+
+# Set the expected specifications for the frame
+expected_shape = (480, 854)  # (height, width)
+expected_channels = 3       # 3 channels for RGB image
+expected_dtype = np.uint8     # uint8 data type (8-bit)
+
+# ---
+# Run yolo inference for video source
 
 def yolo_watch(
     source='http://187.111.99.18:9004/?CODE=1646',  # video source
@@ -145,13 +155,20 @@ def yolo_watch(
             if post_processing_function is not None:
                 post_processing_outputs.append(post_processing_function(result, timestamp, post_processing_outputs, **post_processing_args))
 
-            # ANNOTATE FRAME WITH DETECTION OUTPUTS
-            if annotator is not None:
-                # Arbitrary annotator function
-                annotated_image = annotator(result, timestamp, post_processing_outputs, **post_processing_args)
-            else:
-                # Ultralytics default annotated image
-                annotated_image = result.plot()
+            # ANNOTATE FRAME WITH DETECTION OUTPUTS IF NECESSARY
+            need_annotated_image = writer_params is not None or generator
+            if need_annotated_image:
+                
+                    # Annotate image
+                    if annotator is not None:
+                        # Arbitrary annotator function
+                        annotated_image = annotator(result, timestamp, post_processing_outputs, **post_processing_args)
+                    else:
+                        # Ultralytics default annotated image
+                        annotated_image = result.plot()
+
+                    # Assert that the frame is healthy and meets the expected specifications
+                    assert_frame_health(annotated_image, expected_shape, expected_channels, expected_dtype)
 
             # Save the annotated frame to the output video file
             if writer_params is not None:
@@ -219,6 +236,9 @@ def yolo_watch(
             out.release()
 
 
+# ---
+# Capture video source using opencv and run yolo inference            
+            
 def opencv_capture_predict(source, predict, model_params, max_retries=10):
 
     # initialize the video capture object
@@ -244,6 +264,9 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
             # break loop if `max_retries` reached · valid frame is available after here
             if retries == max_retries:
                 break
+
+            # Assert that the frame is healthy and meets the expected specifications
+            assert_frame_health(frame, expected_shape, expected_channels, expected_dtype)
 
             # update model parameters source and stream attributes
             model_params["source"] = frame
@@ -273,7 +296,50 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
         cap.release()
         cv2.destroyAllWindows()
 
-            
+
+# ---
+# Assert opencv frame is loaded correctly
+        
+def assert_frame_health(frame, expected_shape, expected_channels, expected_dtype):
+    """
+    Asserts that a loaded OpenCV frame is healthy and meets the expected specifications.
+
+    Parameters:
+        frame (numpy.ndarray): The loaded OpenCV frame.
+        expected_shape (tuple): Tuple specifying the expected shape (height, width) of the frame.
+        expected_channels (int): The expected number of channels of the frame (1 for grayscale, 3 for RGB).
+        expected_dtype (numpy.dtype): The expected data type of the frame (e.g., np.uint8).
+
+    Raises:
+        AssertionError: If the frame fails any of the specified checks.
+    """
+    assert frame is not None, "Frame is None, image loading failed or invalid image path."
+    assert isinstance(frame, np.ndarray), "Frame is not a valid image (not an ndarray)."
+    assert frame.shape[:2] == expected_shape, f"Frame shape ({frame.shape[:2]}) does not match the expected shape ({expected_shape})."
+    assert len(frame.shape) == 3 and frame.shape[2] == expected_channels, f"Frame does not have the expected number of channels ({expected_channels})."
+    assert frame.dtype == expected_dtype, f"Frame data type ({frame.dtype}) does not match the expected data type ({expected_dtype})."
+
+    
+# # Example usage:
+# if __name__ == "__main__":
+#     # Load an example frame (replace 'path_to_image.jpg' with the actual path to your image)
+#     image_path = 'path_to_image.jpg'
+#     frame = cv2.imread(image_path)
+
+#     # Set the expected specifications for the frame
+#     expected_shape = (480, 640)  # (height, width)
+#     expected_channels = 3       # 3 channels for RGB image
+#     expected_dtype = np.uint8    # uint8 data type (8-bit)
+
+#     try:
+#         # Assert that the frame is healthy and meets the expected specifications
+#         assert_frame_health(frame, expected_shape, expected_channels, expected_dtype)
+
+#         print("Frame is healthy and meets the expected specifications.")
+#     except AssertionError as e:
+#         print("Error:", e)
+
+
 # ---
 # YOLO auxiliary functions to get detections, identifications and new identified objects
 

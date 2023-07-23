@@ -27,10 +27,10 @@ def get_public_ipv4(instance_id, region_name='sa-east-1'):
 # return {'ip': public_ipv4, 'status': public_ipv4 is None}
 
 
-def reboot_ec2_instance(instance_id):
+def reboot_ec2_instance(instance_id, region_name='sa-east-1'):
     try:
         # Create a Boto3 EC2 client
-        ec2_client = boto3.client('ec2')
+        ec2_client = boto3.client('ec2', region_name=region_name)
 
         # Reboot the EC2 instance
         response = ec2_client.reboot_instances(InstanceIds=[instance_id])

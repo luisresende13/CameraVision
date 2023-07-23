@@ -2,6 +2,9 @@
 
 import os, datetime, pytz, requests
 
+# Set environment variables
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+
 # Get the Brazil time zone
 
 brazil_tz = pytz.timezone('America/Sao_Paulo')

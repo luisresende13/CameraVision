@@ -19,7 +19,7 @@ from apiflask.validators import Length, OneOf
 
 # Custom Python modules
 
-from modules.aws import get_public_ipv4
+from modules.aws import get_public_ipv4, reboot_ec2_instance
 from modules.yolo_util import yolo_watch
 from modules.bigquery_util import bqclient, get_camera_from_bq_table
 from modules.post_processing import default_post_processing, bigquery_post_new_objects, trigger_post_url_new_objects, bigquery_post_and_trigger_new_objects, fps_annotator
@@ -28,7 +28,7 @@ from modules.post_processing import default_post_processing, bigquery_post_new_o
 # FLASK APP DEFINITION -----------------
 
 # Set current API version
-version = '0.6'
+version = '0.7'
 
 # set openapi.info.title and openapi.info.version
 app = APIFlask(__name__, title='Octa Vision API', version=version, docs_ui='elements')
@@ -146,6 +146,17 @@ def server_ip():
         raise HTTPError(500, message, public_ipv4['error'])
     print("Public IPv4 GET request successful:", public_ipv4['ip'])
     return public_ipv4['ip']
+
+@app.get("/reboot")
+@app.doc(tags=['Server'])
+def server_reboot():
+    instance_id = 'i-01796a60ab18b8bd5'
+    message = reboot_ec2_instance(instance_id)
+    if message == 'success':
+        message = "Reboot EC2 instance success"
+        print(message)
+        return message
+    raise HTTPError(500, 'Internal server error when rebooting ec2 instance', message)
 
 
 # ---

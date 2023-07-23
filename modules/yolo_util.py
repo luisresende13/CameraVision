@@ -212,7 +212,7 @@ def yolo_watch(
     finally:
 
         # Release ultralytics result generator
-        results, post_processing_outputs, annotated_image, yolo = None
+        results, post_processing_outputs, annotated_image, yolo = None, None, None, None
         
         # Release the output video file writer
         if writer_params is not None:

@@ -1,6 +1,7 @@
 # Standard Python modules
 
-import requests, json, cv2
+import cv2, requests, json, traceback
+from apiflask import HTTPError
 
 
 # Custom Python modules
@@ -23,7 +24,7 @@ def default_post_processing(result, timestamp, post_processing_outputs, **kwargs
     tracking = identified_objects(result, timestamp)
     new_objects, unique_track_ids = new_objects_from(tracking, unique_track_ids)
 
-    return {'unique_track_ids': unique_track_ids, "timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(tracking), 'n_tracker_new': len(new_objects), "n_tracked_total": len(unique_track_ids), **kwargs}
+    return {'unique_track_ids': unique_track_ids, "timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(tracking), 'n_tracked_new': len(new_objects), "n_tracked_total": len(unique_track_ids), **kwargs}
 
 
 # INSERT RECORDS OF NEW OBJECTS INTO BIGQUERY DATABASE
@@ -87,7 +88,7 @@ def bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwar
             print('Error inserting records into BigQuery:', str(errors))
             # logging.error('Error inserting records into BigQuery:', errors)
 
-    return {'unique_track_ids': unique_track_ids, "timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(tracking), 'n_tracker_new': len(new_objects), "n_tracked_total": len(unique_track_ids), "bigquery_errors": errors, **kwargs}
+    return {'unique_track_ids': unique_track_ids, "timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(tracking), 'n_tracked_new': len(new_objects), "n_tracked_total": len(unique_track_ids), "bigquery_errors": errors, **kwargs}
 
 post_keys_to_english = {
     'objeto': 'class_name',
@@ -129,8 +130,14 @@ def trigger_post_url_new_objects(result, timestamp, post_processing_outputs, **k
     if len(new_objects):
         
         # get dictionary from json string
-        post_scheme = json.loads(post_scheme)
-
+        try:
+            post_scheme = json.loads(post_scheme)
+        except Exception as e:
+            # Get the traceback as a string
+            traceback_str = traceback.format_exc()        
+            raise HTTPError(500, "Internal Server Error in POST PROCESSING (TRIGGER-POST-URL)", traceback_str)
+            
+            
         for obj in sorted(new_objects, key=lambda obj: obj['class_name']):
             '''
             obj keys:
@@ -156,7 +163,7 @@ def trigger_post_url_new_objects(result, timestamp, post_processing_outputs, **k
             res = requests.post(post_url, json=trigger_post_body)
             responses.append({'status_code': res.status_code, 'message': res.reason})
 
-    return {'unique_track_ids': unique_track_ids, "timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(tracking), 'n_tracker_new': len(new_objects), "n_tracked_total": len(unique_track_ids), 'post_url_responses': responses, **kwargs}
+    return {'unique_track_ids': unique_track_ids, "timestamp": timestamp, "n_detected": len(detections), "n_tracked": len(tracking), 'n_tracked_new': len(new_objects), "n_tracked_total": len(unique_track_ids), 'post_url_responses': responses, **kwargs}
 
 def bigquery_post_and_trigger_new_objects(result, timestamp, post_processing_outputs, **kwargs):
     post_status = bigquery_post_new_objects(result, timestamp, post_processing_outputs, **kwargs)

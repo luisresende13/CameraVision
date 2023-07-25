@@ -3,7 +3,8 @@
 import os, datetime, pytz, requests
 
 # Set environment variables
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+os.environ["TORCH_USE_CUDA_DSA"] = "1"
 
 # Get the Brazil time zone
 
@@ -241,15 +242,15 @@ metadata = {
 
 class PredictIn(Schema):
     # Generate fields with metadata using the dictionary values
-    source = String(load_default=None, metadata=metadata["source"])
-    camera_id = Integer(load_default=None, metadata=metadata["camera_id"])
-    post_url = String(load_default=None, metadata=metadata["post_url"])
-    post_scheme = String(load_default=None, metadata=metadata["post_scheme"])
+    source = String(load_default=None, metadata=metadata["source"])  # important
+    camera_id = Integer(load_default=None, metadata=metadata["camera_id"])  # important
+    post_url = String(load_default=None, metadata=metadata["post_url"])   # ignored
+    post_scheme = String(load_default=None, metadata=metadata["post_scheme"])   # ignored
     model = String(load_default="yolov8l.pt", validate=OneOf(["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov8l.pt", "yolov8x.pt", "yolov8n-seg.pt", "yolov8s-seg.pt", "yolov8m-seg.pt", "yolov8l-seg.pt", "yolov8x-seg.pt", "yolov8n-pose.pt", "yolov8s-pose.pt", "yolov8m-pose.pt", "yolov8l-pose.pt", "yolov8x-pose.pt"]), metadata=metadata["model"])
     task = String(load_default="track", validate=OneOf(["predict", "track"]), metadata=metadata["task"])
-    max_frames = Integer(load_default=None, metadata=metadata["max_frames"])
-    seconds = Integer(load_default=None, metadata=metadata["seconds"])
-    execution_seconds = Integer(load_default=None, metadata=metadata["execution_seconds"])
+    max_frames = Integer(load_default=None, metadata=metadata["max_frames"])  # important
+    seconds = Integer(load_default=None, metadata=metadata["seconds"])  # important
+    execution_seconds = Integer(load_default=None, metadata=metadata["execution_seconds"])  # important
     log_seconds = Integer(load_default=10, metadata=metadata["log_seconds"])
     fps = Integer(load_default=3, metadata=metadata["fps"])
     process = String(load_default="none", validate=OneOf(["none", "console-log", "bigquery", "trigger", "bigquery-trigger"]), metadata=metadata["process"])

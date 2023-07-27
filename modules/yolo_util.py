@@ -92,26 +92,31 @@ def yolo_watch(
             objects = [name.strip().lower() for name in objects]    
             model_params["classes"] = [class_ids[name] for name in objects]
 
-    # Detection and tracking specific settings
-    if task == "predict":
-        # Select `predict` method
-        predict = yolo.predict
-
-        # Filter out tracking specific model parameters
-        if "tracker" in model_params:
-            del model_params["tracker"]
-        if "persist" in model_params:
-            del model_params["persist"]
-        
-    elif task == "track":
-        # Select `track` method
-        predict = yolo.track
-
     # Iterate retry loop
     for retry in range(1, retries + 1):
-
+        
         # Error handler for stream loop
         try:
+
+            if retry > 1:
+                # reLoad the model
+                yolo = YOLO(f'models/{model}')  # load an official detection model
+
+            # Detection and tracking specific settings
+            if task == "predict":
+                # Select `predict` method
+                predict = yolo.predict
+
+                # Filter out tracking specific model parameters
+                if "tracker" in model_params:
+                    del model_params["tracker"]
+                if "persist" in model_params:
+                    del model_params["persist"]
+
+            elif task == "track":
+                # Select `track` method
+                predict = yolo.track
+
             # Initialize variable for `results` generator
             results = None            
 

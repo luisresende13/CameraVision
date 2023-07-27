@@ -6,7 +6,7 @@ from ultralytics import YOLO
 from apiflask import HTTPError
 from time import time, sleep
 from datetime import datetime as dt
-
+import torch
 
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
@@ -110,11 +110,10 @@ def yolo_watch(
     # Iterate retry loop
     for retry in range(1, retries + 1):
 
-        # Initialize variable for `results` generator
-        results = None
-
         # Error handler for stream loop
         try:
+            # Initialize variable for `results` generator
+            results = None            
 
             if capture == 'opencv':
                 # model_params["stream"] = False
@@ -224,12 +223,15 @@ def yolo_watch(
 
         # handle exception inside video capture loop
         except Exception as e:
-            print(f'STREAMING EXCEPTION · ATTEMPT: {retry}/{retries} · DELAY: {retry_delay} · ERROR: {str(e)}')
+            print(f'STREAMING EXCEPTION · ATTEMPT: {retry}/{retries} · DELAY: {retry_delay} s · ERROR: {str(e)}')
             if retry < retries:
                 sleep(retry_delay)
             else:
                 # Release ultralytics result generator
-                results, post_processing_outputs, annotated_image, yolo = None, None, None, None
+                yolo, results, post_processing_outputs, annotated_image = None, None, None, None
+
+                # Delete model and clear GPU memory
+                torch.cuda.empty_cache()
 
                 # Release the output video file writer
                 if writer_params is not None:
@@ -240,6 +242,18 @@ def yolo_watch(
                 # Get the traceback as a string
                 traceback_str = traceback.format_exc()
                 raise HTTPError(500, "Internal Server Error During YOLO ULTRALYTICS Video Streaming", traceback_str)
+        
+        finally:
+            # Release ultralytics result generator
+            yolo, results, post_processing_outputs, annotated_image = None, None, None, None
+
+            # Delete model and clear GPU memory
+            torch.cuda.empty_cache()
+
+            # Release the output video file writer
+            if writer_params is not None:
+                out.release()
+
 
 
 # ---

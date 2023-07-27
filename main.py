@@ -223,6 +223,8 @@ metadata = {
     "annotator": {"title": "Annotator", "description": "Annotator type", "example": "fps"},
     "capture": {"title": "Capture Method", "description": "The python framework to use capture the video source", "example": "opencv"},
     "stream": {"title": "Stream", "description": "Whether to stream the results", "example": True},
+    "retries": {"title": "Retries", "description": "Times to retry connecting to video source", "example": 5},
+    "retry_delay": {"title": "Retry Delay", "description": "Delay between retries in video source connection", "example": 2.0},
     "objects": {"title": "Objects", "description": "List of objects", "example": "car, person, dog"},
     "classes": {"title": "Classes", "description": "List of classes", "example": "0, 1, 2"},
     "conf": {"title": "Confidence", "description": "Confidence threshold", "example": 0.5},
@@ -257,6 +259,8 @@ class PredictIn(Schema):
     annotator = String(load_default="none", validate=OneOf(["none", "fps"]), metadata=metadata["annotator"])
     capture = String(load_default="opencv", validate=OneOf(["opencv", "yolo"]), metadata=metadata["capture"])
     stream = Boolean(load_default=False, metadata=metadata["stream"])
+    retries = Integer(load_default=10, metadata=metadata["retries"])
+    retry_delay = Float(load_default=1.0, metadata=metadata["retry_delay"])
     objects = DelimitedList(String(), load_default=[], sep=[',', ', '], metadata=metadata["objects"])
     classes = DelimitedList(Integer(), load_default=[], sep=[',', ', '], metadata=metadata["classes"])
     conf = Float(load_default=0.3, metadata=metadata["conf"])
@@ -372,7 +376,9 @@ def yolo_predict(query):
         "post_processing_args": post_processing_args,
         "annotator": annotator,
         "generator": query["stream"],
-        "capture": query["capture"]
+        "capture": query["capture"],
+        "retries": query["retries"],
+        "retry_delay": query["retry_delay"],
     }
     
     print("INFERENCE REQUEST · QUERY ARGS:", query)
@@ -471,7 +477,9 @@ def post_yolo_predict(data):
         "post_processing_args": post_processing_args,
         "annotator": annotator,
         "generator": data["stream"],
-        "capture": data["capture"]
+        "capture": data["capture"],
+        "retries": data["retries"],
+        "retry_delay": data["retry_delay"],
     }
     
     print("INFERENCE REQUEST · QUERY ARGS:", data)

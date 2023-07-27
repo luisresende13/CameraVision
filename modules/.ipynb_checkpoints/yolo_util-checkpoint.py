@@ -7,6 +7,7 @@ from apiflask import HTTPError
 from time import time, sleep
 from datetime import datetime as dt
 
+
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
 
@@ -56,6 +57,8 @@ def yolo_watch(
     annotator=None,
     generator=False,
     capture='yolo',
+    retries=5,
+    retry_delay=2,  # seconds
 ):
 
     # Load a model
@@ -89,13 +92,6 @@ def yolo_watch(
             objects = [name.strip().lower() for name in objects]    
             model_params["classes"] = [class_ids[name] for name in objects]
 
-    # Set YOLO V8 model parameters dictionary
-    # model_params = {
-        # "source": source,
-        # "stream": True,
-        # **model_params        
-    # }
-
     # Detection and tracking specific settings
     if task == "predict":
         # Select `predict` method
@@ -111,129 +107,139 @@ def yolo_watch(
         # Select `track` method
         predict = yolo.track
 
+    # Iterate retry loop
+    for retry in range(1, retries + 1):
 
-    # Initialize variable for `results` generator
-    results = None
-        
-    # Error handler for stream loop
-    try:
+        # Initialize variable for `results` generator
+        results = None
 
-        if capture == 'opencv':
-            # model_params["stream"] = False
-            results = opencv_capture_predict(source, predict, model_params)
+        # Error handler for stream loop
+        try:
 
-        elif capture == 'yolo':
-            model_params["source"] = source
-            model_params["stream"] = True
-            # Perform detection inference
-            results = predict(**model_params)
+            if capture == 'opencv':
+                # model_params["stream"] = False
+                results = opencv_capture_predict(source, predict, model_params)
 
-        # Start frame count
-        n_frames = 0
+            elif capture == 'yolo':
+                model_params["source"] = source
+                model_params["stream"] = True
+                # Perform detection inference
+                results = predict(**model_params)
 
-        # initialize post processing output list
-        post_processing_outputs = []
+            # Start frame count
+            n_frames = 0
 
-        # Get start time reference to measure execution time
-        start_time = time()
+            # initialize post processing output list
+            post_processing_outputs = []
 
-        # Loop through the video frames results
-        for result in results:
-            # Get result timestamp in Brazil timezone
-            timestamp = dt.now(brazil_tz)
+            # Get start time reference to measure execution time
+            start_time = time()
 
-            # Start video writer on first frame
-            if n_frames == 0 and writer_params is not None:
-                # Get the video frame dimensions
-                height, width = result.orig_shape
-                # Define the output video file
-                fourcc = cv2.VideoWriter_fourcc(*writer_params["codec"])
-                out = cv2.VideoWriter(writer_params["output_file"], fourcc, writer_params["fps"], (width, height))
+            # Loop through the video frames results
+            for result in results:
+                # Get result timestamp in Brazil timezone
+                timestamp = dt.now(brazil_tz)
 
-            # POST PROCESSING
-            # call arbitrary post processing function on frame and detection/tracking outputs
-            if post_processing_function is not None:
-                post_processing_outputs.append(post_processing_function(result, timestamp, post_processing_outputs, **post_processing_args))
+                # Start video writer on first frame
+                if n_frames == 0 and writer_params is not None:
+                    # Get the video frame dimensions
+                    height, width = result.orig_shape
+                    # Define the output video file
+                    fourcc = cv2.VideoWriter_fourcc(*writer_params["codec"])
+                    out = cv2.VideoWriter(writer_params["output_file"], fourcc, writer_params["fps"], (width, height))
 
-            # ANNOTATE FRAME WITH DETECTION OUTPUTS IF NECESSARY
-            need_annotated_image = writer_params is not None or generator
-            if need_annotated_image:
-                
-                    # Annotate image
-                    if annotator is not None:
-                        # Arbitrary annotator function
-                        annotated_image = annotator(result, timestamp, post_processing_outputs, **post_processing_args)
+                # POST PROCESSING
+                # call arbitrary post processing function on frame and detection/tracking outputs
+                if post_processing_function is not None:
+                    post_processing_outputs.append(post_processing_function(result, timestamp, post_processing_outputs, **post_processing_args))
+
+                # ANNOTATE FRAME WITH DETECTION OUTPUTS IF NECESSARY
+                need_annotated_image = writer_params is not None or generator
+                if need_annotated_image:
+
+                        # Annotate image
+                        if annotator is not None:
+                            # Arbitrary annotator function
+                            annotated_image = annotator(result, timestamp, post_processing_outputs, **post_processing_args)
+                        else:
+                            # Ultralytics default annotated image
+                            annotated_image = result.plot()
+
+                        # Assert that the frame is healthy and meets the expected specifications
+                        assert_frame_health(annotated_image, expected_shape, expected_channels, expected_dtype)
+
+                # Save the annotated frame to the output video file
+                if writer_params is not None:
+                    out.write(annotated_image)
+
+                # YIELD FRAME IF GENERATOR MODE IS ACTIVE
+                if generator:
+                    ret, buffer = cv2.imencode('.jpg', annotated_image)
+                    if ret:
+                        yield (b'--frame\r\n'
+                                b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
                     else:
-                        # Ultralytics default annotated image
-                        annotated_image = result.plot()
+                        print("YOLO ERROR: OpenCV Image Encode Error. Skipping image stream...")
 
-                    # Assert that the frame is healthy and meets the expected specifications
-                    assert_frame_health(annotated_image, expected_shape, expected_channels, expected_dtype)
-
-            # Save the annotated frame to the output video file
-            if writer_params is not None:
-                out.write(annotated_image)
-
-            # YIELD FRAME IF GENERATOR MODE IS ACTIVE
-            if generator:
-                ret, buffer = cv2.imencode('.jpg', annotated_image)
-                if ret:
-                    yield (b'--frame\r\n'
-                            b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-                else:
-                    print("YOLO ERROR: OpenCV Image Encode Error. Skipping image stream...")
-
-            # yields post processsing results
-            elif post_processing_function is not None:
-                yield post_processing_outputs[-1]
+                # yields post processsing results
+                elif post_processing_function is not None:
+                    yield post_processing_outputs[-1]
 
 
-            # Update number of frames
-            n_frames += 1
+                # Update number of frames
+                n_frames += 1
 
-            # update video time in seconds
-            video_seconds = n_frames / fps
+                # update video time in seconds
+                video_seconds = n_frames / fps
 
-            # Update execution time in seconds
-            exec_seconds = time() - start_time
+                # Update execution time in seconds
+                exec_seconds = time() - start_time
 
-            # Break loop if `max_frames` is reached
-            if max_frames is not None and n_frames >= max_frames:
-                break
+                # Break loop if `max_frames` is reached
+                if max_frames is not None and n_frames >= max_frames:
+                    break
 
-            # Break loop if execution seconds `exec_secs` is reached
-            if execution_seconds is not None and exec_seconds >= execution_seconds: # Exit stream if max execution time exceeds
-                break
+                # Break loop if execution seconds `exec_secs` is reached
+                if execution_seconds is not None and exec_seconds >= execution_seconds: # Exit stream if max execution time exceeds
+                    break
 
-            # Break loop if video seconds `secs` is reached
-            if seconds is not None and video_seconds >= seconds: # Exit stream if max stream time exceeds
-                break
+                # Break loop if video seconds `secs` is reached
+                if seconds is not None and video_seconds >= seconds: # Exit stream if max stream time exceeds
+                    break
 
-            # Log streaming progress
-            if log_seconds is not None and video_seconds % log_seconds == 0:
-                print(f'STREAMING · N-FRAMES: {n_frames} · VIDEO-TIME: {round(video_seconds, 1)} s · EXECUTION-TIME: {round(exec_seconds, 1)} s · URL: {source}')
+                # Log streaming progress
+                if log_seconds is not None and video_seconds % log_seconds == 0:
+                    print(f'STREAMING · N-FRAMES: {n_frames} · VIDEO-TIME: {round(video_seconds, 1)} s · EXECUTION-TIME: {round(exec_seconds, 1)} s · URL: {source}')
 
-        # Report end of stream
-        print(f'STREAMING FINISHED · N-FRAMES: {n_frames} · STREAM-TIME: {round(video_seconds, 1)} s · EXECUTION-TIME: {round(exec_seconds, 1)} s · URL {source}')
+            # Report end of stream
+            print(f'STREAMING SUCCESS · N-FRAMES: {n_frames} · STREAM-TIME: {round(video_seconds, 1)} s · EXECUTION-TIME: {round(exec_seconds, 1)} s · URL {source}')
 
-    # handle exception inside video capture loop
-    except Exception as e:
-        print(f'STREAMING (EXCEPTION) · ERROR: {str(e)}')
-        # Print the traceback to console
-        traceback.print_exc()
-        # Get the traceback as a string
-        traceback_str = traceback.format_exc()        
-        raise HTTPError(500, "Internal Server Error During YOLO ULTRALYTICS Video Streaming", traceback_str)
+            # Simulating an error for demonstration purposes (remove this in your actual code)
+            # if retry < retries:
+                # raise ValueError("Simulated error on retry")
 
-    # finish video capture
-    finally:
+            # If the code succeeds, break out of the loop
+            break
 
-        # Release ultralytics result generator
-        results, post_processing_outputs, annotated_image, yolo = None, None, None, None
-        
-        # Release the output video file writer
-        if writer_params is not None:
-            out.release()
+
+        # handle exception inside video capture loop
+        except Exception as e:
+            print(f'STREAMING EXCEPTION · ATTEMPT: {retry}/{retries} · DELAY: {retry_delay} · ERROR: {str(e)}')
+            if retry < retries:
+                sleep(retry_delay)
+            else:
+                # Release ultralytics result generator
+                results, post_processing_outputs, annotated_image, yolo = None, None, None, None
+
+                # Release the output video file writer
+                if writer_params is not None:
+                    out.release()
+
+                # Print the traceback to console
+                traceback.print_exc()
+                # Get the traceback as a string
+                traceback_str = traceback.format_exc()
+                raise HTTPError(500, "Internal Server Error During YOLO ULTRALYTICS Video Streaming", traceback_str)
 
 
 # ---

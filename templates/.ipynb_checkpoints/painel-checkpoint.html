@@ -712,7 +712,8 @@
       let execution_seconds = 70;
       let conf = 0.30;
       let objects = selectedCameraData.objects.replace(/,\s+/g, ', '); // Replace multiple spaces after comma with a single space
-
+      let model = "yolov8x.pt";
+      let capture = "yolo";
         
        // Formatted json string
       if (post_scheme != "")
@@ -729,7 +730,7 @@
         handleCameraNameChange();
 
       // Construct the track view URL
-      const trackViewURL = `${baseStreamURL}/track?stream=true&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&camera_id=${encodeURIComponent(currentCameraId)}&objects=${encodeURIComponent(objects)}&execution_seconds=${encodeURIComponent(execution_seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackViewURL = `${baseStreamURL}/track?stream=true&camera_id=${encodeURIComponent(currentCameraId)}&execution_seconds=${encodeURIComponent(execution_seconds)}&model=${model}&capture=${capture}&dt=${encodeURIComponent(new Date().getTime())}`;
 
       // Construct the track post URL
       const trackPostURL = `${baseStreamURL}/track?process=bigquery&stream=false&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&camera_id=${encodeURIComponent(currentCameraId)}&objects=${encodeURIComponent(objects)}&execution_seconds=${encodeURIComponent(execution_seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
@@ -764,36 +765,37 @@
        }
         
         
-      if (post_url == '' | post_scheme == '') {
-          // Request object identification posting asyncronously
-          // console.log('Fetch Track-Post start for URL:', url);
-          fetchData(trackPostURL, {method: "GET", headers:{'Content-Type': 'application/json' }}, "Track-Post");          
-      }
+//       if (post_url == '' | post_scheme == '') {
+//           // Request object identification posting asyncronously
+//           // console.log('Fetch Track-Post start for URL:', url);
+//           fetchData(trackPostURL, {method: "GET", headers:{'Content-Type': 'application/json' }}, "Track-Post");          
+//       }
         
-      else {
-          // Request object identification posting and triggering asyncronously
-          const trackTriggerBody = {
-              camera_id: currentCameraId,
-              // source: url,
-              stream: false,
-              process: "bigquery-trigger",
-              post_url,
-              post_scheme,
-              objects,
-              // seconds,
-              execution_seconds,
-              conf,
-              task,
-              device,
-          }
+//       else {
+//           // Request object identification posting and triggering asyncronously
+//           const trackTriggerBody = {
+//               camera_id: currentCameraId,
+//               // source: url,
+//               stream: false,
+//               process: "bigquery-trigger",
+//               post_url,
+//               post_scheme,
+//               objects,
+//               // seconds,
+//               execution_seconds,
+//               conf,
+//               task,
+//               device,
+//           }
 
-          fetchData(trackTriggerURL, {
-                  method: "POST",
-                  headers: {'Content-Type': 'application/json' },
-                  body: JSON.stringify(trackTriggerBody),              
-              },
-              "Track-Trigger",
-          )};
+//           fetchData(trackTriggerURL, {
+//                   method: "POST",
+//                   headers: {'Content-Type': 'application/json' },
+//                   body: JSON.stringify(trackTriggerBody),              
+//               },
+//               "Track-Trigger",
+//           )
+//       };
 
       window.addEventListener('scroll', onUserActive);
       document.addEventListener('mousemove', onUserActive);

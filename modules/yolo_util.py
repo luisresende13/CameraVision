@@ -11,6 +11,12 @@ import torch
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
 
+# Set cuda device
+torch._C._cuda_setDevice(0)
+torch._C._cuda_init()
+torch._C._cuda_emptyCache()
+# torch._C._cuda_setDevice(-1)
+
 # Video output file parameters
 writer_params = {
     "output_file": "yolo-test.mp4",
@@ -106,7 +112,7 @@ def yolo_watch(
             if task == "predict":
                 # Select `predict` method
                 predict = yolo.predict
-
+                
                 # Filter out tracking specific model parameters
                 if "tracker" in model_params:
                     del model_params["tracker"]
@@ -222,22 +228,16 @@ def yolo_watch(
             # if retry < retries:
                 # raise ValueError("Simulated error on retry")
 
+            # If the code succeeds, clear GPU memory
+            torch.cuda.empty_cache()
+
             # If the code succeeds, break out of the loop
             break
 
 
         # handle exception inside video capture loop
         except Exception as e:
-            print(f'STREAMING EXCEPTION · ATTEMPT: {retry}/{retries} · DELAY: {retry_delay} s')
-            # Release ultralytics result generator
-            yolo, results, post_processing_outputs, annotated_image = None, None, None, None
-
-            # Delete model and clear GPU memory
-            torch.cuda.empty_cache()
-
-            # Release the output video file writer
-            if writer_params is not None:
-                out.release()
+            print(f'STREAMING EXCEPTION · ATTEMPT: {retry}/{retries} · DELAY: {retry_delay} s · SOURCE: {source}')
             
             if retry < retries:
                 sleep(retry_delay)
@@ -252,13 +252,9 @@ def yolo_watch(
             # Release ultralytics result generator
             yolo, results, post_processing_outputs, annotated_image = None, None, None, None
 
-            # Delete model and clear GPU memory
-            torch.cuda.empty_cache()
-
             # Release the output video file writer
             if writer_params is not None:
                 out.release()
-
 
 
 # ---
@@ -310,7 +306,7 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
     except Exception as e:
         print(f'OPENCV WRAP STREAMING (EXCEPTION) · ERROR: {str(e)}')
         # Print the traceback to console
-        traceback.print_exc()
+        # traceback.print_exc()
         # Get the traceback as a string
         traceback_str = traceback.format_exc()        
         raise HTTPError(500, "Internal Server Error During OPEN-CV Video Streaming", traceback_str)

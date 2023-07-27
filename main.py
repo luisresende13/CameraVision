@@ -381,8 +381,8 @@ def yolo_predict(query):
         "retry_delay": query["retry_delay"],
     }
     
-    print("INFERENCE REQUEST · QUERY ARGS:", query)
-    print("YOLO PARAMETERS:", yolo_params_dict)
+    # print("INFERENCE REQUEST · QUERY ARGS:", query)
+    print("YOLO REQUEST:", yolo_params_dict)
     
     results = yolo_watch(**yolo_params_dict)
 
@@ -482,8 +482,8 @@ def post_yolo_predict(data):
         "retry_delay": data["retry_delay"],
     }
     
-    print("INFERENCE REQUEST · QUERY ARGS:", data)
-    print("YOLO PARAMETERS:", yolo_params_dict)
+    # print("INFERENCE REQUEST · QUERY ARGS:", data)
+    print("YOLO REQUEST:", yolo_params_dict)
     
     results = yolo_watch(**yolo_params_dict)
     

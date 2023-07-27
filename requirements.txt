@@ -21,6 +21,12 @@ boto3
 google-cloud-bigquery
 
 # ---
+# PyTorch modules
+
+torch
+torchvision
+
+# ---
 # Ultralytics packages (Not installed by default)
 
 ultralytics

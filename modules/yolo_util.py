@@ -223,20 +223,20 @@ def yolo_watch(
 
         # handle exception inside video capture loop
         except Exception as e:
-            print(f'STREAMING EXCEPTION · ATTEMPT: {retry}/{retries} · DELAY: {retry_delay} s · ERROR: {str(e)}')
+            print(f'STREAMING EXCEPTION · ATTEMPT: {retry}/{retries} · DELAY: {retry_delay} s')
+            # Release ultralytics result generator
+            yolo, results, post_processing_outputs, annotated_image = None, None, None, None
+
+            # Delete model and clear GPU memory
+            torch.cuda.empty_cache()
+
+            # Release the output video file writer
+            if writer_params is not None:
+                out.release()
+            
             if retry < retries:
                 sleep(retry_delay)
             else:
-                # Release ultralytics result generator
-                yolo, results, post_processing_outputs, annotated_image = None, None, None, None
-
-                # Delete model and clear GPU memory
-                torch.cuda.empty_cache()
-
-                # Release the output video file writer
-                if writer_params is not None:
-                    out.release()
-
                 # Print the traceback to console
                 traceback.print_exc()
                 # Get the traceback as a string

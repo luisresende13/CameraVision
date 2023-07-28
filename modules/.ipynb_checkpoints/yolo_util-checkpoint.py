@@ -313,7 +313,7 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
     
     # handle exception inside video capture loop
     except Exception as e:
-        print(f'OPENCV WRAP STREAMING (EXCEPTION) · ERROR: {str(e)}')
+        # print(f'OPENCV WRAP STREAMING (EXCEPTION) · ERROR: {str(e)}')
         
         # Print the traceback to console
         # traceback.print_exc()

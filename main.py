@@ -32,7 +32,7 @@ from modules.post_processing import default_post_processing, bigquery_post_new_o
 # FLASK APP DEFINITION -----------------
 
 # Set current API version
-version = '0.7'
+version = '0.8'
 
 # set openapi.info.title and openapi.info.version
 app = APIFlask(__name__, title='Octa Vision API', version=version, docs_ui='elements')

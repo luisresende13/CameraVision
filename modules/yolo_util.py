@@ -229,7 +229,10 @@ def yolo_watch(
                 # raise ValueError("Simulated error on retry")
 
             # If the code succeeds, clear GPU memory
-            torch.cuda.empty_cache()
+            try:
+                torch.cuda.empty_cache()
+            except:
+                print("FAILED TO CLEAR TORCH CUDA CACHE AFTER SUCCESS.")
 
             # If the code succeeds, break out of the loop
             break
@@ -238,6 +241,12 @@ def yolo_watch(
         # handle exception inside video capture loop
         except Exception as e:
             print(f'STREAMING EXCEPTION · ATTEMPT: {retry}/{retries} · DELAY: {retry_delay} s · SOURCE: {source}')
+
+            # If the code fails, clear GPU memory
+            try:
+                torch.cuda.empty_cache()
+            except:
+                print("FAILED TO CLEAR TORCH CUDA CACHE AFTER EXCEPTION.")
             
             if retry < retries:
                 sleep(retry_delay)
@@ -305,6 +314,7 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
     # handle exception inside video capture loop
     except Exception as e:
         print(f'OPENCV WRAP STREAMING (EXCEPTION) · ERROR: {str(e)}')
+        
         # Print the traceback to console
         # traceback.print_exc()
         # Get the traceback as a string

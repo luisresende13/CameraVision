@@ -12,9 +12,9 @@ import torch
 brazil_tz = pytz.timezone('America/Sao_Paulo')
 
 # Set cuda device
-torch._C._cuda_setDevice(0)
-torch._C._cuda_init()
-torch._C._cuda_emptyCache()
+# torch._C._cuda_setDevice(0)
+# torch._C._cuda_init()
+# torch._C._cuda_emptyCache()
 # torch._C._cuda_setDevice(-1)
 
 # Video output file parameters

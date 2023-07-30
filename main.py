@@ -292,12 +292,15 @@ annotators_dict = {
 @app.get('/track')
 @app.input(PredictIn, 'query')
 @app.doc(tags=['YOLO'])
-def yolo_predict(query):
+def yolo_predict(query=None, query_data=None):
     """YOLO inference
 
     Run YOLO inference on URL source.
     """
 
+    if query_data is not None:
+        query = query_data
+    
     # Handle the case where neither "source" nor "camera_id" is provided
     if query["source"] is None and query["camera_id"] is None:
         raise HTTPError(400, "Error: Either 'source' or 'camera_id' must be provided.")

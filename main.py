@@ -297,7 +297,6 @@ def yolo_predict(query=None, query_data=None):
 
     Run YOLO inference on URL source.
     """
-
     if query_data is not None:
         query = query_data
     
@@ -698,11 +697,13 @@ class ObjectsIn(Schema):
 @app.get("/objects")
 @app.input(ObjectsIn, "query")
 @app.doc(tags=['Objects'])
-def get_objects_from_bigquery(query):
+def get_objects_from_bigquery(query=None, query_data=None):
     """
     Identified Objects
     Returns a JSON list of identified objects from the BigQuery table. Optionally filter by id or camera URL.
     """
+    if query_data is not None:
+        query = query_data
     
     try:
         # Execute BigQuery query

@@ -116,8 +116,8 @@ def yolo_watch(
                 # Filter out tracking specific model parameters
                 if "tracker" in model_params:
                     del model_params["tracker"]
-                if "persist" in model_params:
-                    del model_params["persist"]
+                # if "persist" in model_params:
+                    # del model_params["persist"]
 
             elif task == "track":
                 # Select `track` method
@@ -127,12 +127,13 @@ def yolo_watch(
             results = None            
 
             if capture == 'opencv':
-                # model_params["stream"] = False
+                # model_params["persist"] = True
                 results = opencv_capture_predict(source, predict, model_params)
 
             elif capture == 'yolo':
                 model_params["source"] = source
                 model_params["stream"] = True
+                # model_params["persist"] = False
                 # Perform detection inference
                 results = predict(**model_params)
 

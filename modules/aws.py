@@ -1,5 +1,6 @@
 import os
 import boto3
+import requests
 
 def get_public_ipv4(instance_id, region_name='sa-east-1'):
     ec2_client = boto3.client('ec2', region_name=region_name)  # Replace 'us-west-1' with your desired region
@@ -60,6 +61,49 @@ def reboot_ec2_instance(instance_id, region_name='sa-east-1'):
         print(msg)
         return msg
 
+
+digits_string = list(map(str, range(10))) # [str(i) for i in range(10)]
+
+def is_ip(ip):
+    return all([char == '.' or char in digits_string for char in ip])
+
+class EC2Instance:    
+    def __init__(self, update_ip=True, reboot=False, test=False, instance_id='i-01796a60ab18b8bd5'):
+        self.ip = None
+        self.url = None
+        self.instance_id = instance_id
+        if update_ip:
+            self.update_ip()
+        if reboot:
+            self.reboot()
+        if test:
+            self.test()
+
+    def update_ip(self):
+        ip = get_public_ipv4(self.instance_id)
+        self.url = ""
+        if 'ip' in ip:
+            self.ip = ip["ip"]
+            self.url = f"http://{self.ip}"
+            return self.url
+        print("ERROR IN GET EC2 IP: ", ip["error"])
+
+    def reboot(self):
+        reboot_ec2_instance(self.instance_id)
+
+    def test(self):
+        try:
+            if not self.url:
+                raise Exception("AWS EC2 INSTANCE URL NOT FOUND")
+            res = requests.get(f'{self.url}/init')
+            instance_state = res.ok
+        except Exception as e:
+            instance_state = False
+            print("EC2 INSTANCE TEST REQUEST FAILED. ERROR:", str(e))
+        print("EC2 INSTANCE OK:", instance_state)
+        return instance_state
+    
+    
 # Example Usage
     
 # # Replace this with the ID of the EC2 instance you want to reboot

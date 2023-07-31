@@ -8,6 +8,10 @@ from time import time, sleep
 from datetime import datetime as dt
 import torch
 
+# Custom python modules
+from modules.bigquery_util import get_camera_from_bq_table
+from modules.post_processing import default_post_processing, bigquery_post_new_objects, trigger_post_url_new_objects, bigquery_post_and_trigger_new_objects, fps_annotator
+
 # Get the Brazil time zone
 brazil_tz = pytz.timezone('America/Sao_Paulo')
 
@@ -35,7 +39,7 @@ model_params = {
     "vid_stride": 1,
     "device": 'cpu',
     "verbose": True,
-    "persist": True,
+    # "persist": True,
     "tracker": "botsort.yaml",
 }
 
@@ -328,6 +332,162 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
         cap.release()
         cv2.destroyAllWindows()
 
+        
+# ---
+# Predict with yolo for either `source` value or registere `camera_id`
+        
+post_processing_functions_dict = {
+    'none': None,
+    'console-log': default_post_processing,
+    'bigquery': bigquery_post_new_objects,
+    'trigger': trigger_post_url_new_objects,
+    'bigquery-trigger': bigquery_post_and_trigger_new_objects,
+}
+
+annotators_dict = {
+    'none': None,
+    'fps': fps_annotator,
+}
+
+# Assuming that 'metadata' is a dictionary containing metadata for the fields
+
+def yolo_watch_camera(source=None, camera_id=None, post_url=None, post_scheme=None, model="yolov8l.pt", task="track", max_frames=None, seconds=None, execution_seconds=None,
+                      log_seconds=10, fps=3, process="none", annotator="none", capture="opencv", stream=False, retries=1, retry_delay=1.0, objects=None, classes=None,
+                      conf=0.3, iou=0.7, max_det=300, vid_stride=1, imgsz=640, device="gpu", tracker="botsort.yaml", persist=True, augment=False, save=False,
+                      show=False, verbose=False):
+    """
+    Perform YOLO camera watch with the specified arguments.
+
+    Parameters:
+    - source (str): The source of the video stream.
+    - camera_id (int): The ID of the camera.
+    - post_url (str): URL to send POST requests from inference results.
+    - post_scheme (str): JSON schema to send as the body of the POST request to `post_url` from inference results.
+    - model (str): The YOLO model file to use. Default is "yolov8l.pt".
+    - task (str): The YOLO task to perform, either "predict" or "track". Default is "track".
+    - max_frames (int): Maximum number of frames to process.
+    - seconds (int): The number of seconds to run the watch process.
+    - execution_seconds (int): The maximum number of seconds for inference execution.
+    - log_seconds (int): Number of seconds to log the output.
+    - fps (int): Frames per second for video playback.
+    - process (str): Process mode, one of "none", "console-log", "bigquery", "trigger", or "bigquery-trigger".
+    - annotator (str): Annotator mode, either "none" or "fps".
+    - capture (str): Capture mode, either "opencv" or "yolo".
+    - stream (bool): Whether to stream the video or not.
+    - retries (int): Number of retries for inference.
+    - retry_delay (float): Delay in seconds between retries.
+    - objects (List[str]): List of objects to detect.
+    - classes (List[int]): List of classes to detect.
+    - conf (float): Confidence threshold for detections.
+    - iou (float): IOU (Intersection over Union) threshold for detections.
+    - max_det (int): Maximum number of detections.
+    - vid_stride (int): Stride for processing frames from a video.
+    - imgsz (int): Size of the input images for inference.
+    - device (str): Device for running inference, either "cpu" or "gpu". Default is "gpu".
+    - tracker (str): The tracker configuration file to use, either "botsort.yaml" or "bytetracker.yaml".
+    - persist (bool): Whether to persist video files after processing or not. Default is True.
+    - augment (bool): Whether to apply data augmentation during inference or not. Default is False.
+    - save (bool): Whether to save inference results or not. Default is False.
+    - show (bool): Whether to display video playback or not. Default is False.
+    - verbose (bool): Whether to enable verbose mode or not. Default is False.
+    """
+    # Implementation of the yolo_watch_camera function using the provided arguments
+
+    # Convert all arguments to a dictionary using locals()
+    query = locals().copy()
+    print('YOLO CAMERA QUERY:', query)
+    # query.pop('self', None)  # Remove the 'self' key if this function is within a class
+
+    device = query["device"]
+    if device == "gpu":
+        device = 0
+
+    source = query["source"]
+    objects = query["objects"]
+    classes = query["classes"]
+
+    camera = None
+    if query['camera_id'] is not None:
+        # Get camera object from bigquery table
+        camera_id = query['camera_id']
+        camera = get_camera_from_bq_table(camera_id)
+        
+        # override parameters based on registered camera data
+        source = camera["url"]
+        if objects is not None:
+            objects = [name.strip() for name in camera["objects"].split(",") if name != ""]
+
+    if objects is not None and len(objects) == 0:
+        objects = None
+    if classes is not None and len(classes) == 0:
+        classes = None
+    
+    # Detection/tracking model parameters
+    model_params = {
+        "objects": objects,
+        "classes": classes,
+        "imgsz": query["imgsz"],
+        "conf": query["conf"],
+        "iou": query["iou"],
+        "max_det": query["max_det"],
+        "vid_stride": query["vid_stride"],
+        "device": device,
+        "tracker": query["tracker"],
+        # "persist": query["persist"],
+        "augment": query["augment"],
+        "save": query["save"],
+        "show": query["show"],
+        "verbose": query["verbose"],
+    }
+    
+    if query['task'] == 'track' and query['capture'] == 'opencv':
+        model_params['persist'] = True
+        
+    post_processing_args_dict = {
+        'none': None,
+        'console-log': {},
+        'bigquery': {
+            'camera': camera,
+        },
+        'trigger': {
+            'camera': camera,
+        },
+        'bigquery-trigger': {
+            'camera': camera,
+        },
+    }
+
+    post_processing_function = post_processing_functions_dict[query['process']]
+    post_processing_args = post_processing_args_dict[query['process']]
+    annotator = annotators_dict[query['annotator']]
+
+    yolo_params_dict = {
+        "source": source,
+        "model": query["model"],
+        "task": query["task"],
+        "model_params": model_params,
+        "max_frames": query["max_frames"],
+        "seconds": query["seconds"],
+        "execution_seconds": query["execution_seconds"],
+        "log_seconds": query["log_seconds"],
+        "fps": query["fps"],
+        "writer_params": None,
+        "post_processing_function": post_processing_function,
+        "post_processing_args": post_processing_args,
+        "annotator": annotator,
+        "generator": query["stream"],
+        "capture": query["capture"],
+        "retries": query["retries"],
+        "retry_delay": query["retry_delay"],
+    }
+    
+    # print("INFERENCE REQUEST · QUERY ARGS:", query)
+    print("YOLO REQUEST:", yolo_params_dict)
+    
+    results = yolo_watch(**yolo_params_dict) # generator function, e.i returns generator object
+
+    return results
+
 
 # ---
 # Assert opencv frame is loaded correctly
@@ -370,77 +530,3 @@ def assert_frame_health(frame, expected_shape, expected_channels, expected_dtype
 #         print("Frame is healthy and meets the expected specifications.")
 #     except AssertionError as e:
 #         print("Error:", e)
-
-
-# ---
-# YOLO auxiliary functions to get detections, identifications and new identified objects
-
-def detected_objects(result, timestamp):
-    """
-    Formats the YOLO detection results.
-
-    Args:
-        result (object): The detection object.
-        timestamp (datetime string): Dict of class names by class id.
-
-    Returns:
-        list: Formatted detection results.
-    """
-    # initialize list for formatted tracker output
-    detections = []
-
-    # list tracking result
-    boxes = result.boxes
-    for class_id, confidence, bbox in zip(boxes.cls.tolist(), boxes.conf.tolist(), boxes.data.tolist()):
-        # Get obeject class name
-        class_name = result.names[class_id]
-        # Get the bounding box
-        bbox = [int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])]
-        # Set detection objectc dictionary
-        detection = {
-            "timestamp": timestamp,
-            "class_id": class_id,
-            "class_name": class_name,
-            "confidence": confidence,
-            "bbox": bbox
-        }
-        # Append tracked object attributes
-        detections.append(detection)
-    
-    return detections
-
-def identified_objects(result, timestamp):
-    # formatted yolo detections
-    detections = detected_objects(result, timestamp)
-
-    # initialize list for formatted tracker output
-    tracking = []
-
-    # list tracking result
-    if result.boxes.id is not None:
-        track_ids = result.boxes.id.tolist()
-        for track_id, detection in zip(track_ids, detections):
-            tracking.append({"track_id": track_id, **detection})
-
-    return tracking
-
-
-def new_objects_from(tracking, unique_track_ids):
-    ######################################
-    # GET NEW IDENTIFIED OBJECTS
-
-    # initialize list for newly detected objects
-    new_objects = []
-
-    # loop over the formatted tracks and get newly identified objects
-    for track in tracking:
-
-        # check if track ID is unique
-        if track["track_id"] not in unique_track_ids:
-            # append record to list of new objects
-            new_objects.append(track)
-
-            # add the tracked object ID to the set of unique track IDs
-            unique_track_ids.append(track["track_id"])
-    
-    return new_objects, unique_track_ids

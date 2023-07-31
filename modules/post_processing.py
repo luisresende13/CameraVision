@@ -7,7 +7,79 @@ from apiflask import HTTPError
 # Custom Python modules
 
 from modules.bigquery_util import bqclient, objects_table
-from modules.yolo_util import detected_objects, identified_objects, new_objects_from
+
+# ---
+# YOLO auxiliary functions to get detections, identifications and new identified objects
+
+def detected_objects(result, timestamp):
+    """
+    Formats the YOLO detection results.
+
+    Args:
+        result (object): The detection object.
+        timestamp (datetime string): Dict of class names by class id.
+
+    Returns:
+        list: Formatted detection results.
+    """
+    # initialize list for formatted tracker output
+    detections = []
+
+    # list tracking result
+    boxes = result.boxes
+    for class_id, confidence, bbox in zip(boxes.cls.tolist(), boxes.conf.tolist(), boxes.data.tolist()):
+        # Get obeject class name
+        class_name = result.names[class_id]
+        # Get the bounding box
+        bbox = [int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])]
+        # Set detection objectc dictionary
+        detection = {
+            "timestamp": timestamp,
+            "class_id": class_id,
+            "class_name": class_name,
+            "confidence": confidence,
+            "bbox": bbox
+        }
+        # Append tracked object attributes
+        detections.append(detection)
+    
+    return detections
+
+def identified_objects(result, timestamp):
+    # formatted yolo detections
+    detections = detected_objects(result, timestamp)
+
+    # initialize list for formatted tracker output
+    tracking = []
+
+    # list tracking result
+    if result.boxes.id is not None:
+        track_ids = result.boxes.id.tolist()
+        for track_id, detection in zip(track_ids, detections):
+            tracking.append({"track_id": track_id, **detection})
+
+    return tracking
+
+
+def new_objects_from(tracking, unique_track_ids):
+    ######################################
+    # GET NEW IDENTIFIED OBJECTS
+
+    # initialize list for newly detected objects
+    new_objects = []
+
+    # loop over the formatted tracks and get newly identified objects
+    for track in tracking:
+
+        # check if track ID is unique
+        if track["track_id"] not in unique_track_ids:
+            # append record to list of new objects
+            new_objects.append(track)
+
+            # add the tracked object ID to the set of unique track IDs
+            unique_track_ids.append(track["track_id"])
+    
+    return new_objects, unique_track_ids
 
 
 # DEFAULT POST PROCESSING FUNCTION

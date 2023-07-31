@@ -24,10 +24,8 @@ from apiflask.validators import Length, OneOf
 # Custom Python modules
 
 from modules.aws import get_public_ipv4, reboot_ec2_instance
-from modules.yolo_util import yolo_watch
+from modules.yolo_util import yolo_watch_camera
 from modules.bigquery_util import bqclient, get_camera_from_bq_table
-from modules.post_processing import default_post_processing, bigquery_post_new_objects, trigger_post_url_new_objects, bigquery_post_and_trigger_new_objects, fps_annotator
-
 
 # FLASK APP DEFINITION -----------------
 
@@ -275,20 +273,7 @@ class PredictIn(Schema):
     save = Boolean(load_default=False, metadata=metadata["save"])
     show = Boolean(load_default=False, metadata=metadata["show"])
     verbose = Boolean(load_default=False, metadata=metadata["verbose"])
-
-post_processing_functions_dict = {
-    'none': None,
-    'console-log': default_post_processing,
-    'bigquery': bigquery_post_new_objects,
-    'trigger': trigger_post_url_new_objects,
-    'bigquery-trigger': bigquery_post_and_trigger_new_objects,
-}
-
-annotators_dict = {
-    'none': None,
-    'fps': fps_annotator,
-}
-
+    
 @app.get('/track')
 @app.input(PredictIn, 'query')
 @app.doc(tags=['YOLO'])
@@ -304,95 +289,12 @@ def yolo_predict(query=None, query_data=None):
     if query["source"] is None and query["camera_id"] is None:
         raise HTTPError(400, "Error: Either 'source' or 'camera_id' must be provided.")
 
-    device = query["device"]
-    if device == "gpu":
-        device = 0
-
-    source = query["source"]
-    objects = query["objects"]
-    classes = query["classes"]
-
-    camera = None
-    if query['camera_id'] is not None:
-        # Get camera object from bigquery table
-        camera_id = query['camera_id']
-        camera = get_camera_from_bq_table(camera_id)
+    results = yolo_watch_camera(**query)
         
-        # override parameters based on registered camera data
-        source = camera["url"]
-        objects = [name.strip() for name in camera["objects"].split(",") if name != ""]
-
-    if len(objects) == 0:
-        objects = None
-    if len(classes) == 0:
-        classes = None
-    
-    # Detection/tracking model parameters
-    model_params = {
-        "objects": objects,
-        "classes": classes,
-        "imgsz": query["imgsz"],
-        "conf": query["conf"],
-        "iou": query["iou"],
-        "max_det": query["max_det"],
-        "vid_stride": query["vid_stride"],
-        "device": device,
-        "tracker": query["tracker"],
-        "persist": query["persist"],
-        "augment": query["augment"],
-        "save": query["save"],
-        "show": query["show"],
-        "verbose": query["verbose"],
-    }
-        
-    post_processing_args_dict = {
-        'none': None,
-        'console-log': {},
-        'bigquery': {
-            'camera': camera,
-        },
-        'trigger': {
-            'camera': camera,
-        },
-        'bigquery-trigger': {
-            'camera': camera,
-        },
-    }
-
-    post_processing_function = post_processing_functions_dict[query['process']]
-    post_processing_args = post_processing_args_dict[query['process']]
-    annotator = annotators_dict[query['annotator']]
-
-    yolo_params_dict = {
-        "source": source,
-        "model": query["model"],
-        "task": query["task"],
-        "model_params": model_params,
-        "max_frames": query["max_frames"],
-        "seconds": query["seconds"],
-        "execution_seconds": query["execution_seconds"],
-        "log_seconds": query["log_seconds"],
-        "fps": query["fps"],
-        "writer_params": None,
-        "post_processing_function": post_processing_function,
-        "post_processing_args": post_processing_args,
-        "annotator": annotator,
-        "generator": query["stream"],
-        "capture": query["capture"],
-        "retries": query["retries"],
-        "retry_delay": query["retry_delay"],
-    }
-    
-    # print("INFERENCE REQUEST · QUERY ARGS:", query)
-    print("YOLO REQUEST:", yolo_params_dict)
-    
-    results = yolo_watch(**yolo_params_dict)
-
     if query["stream"]:
         return Response(stream_with_context(results), mimetype='multipart/x-mixed-replace; boundary=frame')
     
     return list(results)
-
 
 @app.post('/track')
 @app.input(PredictIn)
@@ -407,87 +309,7 @@ def post_yolo_predict(data):
     if data["source"] is None and data["camera_id"] is None:
         raise HTTPError(400, "Error: Must provide one of 'source' and 'camera_id'.")
 
-    device = data["device"]
-    if device == "gpu":
-        device = 0
-    
-    source = data["source"]
-    objects = data["objects"]
-    classes = data["classes"]
-
-    camera = None
-    if data['camera_id'] is not None:
-        camera_id = data['camera_id']
-        camera = get_camera_from_bq_table(camera_id)
-        # override parameters based on camera registered data
-        source = camera["url"]
-        objects = [name.strip() for name in camera["objects"].split(",") if name != ""]
-
-    if len(objects) == 0:
-        objects = None
-    if len(classes) == 0:
-        classes = None
-            
-    # Detection/tracking model parameters
-    model_params = {
-        "objects": objects,
-        "classes": classes,
-        "imgsz": data["imgsz"],
-        "conf": data["conf"],
-        "iou": data["iou"],
-        "max_det": data["max_det"],
-        "vid_stride": data["vid_stride"],
-        "device": device,
-        "tracker": data["tracker"],
-        "persist": data["persist"],
-        "augment": data["augment"],
-        "save": data["save"],
-        "show": data["show"],
-        "verbose": data["verbose"],
-    }
-
-    post_processing_args_dict = {
-        'none': None,
-        'console-log': {},
-        'bigquery': {
-            'camera': camera,
-        },
-        'trigger': {
-            'camera': camera,
-        },
-        'bigquery-trigger': {
-            'camera': camera,
-        },
-    }
-
-    post_processing_function = post_processing_functions_dict[data['process']]
-    post_processing_args = post_processing_args_dict[data['process']]
-    annotator = annotators_dict[data['annotator']]
-
-    yolo_params_dict = {
-        "source": source,
-        "model": data["model"],
-        "task": data["task"],
-        "model_params": model_params,
-        "max_frames": data["max_frames"],
-        "seconds": data["seconds"],
-        "execution_seconds": data["execution_seconds"],
-        "log_seconds": data["log_seconds"],
-        "fps": data["fps"],
-        "writer_params": None,
-        "post_processing_function": post_processing_function,
-        "post_processing_args": post_processing_args,
-        "annotator": annotator,
-        "generator": data["stream"],
-        "capture": data["capture"],
-        "retries": data["retries"],
-        "retry_delay": data["retry_delay"],
-    }
-    
-    # print("INFERENCE REQUEST · QUERY ARGS:", data)
-    print("YOLO REQUEST:", yolo_params_dict)
-    
-    results = yolo_watch(**yolo_params_dict)
+    results = yolo_watch_camera(**data)
     
     if data["stream"]:
         return Response(stream_with_context(results), mimetype='multipart/x-mixed-replace; boundary=frame')

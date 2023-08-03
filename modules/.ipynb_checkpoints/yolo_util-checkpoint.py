@@ -148,11 +148,15 @@ def yolo_watch(
             # initialize post processing output list
             post_processing_outputs = []
 
-            # Get start time reference to measure execution time
-            start_time = time()
+            # Initialize `start_time` variable
+            start_time = None
 
             # Loop through the video frames results
             for result in results:
+                # Get start time reference to measure execution time
+                if start_time is None:
+                    start_time = time()
+
                 # Get result timestamp in Brazil timezone
                 timestamp = dt.now(brazil_tz)
 

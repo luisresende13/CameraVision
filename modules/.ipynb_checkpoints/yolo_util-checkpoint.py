@@ -48,6 +48,7 @@ expected_shape = (480, 854)  # (height, width)
 expected_channels = 3       # 3 channels for RGB image
 expected_dtype = np.uint8     # uint8 data type (8-bit)
 
+
 # ---
 # Run yolo inference for video source
 
@@ -486,7 +487,7 @@ def yolo_watch_camera(source=None, camera_id=None, post_url=None, post_scheme=No
     
     results = yolo_watch(**yolo_params_dict) # generator function, e.i returns generator object
 
-    return results
+    return results # return generator object
 
 
 # ---

@@ -21,15 +21,10 @@ boto3
 google-cloud-bigquery
 
 # ---
-# PyTorch modules
-
-torch
-torchvision
-
-# ---
 # Ultralytics packages (Not installed by default)
 
 ultralytics
 py-cpuinfo
 lap
-# pafy youtube_dl
+pafy
+youtube_dl

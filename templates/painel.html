@@ -707,9 +707,9 @@
       // let device = isLocalRequest ? "cpu": "gpu";
       // let seconds = isLocalRequest ? 3 : 70;
       let task = "track";
-      let device = "gpu";
-      let seconds = 70;
-      let execution_seconds = 70;
+      let device = baseURL.includes(cloudRunServerURL) ? "cpu" : "gpu";
+      let seconds = baseURL.includes(cloudRunServerURL) ? 20 : 70;
+      let execution_seconds = baseURL.includes(cloudRunServerURL) ? 20 : 70;
       let conf = 0.30;
       let objects = selectedCameraData.objects.replace(/,\s+/g, ', '); // Replace multiple spaces after comma with a single space
       let model = "yolov8x.pt";
@@ -1303,7 +1303,7 @@
     let baseStreamURL;
     // const AWSServerIP = "15.229.156.138";
     // const AWSServerURL = `http://${AWSServerIP}`;
-    const cloudRunServerURL = 'https://octa-vision-oayt5ztuxq-ue.a.run.app'; // cloud run server
+    const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
     const isHTMLHosted = host.includes("octacity.org") | host == "";
     const isLocalRequest = host.includes("127.0.0.1");
       
@@ -1311,14 +1311,20 @@
     async function fetchServerIP() {
       try {
         const response = await fetch(`${cloudRunServerURL}/ip`);
-        const serverIP = await response.text();
-        baseURL = `http://${serverIP}`;
-        baseStreamURL = `http://${serverIP}`;
+        if (response.ok) {
+            const serverIP = await response.text();
+            baseURL = `http://${serverIP}`;
+            baseStreamURL = `http://${serverIP}`;            
+        } else {
+            // Use the AWS server URL as a fallback
+            baseURL = cloudRunServerURL;
+            baseStreamURL = cloudRunServerURL;
+        }
       } catch (error) {
         console.error('Error fetching server IP:', error);
         // Use the AWS server URL as a fallback
-        // baseURL = AWSServerURL;
-        // baseStreamURL = AWSServerURL;
+        baseURL = cloudRunServerURL;
+        baseStreamURL = cloudRunServerURL;
       }
     }
 

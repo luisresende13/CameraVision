@@ -1,6 +1,6 @@
 # Standard Python modules
 
-import os, datetime, pytz, requests
+import os, datetime, pytz, requests, gc
 
 # Set environment variables
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
@@ -90,9 +90,13 @@ app.config['TAGS'] = [{
     'description': ''
 }]
 
+# ---
+# Get aws instance public ip  
 cloudRunServerURL = 'https://octa-vision-oayt5ztuxq-ue.a.run.app'
+instance_id = 'i-01796a60ab18b8bd5'
+awsIP = ''
 try:
-    awsIP = requests.get(f"{cloudRunServerURL}/ip").text
+    awsIP = get_public_ipv4(instance_id)['ip']
 except:
     awsIP = ''
     
@@ -257,7 +261,7 @@ class PredictIn(Schema):
     annotator = String(load_default="none", validate=OneOf(["none", "fps"]), metadata=metadata["annotator"])
     capture = String(load_default="opencv", validate=OneOf(["opencv", "yolo"]), metadata=metadata["capture"])
     stream = Boolean(load_default=False, metadata=metadata["stream"])
-    retries = Integer(load_default=10, metadata=metadata["retries"])
+    retries = Integer(load_default=3, metadata=metadata["retries"])
     retry_delay = Float(load_default=1.0, metadata=metadata["retry_delay"])
     objects = DelimitedList(String(), load_default=[], sep=[',', ', '], metadata=metadata["objects"])
     classes = DelimitedList(Integer(), load_default=[], sep=[',', ', '], metadata=metadata["classes"])
@@ -294,7 +298,13 @@ def yolo_predict(query=None, query_data=None):
     if query["stream"]:
         return Response(stream_with_context(results), mimetype='multipart/x-mixed-replace; boundary=frame')
     
-    return list(results)
+    # Run generator
+    results = list(results)
+    
+    # Collect garbage data to clear RAM
+    gc.collect()
+    
+    return results
 
 @app.post('/track')
 @app.input(PredictIn)
@@ -314,7 +324,13 @@ def post_yolo_predict(data):
     if data["stream"]:
         return Response(stream_with_context(results), mimetype='multipart/x-mixed-replace; boundary=frame')
     
-    return list(results)
+    # Run generator
+    results = list(results)
+    
+    # Collect garbage data to clear RAM
+    gc.collect()
+    
+    return results
 
 
 # ---

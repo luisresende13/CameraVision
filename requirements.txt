@@ -28,3 +28,9 @@ py-cpuinfo
 lap
 pafy
 youtube_dl
+
+# ---
+# Scheduler related
+
+apscheduler
+requests_futures

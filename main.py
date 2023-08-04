@@ -567,7 +567,7 @@ def get_objects_from_bigquery(query=None, query_data=None):
 
     except Exception as e:
         raise HTTPError(500, 'Failed to get objects', str(e))
-        
+
 
 
 if __name__ == "__main__":

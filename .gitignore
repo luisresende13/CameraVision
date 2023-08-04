@@ -6,3 +6,7 @@ app.log
 .ipynb_checkpoints/
 .ipynb_checkpoints
 models/yolov8x.pt
+
+# Ignore .ipynb_checkpoints in nested directories
+**/.ipynb_checkpoints/
+**/__pycache__/

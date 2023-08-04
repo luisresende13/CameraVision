@@ -356,10 +356,39 @@ annotators_dict = {
 
 # Assuming that 'metadata' is a dictionary containing metadata for the fields
 
-def yolo_watch_camera(source=None, camera_id=None, post_url=None, post_scheme=None, model="yolov8l.pt", task="track", max_frames=None, seconds=None, execution_seconds=None,
-                      log_seconds=10, fps=3, process="none", annotator="none", capture="opencv", stream=False, retries=1, retry_delay=1.0, objects=None, classes=None,
-                      conf=0.3, iou=0.7, max_det=300, vid_stride=1, imgsz=640, device="gpu", tracker="botsort.yaml", persist=True, augment=False, save=False,
-                      show=False, verbose=False):
+def yolo_watch_camera(
+    source=None,
+    camera_id=None,
+    post_url=None,
+    post_scheme=None,
+    model="yolov8l.pt",
+    task="track",
+    max_frames=None,
+    seconds=None,
+    execution_seconds=None,
+    log_seconds=10,
+    fps=3,
+    process="none",
+    annotator="none",
+    capture="opencv",
+    stream=False,
+    retries=1,
+    retry_delay=1.0,
+    objects=None,
+    classes=None,
+    conf=0.3,
+    iou=0.7,
+    max_det=300,
+    vid_stride=1,
+    imgsz=640,
+    device="gpu",
+    tracker="botsort.yaml",
+    persist=True,
+    augment=False,
+    save=False,
+    show=False, 
+    verbose=False
+):
     """
     Perform YOLO camera watch with the specified arguments.
 
@@ -400,8 +429,11 @@ def yolo_watch_camera(source=None, camera_id=None, post_url=None, post_scheme=No
 
     # Convert all arguments to a dictionary using locals()
     query = locals().copy()
-    print('YOLO CAMERA QUERY:', query)
     # query.pop('self', None)  # Remove the 'self' key if this function is within a class
+    
+    # Show params
+    if verbose:
+        print('YOLO CAMERA QUERY:', query)
 
     device = query["device"]
     if device == "gpu":
@@ -485,9 +517,10 @@ def yolo_watch_camera(source=None, camera_id=None, post_url=None, post_scheme=No
         "retries": query["retries"],
         "retry_delay": query["retry_delay"],
     }
-    
-    # print("INFERENCE REQUEST · QUERY ARGS:", query)
-    print("YOLO REQUEST:", yolo_params_dict)
+
+    if verbose:
+        # print("INFERENCE REQUEST · QUERY ARGS:", query)
+        print("YOLO REQUEST:", yolo_params_dict)
     
     results = yolo_watch(**yolo_params_dict) # generator function, e.i returns generator object
 

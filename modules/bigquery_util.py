@@ -37,4 +37,4 @@ def get_camera_from_bq_table(camera_id):
 
     except Exception as e:
         msg = str(e)
-        raise HTTPError(500, f"FAILED TO GET CAMERA FROM BIGQUERY TABLE. ERROR: {msg}")
+        raise HTTPError(500, f"FAILED TO GET CAMERA FROM BIGQUERY TABLE. ERROR: {e}")

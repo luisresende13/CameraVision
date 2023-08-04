@@ -21,16 +21,16 @@ boto3
 google-cloud-bigquery
 
 # ---
-# Ultralytics packages (Not installed by default)
-
-ultralytics
-py-cpuinfo
-lap
-pafy
-youtube_dl
-
-# ---
 # Scheduler related
 
 apscheduler
 requests_futures
+
+# ---
+# Ultralytics packages (Not installed by default)
+
+ultralytics
+py-cpuinfo
+# lapx>=0.5.2
+# pafy
+# youtube_dl

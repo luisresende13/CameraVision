@@ -164,6 +164,44 @@ def server_reboot():
         return message
     raise HTTPError(500, 'Internal server error when rebooting ec2 instance', message)
 
+@app.get("/env")
+@app.doc(tags=['Server'])
+def get_environment_variables():
+    aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+    aws_default_region = os.getenv('AWS_DEFAULT_REGION')
+    
+    if aws_access_key_id is None or aws_secret_access_key is None or aws_default_region is None:
+        # If any of the required environment variables is not set, return a 404 Not Found
+        raise HTTPError(404, 'Not Found', 'Environment variables not available')
+    
+    return {
+        'AWS_ACCESS_KEY_ID': aws_access_key_id,
+        'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
+        'AWS_DEFAULT_REGION': aws_default_region
+    }, 200
+    
+
+@app.post("/env")
+@app.doc(tags=['Server'])
+def set_environment_variables():
+    data = request.get_json()
+    aws_access_key_id = data.get('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = data.get('AWS_SECRET_ACCESS_KEY')
+    aws_default_region = data.get('AWS_DEFAULT_REGION')
+    
+    if not aws_access_key_id or not aws_secret_access_key or not aws_default_region:
+        # If any of the required environment variables is missing in the request, return a 400 Bad Request
+        abort(400, 'Bad Request', 'Missing required environment variables in the request.')
+    
+    # Set the environment variables
+    os.environ['AWS_ACCESS_KEY_ID'] = aws_access_key_id
+    os.environ['AWS_SECRET_ACCESS_KEY'] = aws_secret_access_key
+    os.environ['AWS_DEFAULT_REGION'] = aws_default_region
+    
+    return {
+        'message': 'Environment variables set successfully.'
+    }, 200
 
 # ---
 # WEB APPS

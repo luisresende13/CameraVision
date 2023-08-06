@@ -51,7 +51,7 @@ def parse_args():
     parser.add_argument('--allow_replacement', action='store_false', help='Allow replacement of cameras in random selection')
     parser.add_argument('--source_field', type=str, default='id', help='Source field for cameras')
     parser.add_argument('--freq_seconds', type=int, default=60, help='Frequency at which to run inference in seconds')
-    parser.add_argument('--seconds', type=int, default=60, help='YOLO Seconds parameter')
+    parser.add_argument('--seconds', type=int, default=None, help='YOLO Seconds parameter')
     parser.add_argument('--execution_seconds', type=int, default=None, help='YOLO Execution seconds parameter')
     parser.add_argument('--log_seconds', type=int, default=None, help='YOLO Log Seconds parameter')
     parser.add_argument('--model', type=str, default='yolov8n.pt', help='Model filename')

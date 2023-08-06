@@ -23,19 +23,6 @@ Original file is located at
 # !pip install -r requirements.txt
 # !pip install lapx
 
-"""### Set ec2 instance"""
-
-import os
-
-os.environ['AWS_ACCESS_KEY_ID'] = 'AKIAQDINISPVNETQZ54A'
-os.environ['AWS_SECRET_ACCESS_KEY'] = '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'
-os.environ['AWS_DEFAULT_REGION'] = 'sa-east-1'
-
-from modules.aws import EC2Instance
-
-ec2 = EC2Instance(test=True)
-
-
 """# ---"""
 """# Set command-line arguments parser"""
 
@@ -96,10 +83,8 @@ params = {
     'model': args.model,
 }
 
-base_url = ec2.url if args.base_url == 'ec2' else args.base_url
-
 main_job_params = {
-    'base_url': base_url,
+    'base_url': args.base_url,
     'query': args.query,
     'n_random': args.n_random,
     'allow_replacement': args.allow_replacement,
@@ -109,7 +94,25 @@ main_job_params = {
     'params': params,
 }
 
+# ---
+# Set base url
 
+"""### Set envirornment variables"""
+import os
+
+os.environ['AWS_ACCESS_KEY_ID'] = 'AKIAQDINISPVNETQZ54A'
+os.environ['AWS_SECRET_ACCESS_KEY'] = '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'
+os.environ['AWS_DEFAULT_REGION'] = 'sa-east-1'
+
+"""### Set ec2 instance"""
+
+from modules.aws import EC2Instance
+
+if args.base_url == 'ec2':
+    ec2 = EC2Instance(test=True)
+    main_job_params['base_url'] = ec2.url
+    
+"""### --- """    
 """### Function to request parallel inference for cameras in database"""
 
 import time

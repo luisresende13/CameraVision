@@ -146,7 +146,7 @@ def yolo_watch(
                 # model_params["source"] = source
                 # model_params["stream"] = True
                 # model_params["persist"] = True                # Perform detection inference
-                results = predict({**model_params, "source": source, "stream": True, "persist": True})
+                results = predict(**{**model_params, "source": source, "stream": True, "persist": True})
 
             # Start frame count
             n_frames = 0
@@ -329,7 +329,7 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
             # model_params["persist"] = True
             
             # run inference on the current frame / override attributes
-            results = predict({**model_params, "source": frame, "stream": False, "persist": True})
+            results = predict(**{**model_params, "source": frame, "stream": False, "persist": True})
             
             # get the frame result
             result = results[0]

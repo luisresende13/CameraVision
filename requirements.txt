@@ -32,5 +32,6 @@ requests_futures
 ultralytics
 py-cpuinfo
 # lapx>=0.5.2
-# pafy
-# youtube_dl
+lapx
+pafy
+youtube_dl

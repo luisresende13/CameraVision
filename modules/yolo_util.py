@@ -71,10 +71,14 @@ def yolo_watch(
     retries=5,
     retry_delay=2,  # seconds
 ):
-
+    
     # Load a model
-    yolo = YOLO(f'models/{model}')  # load an official detection model
-
+    if isinstance(model, str):
+        yolo = YOLO(f'models/{model}')  # load an official detection model
+    else:
+        # print('REUTILIZING EXISTING YOLO MODEL')
+        yolo = model
+        
     # Get classes names
     class_ids = {name: class_id for class_id, name in yolo.names.items()}
 
@@ -109,9 +113,10 @@ def yolo_watch(
         # Error handler for stream loop
         try:
 
+            # reLoad the model
             if retry > 1:
-                # reLoad the model
-                yolo = YOLO(f'models/{model}')  # load an official detection model
+                if isinstance(model, str):
+                    yolo = YOLO(f'models/{model}')  # load an official detection model
 
             # Detection and tracking specific settings
             if task == "predict":
@@ -128,9 +133,12 @@ def yolo_watch(
                 # Select `track` method
                 predict = yolo.track
 
+            # Start time counting
+            video_seconds = exec_seconds = 0
+                
             # Initialize variable for `results` generator
             results = None            
-
+    
             if capture == 'opencv':
                 # model_params["persist"] = True
                 results = opencv_capture_predict(source, predict, model_params)
@@ -187,7 +195,10 @@ def yolo_watch(
 
                         # Assert that the frame is healthy and meets the expected specifications
                         assert_frame_health(annotated_image, expected_shape, expected_channels, expected_dtype)
-
+                
+                # Clear result when done with it
+                result = None
+                
                 # Save the annotated frame to the output video file
                 if writer_params is not None:
                     out.write(annotated_image)
@@ -269,7 +280,13 @@ def yolo_watch(
         
         finally:
             # Release ultralytics result generator
-            yolo, results, post_processing_outputs, annotated_image = None, None, None, None
+            results, post_processing_outputs, annotated_image = None, None, None
+            
+            if isinstance(model, str):
+                yolo = None
+            
+            # Destroy cv2 windows
+            cv2.destroyAllWindows()
 
             # Release the output video file writer
             if writer_params is not None:
@@ -355,7 +372,7 @@ annotators_dict = {
 }
 
 # Assuming that 'metadata' is a dictionary containing metadata for the fields
-
+    
 def yolo_watch_camera(
     source=None,
     camera_id=None,
@@ -397,7 +414,7 @@ def yolo_watch_camera(
     - camera_id (int): The ID of the camera.
     - post_url (str): URL to send POST requests from inference results.
     - post_scheme (str): JSON schema to send as the body of the POST request to `post_url` from inference results.
-    - model (str): The YOLO model file to use. Default is "yolov8l.pt".
+    - model (str or YOLO instance): The YOLO model file to use or the YOLO model instance. Default is "yolov8l.pt".
     - task (str): The YOLO task to perform, either "predict" or "track". Default is "track".
     - max_frames (int): Maximum number of frames to process.
     - seconds (int): The number of seconds to run the watch process.
@@ -428,7 +445,7 @@ def yolo_watch_camera(
     # Implementation of the yolo_watch_camera function using the provided arguments
 
     # Convert all arguments to a dictionary using locals()
-    query = locals().copy()
+    query = locals()
     # query.pop('self', None)  # Remove the 'self' key if this function is within a class
     
     # Show params

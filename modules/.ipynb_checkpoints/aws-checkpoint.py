@@ -90,7 +90,7 @@ class EC2Instance:
 
     def reboot(self):
         reboot_ec2_instance(self.instance_id)
-
+        
     def test(self):
         try:
             if not self.url:

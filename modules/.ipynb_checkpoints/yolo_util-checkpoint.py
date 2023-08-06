@@ -140,15 +140,13 @@ def yolo_watch(
             results = None            
     
             if capture == 'opencv':
-                # model_params["persist"] = True
                 results = opencv_capture_predict(source, predict, model_params)
 
             elif capture == 'yolo':
-                model_params["source"] = source
-                model_params["stream"] = True
-                # model_params["persist"] = False
-                # Perform detection inference
-                results = predict(**model_params)
+                # model_params["source"] = source
+                # model_params["stream"] = True
+                # model_params["persist"] = True                # Perform detection inference
+                results = predict({**model_params, "source": source, "stream": True, "persist": True})
 
             # Start frame count
             n_frames = 0
@@ -325,12 +323,13 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
             # Assert that the frame is healthy and meets the expected specifications
             assert_frame_health(frame, expected_shape, expected_channels, expected_dtype)
 
-            # update model parameters source and stream attributes
-            model_params["source"] = frame
-            model_params["stream"] = False
+            # override model parameters source and stream attributes
+            # model_params["source"] = frame
+            # model_params["stream"] = False
+            # model_params["persist"] = True
             
-            # run inference on the current frame
-            results = predict(**model_params)
+            # run inference on the current frame / override attributes
+            results = predict({**model_params, "source": frame, "stream": False, "persist": True})
             
             # get the frame result
             result = results[0]

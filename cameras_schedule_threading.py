@@ -50,6 +50,7 @@ def parse_args():
     parser.add_argument('--backoff_factor', type=float, default=1.0, help='Backoff factor for retries')
     parser.add_argument('--process_type', type=str, default='threads', help='Process type of the scheduler. threads or process')
     parser.add_argument('--max_running_instances', type=int, default=8, help='Maximum number of concurrent instances of the scheduler')
+    parser.add_argument('--thread_delay', type=float, default=2.0, help='Delay between start of concurrent inferences')
     # parser.add_argument('--retry_codes', type=int, nargs='+', default=[500], help='HTTP status codes to retry')
     # parser.add_argument('--raise_on_status', action='store_true', help='Raise exception on non-2xx status codes')
     # parser.add_argument('--show_params', action='store_true', help='Show request parameters')
@@ -91,6 +92,7 @@ main_job_params = {
     'source_field': args.source_field,
     'seconds': args.seconds,
     'execution_seconds': args.execution_seconds,
+    'thread_delay': args.thread_delay,
     'params': params,
 }
 
@@ -99,10 +101,6 @@ main_job_params = {
 
 """### Set envirornment variables"""
 import os
-
-os.environ['AWS_ACCESS_KEY_ID'] = 'AKIAQDINISPVNETQZ54A'
-os.environ['AWS_SECRET_ACCESS_KEY'] = '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'
-os.environ['AWS_DEFAULT_REGION'] = 'sa-east-1'
 
 """### Set ec2 instance"""
 
@@ -158,6 +156,7 @@ def cameras_inference(
     show_params=True,
     process_type='threads',
     daemon=True,
+    thread_delay=1,
 ):
 
     # Cameras request start
@@ -241,6 +240,7 @@ def cameras_inference(
         thread = threading.Thread(target=yolo_watch_camera_sync, args=(params_dict, result_queue), daemon=True)
         thread.start()
         ts.append(thread)
+        time.sleep(thread_delay)
 
     # # Wait for threads to finish
     # for thread in ts:

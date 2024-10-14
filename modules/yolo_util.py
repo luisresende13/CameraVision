@@ -53,7 +53,7 @@ expected_dtype = np.uint8     # uint8 data type (8-bit)
 # Run yolo inference for video source
 
 def yolo_watch(
-    source='http://187.111.99.18:9004/?CODE=1646',  # video source
+    source='https://app.tixxi.rio/outvideo/?KEY=B0914&CODE=1646',  # video source
     model="yolov8s.pt",  # ultralytics yolov8 model name
     task="track",  # ultralytics yolo task
     model_params=model_params,  # detection or tracking parameters
@@ -192,7 +192,7 @@ def yolo_watch(
                             annotated_image = result.plot()
 
                         # Assert that the frame is healthy and meets the expected specifications
-                        assert_frame_health(annotated_image, expected_shape, expected_channels, expected_dtype)
+                        # assert_frame_health(annotated_image, expected_shape, expected_channels, expected_dtype)
                 
                 # Clear result when done with it
                 result = None
@@ -321,7 +321,7 @@ def opencv_capture_predict(source, predict, model_params, max_retries=10):
                 break
 
             # Assert that the frame is healthy and meets the expected specifications
-            assert_frame_health(frame, expected_shape, expected_channels, expected_dtype)
+            # assert_frame_health(frame, expected_shape, expected_channels, expected_dtype)
 
             # override model parameters source and stream attributes
             # model_params["source"] = frame

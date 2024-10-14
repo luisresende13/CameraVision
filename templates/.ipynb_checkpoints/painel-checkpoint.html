@@ -707,7 +707,7 @@
       // let device = isLocalRequest ? "cpu": "gpu";
       // let seconds = isLocalRequest ? 3 : 70;
       let task = "track";
-      let device = baseURL.includes(cloudRunServerURL) ? "cpu" : "gpu";
+      let device = "cpu";
       let seconds = baseURL.includes(cloudRunServerURL) ? 20 : 70;
       let execution_seconds = baseURL.includes(cloudRunServerURL) ? 20 : 70;
       let conf = 0.30;
@@ -730,7 +730,7 @@
         handleCameraNameChange();
 
       // Construct the track view URL
-      const trackViewURL = `${baseStreamURL}/track?stream=true&camera_id=${encodeURIComponent(currentCameraId)}&execution_seconds=${encodeURIComponent(execution_seconds)}&model=${model}&capture=${capture}&dt=${encodeURIComponent(new Date().getTime())}`;
+      const trackViewURL = `${baseStreamURL}/track?stream=true&camera_id=${encodeURIComponent(currentCameraId)}&execution_seconds=${encodeURIComponent(execution_seconds)}&model=${model}&capture=${capture}&device=${device}&dt=${encodeURIComponent(new Date().getTime())}`;
 
       // Construct the track post URL
       const trackPostURL = `${baseStreamURL}/track?process=bigquery&stream=false&task=${encodeURIComponent(task)}&device=${encodeURIComponent(device)}&camera_id=${encodeURIComponent(currentCameraId)}&objects=${encodeURIComponent(objects)}&execution_seconds=${encodeURIComponent(execution_seconds)}&conf=${encodeURIComponent(conf)}&dt=${encodeURIComponent(new Date().getTime())}`;
@@ -1303,7 +1303,8 @@
     let baseStreamURL;
     // const AWSServerIP = "15.229.156.138";
     // const AWSServerURL = `http://${AWSServerIP}`;
-    const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
+    // const cloudRunServerURL = 'https://video-analytics-oayt5ztuxq-ue.a.run.app'; // cloud run server
+    const cloudRunServerURL = 'https://octa-vision-j3velvy4eq-uc.a.run.app'; // cloud run server
     const isHTMLHosted = host.includes("octacity.org") | host == "";
     const isLocalRequest = host.includes("127.0.0.1");
       

@@ -45,7 +45,7 @@ camera_bp = APIBlueprint('camera', __name__, tag={'name': 'Cameras', 'descriptio
 # OPENAPI SPECIFICATION OPTIONS --------------
 
 # openapi.info.description
-app.config['DESCRIPTION'] = open('README.MD').read()
+# app.config['DESCRIPTION'] = open('README.MD').read()
 
 # openapi.info.contact
 app.config['CONTACT'] = {
@@ -95,10 +95,10 @@ app.config['TAGS'] = [{
 cloudRunServerURL = 'https://octa-vision-oayt5ztuxq-ue.a.run.app'
 instance_id = 'i-01796a60ab18b8bd5'
 awsIP = ''
-try:
-    awsIP = get_public_ipv4(instance_id)['ip']
-except:
-    awsIP = ''
+# try:
+#     awsIP = get_public_ipv4(instance_id)['ip']
+# except:
+#     awsIP = ''
     
 # openapi.servers
 app.config['SERVERS'] = [{
@@ -610,8 +610,8 @@ def get_objects_from_bigquery(query=None, query_data=None):
 
 if __name__ == "__main__":
     print('main.py __main__ EXECUTING...')
-    app.run()
-    # app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    # app.run()
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
 
 # EXAMPLE ENDPOINTS 
